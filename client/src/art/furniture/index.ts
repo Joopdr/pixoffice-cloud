@@ -18,6 +18,8 @@ export const SEED_VARIATIONS: Partial<Record<FurnitureKind, number>> = {
   coffee_table: 2,
   plant_small: 3,
   plant_tall: 3,
+  server_rack: 3,
+  crt_workstation: 2,
 };
 
 /** Normaliza variante/estado para valores válidos do catálogo. */
@@ -125,6 +127,12 @@ function build(kind: FurnitureKind, variant: string | undefined, state: number, 
       return C.receptionDesk(seed);
     case 'bench':
       return C.bench();
+    case 'hc_sofa':
+      return C.hcSofa(variant);
+    case 'server_rack':
+      return O.serverRack(seed);
+    case 'crt_workstation':
+      return O.crtWorkstation(seed);
   }
 }
 

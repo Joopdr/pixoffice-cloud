@@ -785,3 +785,111 @@ export function waterCooler(): BufFurniture {
   contact(b, 1, 13, 14, 4, 0.22);
   return { base: s };
 }
+
+/** Rack de Servidores 42U Tech Retrô com porta de vidro temperado e LEDs de atividade. */
+export function serverRack(seed = 0): BufFurniture {
+  const s = floorSheet(1, 1, 22);
+  const b = s.buf;
+  const cab = ramp('#282f3c', 0.06);
+  const steel = '#171c26';
+  // Topo do gabinete com grade de ventilação
+  topFace(b, 1, -20, 14, 5, cab);
+  for (let x = 3; x <= 11; x += 2) b.hline(x, x, -18, '#10141c');
+  // Corpo frontal alto (28px)
+  frontFace(b, 1, -15, 14, 30, cab);
+  b.vline(1, -15, 14, cab.lt);
+  b.vline(14, -15, 14, cab.dd);
+  // Miolo interno escuro (blades)
+  b.rect(3, -13, 10, 25, steel);
+  // 5 unidades rackmount (blades + patch panel + LEDs)
+  const leds = ['#34f57b', '#38d9ff', '#ffae2b', '#34f57b', '#ff5468'];
+  for (let u = 0; u < 5; u++) {
+    const uy = -12 + u * 5;
+    b.rect(4, uy, 8, 4, '#242b38');
+    b.hline(4, 11, uy, '#364052');
+    // Slots de ventilação / HDD bays
+    b.hline(5, 7, uy + 2, '#131720');
+    // LEDs brilhantes
+    const c1 = leds[(u + seed) % leds.length];
+    const c2 = leds[(u + seed + 2) % leds.length];
+    b.set(9, uy + 2, c1);
+    b.set(11, uy + 2, u % 2 === 0 ? c2 : '#34f57b');
+  }
+  // Reflexo diagonal suave da porta de vidro
+  b.set(4, -12, 'rgba(180,225,255,0.28)');
+  b.set(5, -11, 'rgba(180,225,255,0.22)');
+  b.set(6, -10, 'rgba(180,225,255,0.18)');
+  b.set(4, 2, 'rgba(180,225,255,0.22)');
+  b.set(5, 3, 'rgba(180,225,255,0.18)');
+  // Rodinhas / pés
+  b.rect(2, 15, 2, 1, '#10131a');
+  b.rect(12, 15, 2, 1, '#10131a');
+  b.outline();
+  contact(b, 0, 13, 16, 4, 0.28);
+  return { base: s };
+}
+
+/** Bancada Retrô Anos 2000: Monitor CRT bege clássico, tela Windows XP/terminal, disquetes e gabinete torre. */
+export function crtWorkstation(seed = 0): BufFurniture {
+  const s = floorSheet(2, 1, 22);
+  const b = s.buf;
+  const top = M.oak;
+  const edge = M.oakDark;
+  const beige = ramp('#dcd5c0', 0.07);
+  const screenBg = seed % 2 === 0 ? '#1f6bd6' : '#0f3320';
+  const screenFg = seed % 2 === 0 ? '#89d4ff' : '#45f58a';
+
+  // Pernas e gabinete torre bege embaixo à esquerda
+  for (const x of [0, 29]) {
+    b.rect(x, 8, 3, 8, M.steel.base);
+    b.vline(x, 8, 15, M.steel.lt);
+  }
+  // Gabinete Torre PC bege (anos 2000) sob a mesa
+  b.rect(3, 7, 7, 9, beige.base);
+  b.vline(3, 7, 15, beige.hi);
+  b.vline(9, 7, 15, beige.dk);
+  b.hline(4, 8, 9, '#7a7568'); // drive de CD-ROM
+  b.hline(5, 7, 11, '#585348'); // drive de disquete 3.5"
+  b.set(8, 13, '#34f57b'); // LED Power verde
+  b.set(6, 13, '#ffae2b'); // LED HDD âmbar
+
+  // Tampo da mesa em carvalho quente
+  topFace(b, 0, -6, 32, 12, top);
+  woodGrain(b, 1, -5, 30, 10, top, seed + 3);
+  b.hline(0, 31, 6, edge.base);
+  b.hline(0, 31, 7, edge.dk);
+
+  // Monitor CRT Bege Clássico (17") com base giratória
+  b.rect(10, -6, 8, 2, beige.dk); // pedestal
+  b.rect(7, -18, 14, 12, beige.base); // carcaça frontal
+  b.hline(8, 19, -18, beige.hi);
+  b.vline(7, -17, -7, beige.lt);
+  b.vline(20, -17, -7, beige.dk);
+  b.hline(7, 20, -7, beige.dd);
+  // Tubo de vidro CRT com brilho
+  b.rect(9, -16, 10, 7, screenBg);
+  b.hline(10, 17, -15, screenFg);
+  b.hline(10, 15, -13, screenFg);
+  b.hline(10, 16, -11, seed % 2 === 0 ? '#5ad46a' : '#26a85c'); // colina Bliss ou prompt
+  b.set(18, -8, '#34f57b'); // botão power LED verde no CRT
+
+  // Teclado mecânico bege + mousepad azul + mouse de bolinha
+  b.rect(6, -2, 13, 4, beige.lt);
+  b.hline(7, 17, -1, '#9e9784');
+  b.hline(7, 17, 0, '#9e9784');
+  b.rect(21, -2, 5, 4, '#245dc4'); // mousepad azul XP
+  b.rect(22, -1, 3, 2, beige.hi); // mouse bege
+
+  // Pilha de disquetes 3.5" coloridos na lateral direita
+  b.rect(26, -5, 4, 4, '#2b6de0');
+  b.rect(27, -5, 2, 2, '#d8dde6');
+  b.rect(25, -4, 4, 3, '#e5b82e');
+  b.set(26, -4, '#d8dde6');
+
+  // Caneca de café na esquerda
+  mug(b, 2, -3, '#d94f3d');
+
+  b.outline();
+  deskShadow(b);
+  return { base: s };
+}

@@ -19,6 +19,10 @@ export interface WorldOptions {
   daylight?: DaylightMode;
   /** Tema visual: automático (segue o calendário; ver seasonalThemeFor), nenhum, Natal ou Halloween. */
   theme?: OfficeTheme;
+  /** (Opcional, aditivo) Visual exclusivo Squiggly Studio (Habbo + Old Web) aplicado às salas e UI. */
+  squigglyStudioMode?: boolean;
+  /** (Opcional, aditivo) Modo foco: exibe apenas a sala do Squiggly Studio quando ela existir. */
+  squigglyFocusRoom?: boolean;
 }
 
 /** Tema que o renderer desenha: o escritório original ('none') ou um dos sazonais. */
@@ -41,7 +45,21 @@ export function seasonalThemeFor(theme: OfficeTheme | undefined, date: Date): Se
 export type DaylightMode = 'auto' | 'day' | 'night';
 
 /** Sons do ambiente que o mundo sugere (quem toca, e se toca, é a UI). */
-export type SoundCueKind = 'keys' | 'elevator' | 'pingpong' | 'table' | 'arcade';
+export type SoundCueKind =
+  | 'keys'
+  | 'mouse'
+  | 'step'
+  | 'printer'
+  | 'paper'
+  | 'coffee'
+  | 'water'
+  | 'chair'
+  | 'server'
+  | 'cheer'
+  | 'elevator'
+  | 'pingpong'
+  | 'table'
+  | 'arcade';
 
 export interface SoundCue {
   kind: SoundCueKind;
@@ -70,6 +88,18 @@ export interface WorldApi {
   setOptions(o: Partial<WorldOptions>): void;
   /** Posição na tela (CSS px, relativo à viewport) logo acima da cabeça do personagem, ou null se não visível. */
   screenPositionOf(agentId: string): { x: number; y: number } | null;
+  /** (Aditivo) Zoom atual da câmera (para escalar balões e overlays sem desalinhar). */
+  getZoom?(): number;
+  /** (Aditivo) Dispara uma animação expressiva temporária (dance, flirt, wave, clap, cheer, laugh) + mini emoji. */
+  playEmote?(agentId: string, pose: string, emoji?: string, durationMs?: number): void;
+  /** (Aditivo) Aplica o tema arquitetônico exclusivo do andar atual (cores, placa, iluminação). */
+  setFloorVisual?(visual: {
+    id: string;
+    companyName: string;
+    style: 'luna_tech' | 'retro_studio' | 'warm_loft' | 'cyber_neon' | 'sunset_lounge';
+    daylight?: DaylightMode;
+    squiggly?: boolean;
+  }): void;
   /**
    * (Opcional, aditivo) Área da tela coberta por painéis da UI, em px CSS. O mundo passa a enquadrar
    * (visão geral) e centralizar (focusAgent/focusRoom/seguir) dentro da área livre.

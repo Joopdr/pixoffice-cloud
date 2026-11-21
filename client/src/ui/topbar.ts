@@ -49,6 +49,8 @@ export class TopBar implements UiComponent {
   readonly settingsBtn: HTMLButtonElement;
   /** Abre a janela do Habblaud World (ao lado de Configurações); a janela decide quando ele aparece. */
   readonly worldBtn: HTMLButtonElement;
+  private readonly squigglyBtn: HTMLButtonElement;
+  private readonly squigglyFocusBtn: HTMLButtonElement;
   private readonly spawnBtn: HTMLButtonElement;
   private readonly spawnPanel: SpawnPanel;
   /** Grupo dos botões de painéis (feed, Habblaud World, configurações, ajuda); o histórico entra aqui (ui/index.ts). */
@@ -125,9 +127,33 @@ export class TopBar implements UiComponent {
       iconButton(ICONS.zoomOut, tr('Afastar (−)'), () => ctx.camera('zoomOut')),
       iconButton(ICONS.zoomIn, tr('Aproximar (+)'), () => ctx.camera('zoomIn')),
     );
+    this.squigglyBtn = h('button', {
+      class: 'ui-btn ui-squiggly-btn',
+      type: 'button',
+      text: tr('Squiggly Studio'),
+      title: tr('Ativa o Escritório Squiggly Studio (visual Habbo + Old Web XP)'),
+      on: {
+        click: () => {
+          const next = !this.ctx.prefs.squigglyStudioMode;
+          this.ctx.updatePrefs({ squigglyStudioMode: next, ...(next ? {} : { squigglyFocusRoom: false }) });
+        },
+      },
+    });
+    this.squigglyFocusBtn = h('button', {
+      class: 'ui-btn ui-squiggly-focus-btn',
+      type: 'button',
+      text: tr('Só Estúdio'),
+      title: tr('Mostra apenas a sala do Squiggly Studio no escritório'),
+      hidden: true,
+      on: {
+        click: () => this.ctx.updatePrefs({ squigglyFocusRoom: !this.ctx.prefs.squigglyFocusRoom }),
+      },
+    });
     const panelGroup = h(
       'div',
       { class: 'ui-btn-group', role: 'group', attrs: { 'aria-label': tr('Painéis') } },
+      this.squigglyBtn,
+      this.squigglyFocusBtn,
       this.spawnBtn,
       this.timelapseBtn,
       this.feedBtn,
@@ -192,6 +218,13 @@ export class TopBar implements UiComponent {
           : tr('Sem conexão com o servidor do Habblaud'),
     );
     setHidden(this.demoBadge, !(conn === 'open' && snap?.meta.demo));
+    const sqOn = Boolean(this.ctx.prefs.squigglyStudioMode);
+    const sqFocus = Boolean(this.ctx.prefs.squigglyFocusRoom);
+    this.squigglyBtn.classList.toggle('is-active', sqOn);
+    this.squigglyBtn.setAttribute('aria-pressed', sqOn ? 'true' : 'false');
+    setHidden(this.squigglyFocusBtn, !sqOn);
+    this.squigglyFocusBtn.classList.toggle('is-active', sqFocus);
+    this.squigglyFocusBtn.setAttribute('aria-pressed', sqFocus ? 'true' : 'false');
 
     // Contadores.
     const now = this.ctx.now();

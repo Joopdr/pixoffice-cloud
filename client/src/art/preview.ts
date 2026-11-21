@@ -30,6 +30,7 @@ const POSE_PT: Record<Pose, string> = {
   stand: 'parado', walk: 'andando', run: 'correndo', sit: 'sentado', type: 'digitando', sleep: 'cochilando', drink: 'bebendo',
   use: 'usando máquina', raise_hand: 'mão levantada', talk: 'conversando', stretch: 'espreguiçando', read: 'lendo', play: 'ping-pong',
   wait: 'esperando', cheer: 'comemorando', laugh: 'gargalhando', game: 'videogame', rps: 'jokenpô', groom: 'no espelho', sulk: 'chateado',
+  dance: 'dançando', flirt: 'flertando', wave: 'acenando', clap: 'aplaudindo',
 };
 /** Poses que sempre são sentadas (as demais podem ser em pé ou sentadas). */
 const SEATED_POSES: readonly Pose[] = ['sit', 'type', 'sleep', 'wait'];
@@ -43,9 +44,9 @@ const SCREEN_PT: Record<ScreenMode, string> = {
   off: 'desligado', standby: 'em espera', idle: 'descanso', code: 'código', terminal: 'terminal', browser: 'navegador', search: 'busca', chat: 'chat', docs: 'documento', tasks: 'tarefas', alert: 'alerta',
   progress: 'progresso', show: 'programa', game: 'videogame',
 };
-const FLOORS: readonly FloorKind[] = ['carpet', 'wood', 'tile_check', 'tile_white', 'concrete', 'marble', 'grass', 'sidewalk', 'street'];
+const FLOORS: readonly FloorKind[] = ['carpet', 'habbo_check', 'wood', 'tile_check', 'tile_white', 'concrete', 'marble', 'grass', 'sidewalk', 'street'];
 const FLOOR_PT: Record<FloorKind, string> = {
-  carpet: 'carpete', wood: 'madeira', tile_check: 'xadrez', tile_white: 'azulejo', concrete: 'cimento polido', marble: 'mármore', grass: 'grama', sidewalk: 'calçada', street: 'asfalto',
+  carpet: 'carpete', habbo_check: 'quadriculado Habbo', wood: 'madeira', tile_check: 'xadrez', tile_white: 'azulejo', concrete: 'cimento polido', marble: 'mármore', grass: 'grama', sidewalk: 'calçada', street: 'asfalto',
 };
 const ICONS: readonly IconName[] = [
   'alert', 'question', 'zzz', 'check', 'heart', 'coffee', 'music', 'idea', 'sweat', 'star', 'lightning', 'chat', 'box', 'wave',

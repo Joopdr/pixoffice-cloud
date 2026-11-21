@@ -91,6 +91,15 @@ const PROJECTS: DemoProject[] = [
     commands: ['npm test', 'npm run dev', 'git status', 'git push'],
     greps: ['handoff', 'escalate'],
   },
+  {
+    name: 'squiggly-animate-xp',
+    files: ['engines/studio_engines.js', 'app.js', 'index.html', 'site.html', 'tests/test_suite.js'],
+    prompts: [tr('Cria shader 3D de massinha com digitais orgânicas'), tr('Adiciona pincéis 3D independentes na aba 3D'), tr('Ajusta interface Windows XP Luna e portal Old Web')],
+    tasks: [tr('Shader 3D Claymation'), tr('Pincéis 3D sem calombo'), tr('Testes do estúdio'), tr('Preview no navegador')],
+    queries: ['procedural claymation shader normal bump', 'windows xp luna css pixel art'],
+    commands: ['node tests/test_runner_cli.js', 'node --check app.js', 'git status', 'git push origin main'],
+    greps: ['StudioLightingVolumeEngine', 'plasticine', 'brush_3d_'],
+  },
 ];
 
 /** Projetos do demo (o histórico fictício do "Meu dia" usa todos, não só as salas abertas no momento). */

@@ -413,8 +413,14 @@ export function createWorld(canvas: HTMLCanvasElement, store: OfficeStore, o: Cr
     },
     getOptions: () => ({ ...options }),
     setOptions: (o) => {
+      const prevSq = Boolean(options.squigglyStudioMode);
+      const prevFocus = Boolean(options.squigglyFocusRoom);
       options = { ...options, ...o };
       if (o.followSelected !== undefined) camera.follow = o.followSelected && selection?.type === 'agent' ? selection.id : null;
+      if (Boolean(options.squigglyStudioMode) !== prevSq || Boolean(options.squigglyFocusRoom) !== prevFocus) {
+        sim.rebuildRoomsForTheme(Date.now());
+        if (!userMoved && framed) overview(true);
+      }
     },
     setViewInsets: (ins) => {
       const v = (n: number | undefined, cur: number) => (typeof n === 'number' && Number.isFinite(n) ? Math.max(0, n) : cur);
@@ -429,6 +435,35 @@ export function createWorld(canvas: HTMLCanvasElement, store: OfficeStore, o: Cr
       const p = camera.worldToScreen(h.x, h.y - 2);
       if (p.x < 0 || p.y < 0 || p.x > camera.viewW || p.y > camera.viewH) return null;
       return p;
+    },
+    getZoom: () => camera.zoom,
+    playEmote: (id, pose, emoji, durationMs = 3600) => {
+      const ch = sim.chars.get(id);
+      if (!ch || ch.leaving || ch.inside) return;
+      const now = Date.now();
+      const prevPose = ch.pose;
+      const prevHeld = ch.held;
+      ch.setPose(pose as any, 'none');
+      if (emoji) {
+        ch.chatEmoji = emoji;
+        ch.chatUntil = now + durationMs;
+      }
+      setTimeout(() => {
+        if (ch.pose === (pose as any) && !ch.leaving) {
+          ch.setPose(ch.seated ? (ch.mode === 'work' ? 'type' : 'sit') : prevPose === pose ? 'stand' : prevPose, prevHeld);
+        }
+      }, durationMs);
+    },
+    setFloorVisual: (visual) => {
+      canvas.dataset.floorStyle = visual.style;
+      const nextDaylight = visual.daylight ?? 'day';
+      const nextSq = Boolean(visual.squiggly);
+      const changed = options.daylight !== nextDaylight || Boolean(options.squigglyStudioMode) !== nextSq;
+      options = { ...options, daylight: nextDaylight, squigglyStudioMode: nextSq };
+      if (changed) {
+        sim.rebuildRoomsForTheme(Date.now());
+        rebuild();
+      }
     },
     social: (id) => sim.social.info(id),
     onRoomContextMenu: (cb) => {

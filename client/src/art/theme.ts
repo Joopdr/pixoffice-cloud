@@ -17,6 +17,16 @@ const THEMES: readonly RoomTheme[] = [
 
 export const THEME_COUNT = THEMES.length;
 
+/** Tema exclusivo da sala Squiggly Studio (Habbo + Old Web XP). */
+export const SQUIGGLY_STUDIO_THEME: RoomTheme = {
+  carpet: '#2d7ad6',
+  carpet2: '#f4c542',
+  wall: { base: '#eef3ff', trim: '#2563eb', pattern: 'stripes' },
+  accent: '#ffb703',
+  deskVariant: 'white',
+  chairVariant: 'blue',
+};
+
 export function roomTheme(seed: number): RoomTheme {
   const n = THEMES.length;
   const t = THEMES[((Math.floor(seed) % n) + n) % n];

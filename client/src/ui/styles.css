@@ -11147,3 +11147,91 @@ html.is-replay #world {
 .ui-world-chip__visitors[hidden] {
   display: none;
 }
+
+/* =====================================================================
+   Tema Exclusivo: Squiggly Studio (Habbo + Old Web Windows XP Luna)
+   ===================================================================== */
+body.ui-squiggly-xp {
+  background-color: #102e52;
+  background-image:
+    radial-gradient(rgba(147, 197, 253, 0.22) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+
+.ui-root.ui-squiggly-xp {
+  --ui-bg: rgba(236, 233, 216, 0.96);
+  --ui-bg-solid: #ece9d8;
+  --ui-bg-soft: rgba(0, 88, 230, 0.08);
+  --ui-bg-hover: rgba(0, 88, 230, 0.16);
+  --ui-line: #9cb3d6;
+  --ui-line-strong: #0058e6;
+  --ui-text: #162038;
+  --ui-muted: #3b4b6b;
+  --ui-faint: #526282;
+  --ui-accent: #0058e6;
+  --ui-accent-soft: rgba(0, 88, 230, 0.14);
+  --radius: 4px;
+  --radius-sm: 3px;
+}
+
+.ui-root.ui-squiggly-xp .ui-topbar {
+  background: linear-gradient(180deg, #2787ff 0%, #0058e6 55%, #0644b2 100%);
+  border-bottom: 2px solid #003c9d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 3px 10px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+}
+
+.ui-root.ui-squiggly-xp .ui-topbar .ui-brand__name,
+.ui-root.ui-squiggly-xp .ui-topbar .ui-counter__value,
+.ui-root.ui-squiggly-xp .ui-topbar .ui-counter__label,
+.ui-root.ui-squiggly-xp .ui-topbar .ui-pill {
+  color: #ffffff;
+  text-shadow: 1px 1px 0 rgba(0, 28, 84, 0.7);
+}
+
+.ui-root.ui-squiggly-xp .ui-topbar .ui-btn,
+.ui-root.ui-squiggly-xp .ui-topbar .ui-icon-btn {
+  background: linear-gradient(180deg, #f7f5ee 0%, #dcd7c6 100%);
+  border: 1px solid #003c9d;
+  box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #9f9a88;
+  color: #162038;
+}
+
+.ui-root.ui-squiggly-xp .ui-topbar .ui-btn.is-active,
+.ui-root.ui-squiggly-xp .ui-squiggly-btn.is-active {
+  background: linear-gradient(180deg, #ffe066 0%, #f4b400 100%);
+  border-color: #7c4d00;
+  color: #1f1400;
+  font-weight: 700;
+}
+
+.ui-root.ui-squiggly-xp .ui-sidebar,
+.ui-root.ui-squiggly-xp .ui-feed,
+.ui-root.ui-squiggly-xp .ui-drawer,
+.ui-root.ui-squiggly-xp .ui-popover,
+.ui-root.ui-squiggly-xp .ui-dialog {
+  background: #ece9d8;
+  border: 2px solid #0058e6;
+  box-shadow: inset 1px 1px 0 #ffffff, 0 4px 14px rgba(0, 18, 52, 0.42);
+  color: #162038;
+}
+
+.ui-root.ui-squiggly-xp .ui-sidebar__head,
+.ui-root.ui-squiggly-xp .ui-feed__head,
+.ui-root.ui-squiggly-xp .ui-drawer__head,
+.ui-root.ui-squiggly-xp .ui-popover__head,
+.ui-root.ui-squiggly-xp .ui-dialog__head {
+  background: linear-gradient(180deg, #2787ff 0%, #0058e6 100%);
+  color: #ffffff;
+  border-bottom: 1px solid #003c9d;
+}
+
+.ui-root.ui-squiggly-xp .ui-sidebar__head *,
+.ui-root.ui-squiggly-xp .ui-feed__head *,
+.ui-root.ui-squiggly-xp .ui-drawer__head *,
+.ui-root.ui-squiggly-xp .ui-popover__head *,
+.ui-root.ui-squiggly-xp .ui-dialog__head * {
+  color: #ffffff;
+}

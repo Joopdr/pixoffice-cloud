@@ -225,9 +225,9 @@ export function worldSocketUrl(base: string): string {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env, argv: string[] = process.argv): ServerConfig {
   const home = env.HOME || homedir();
   const inDocker = detectDocker(env);
-  const port = Number.parseInt(env.HABBLAUD_PORT ?? '', 10);
+  const port = Number.parseInt(env.HABBLAUD_PORT ?? env.PORT ?? '', 10);
   const rootDir = findRoot(dirname(fileURLToPath(import.meta.url)));
-  const host = env.HABBLAUD_HOST?.trim() || '127.0.0.1';
+  const host = env.HABBLAUD_HOST?.trim() || (inDocker || env.PORT ? '0.0.0.0' : '127.0.0.1');
   const pkg = readPackage(rootDir);
   const remote = parseRemoteConfig(env, inDocker);
   return {

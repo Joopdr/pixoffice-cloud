@@ -54,7 +54,12 @@ export type Pose =
   | 'game' // jogando videogame: controle (held 'controller') nas duas mãos à frente do peito, polegares mexendo, corpo inclinado para a tela (2). Em pé ou sentado
   | 'rps' // pedra-papel-tesoura. held 'none': punho fechado subindo (quadro 0) e descendo (1) na contagem "jo-ken-pô"; held 'rock'|'paper'|'scissors': braço estendido à frente mostrando o gesto (2). Em pé (sentado também funciona)
   | 'groom' // diante do espelho (normalmente dir 'up', de costas): uma mão perto do rosto/cabelo indo e voltando — batom, pente, ajeitar o cabelo (2). held opcional 'lipstick'|'comb'. Em pé
-  | 'sulk'; // chateado (perdeu a aposta/partida): ombros caídos, cabeça baixa, olhos semicerrados, braços pendurados (2). Em pé ou sentado
+  | 'sulk' // chateado (perdeu a aposta/partida): ombros caídos, cabeça baixa, olhos semicerrados, braços pendurados (2). Em pé ou sentado
+  // --- vida real / expressões extras (aditivo)
+  | 'dance' // dançando com braços alternados e pulinho alegre (4)
+  | 'flirt' // flertando / corado com sorriso doce e mão no coração/beijo (2)
+  | 'wave' // acenando alegremente para um colega (2)
+  | 'clap'; // batendo palmas em comemoração (2)
 
 export type HeldItem = 'none' | 'coffee' | 'water' | 'papers' | 'laptop' | 'book' | 'box' | 'paddle' | 'popcorn'
   // --- vida social (aditivo)
@@ -70,9 +75,13 @@ export type HairStyle =
   | 'short' | 'buzz' | 'spiky' | 'side_part' | 'curly' | 'afro' | 'bob' | 'long' | 'ponytail' | 'bun' | 'pigtails'
   | 'mohawk' | 'bald' | 'wavy';
 
-export type TopStyle = 'tshirt' | 'hoodie' | 'shirt_tie' | 'sweater' | 'jacket' | 'blouse' | 'polo';
+export type TopStyle =
+  | 'tshirt' | 'hoodie' | 'shirt_tie' | 'sweater' | 'jacket' | 'blouse' | 'polo'
+  | 'blazer' | 'overalls' | 'vest' | 'dress' | 'cyber_jacket';
 
-export type Accessory = 'none' | 'glasses' | 'sunglasses' | 'headphones' | 'cap' | 'beanie' | 'earrings' | 'bow';
+export type Accessory =
+  | 'none' | 'glasses' | 'sunglasses' | 'headphones' | 'cap' | 'beanie' | 'earrings' | 'bow'
+  | 'crown' | 'beret' | 'flower' | 'visor' | 'scarf';
 
 export interface Appearance {
   skin: string;
@@ -189,7 +198,11 @@ export type FurnitureKind =
   | 'sink' // 1x1 pia com gabinete (encostada na parede norte; use 'mirror' na parede acima).
   // --- recepção
   | 'reception_desk' // 3x1 balcão de recepção.
-  | 'bench'; // 2x1 banco de espera (assento, olhando para baixo).
+  | 'bench' // 2x1 banco de espera (assento, olhando para baixo).
+  // --- pacote tech retrô habbo (aditivo)
+  | 'hc_sofa' // 3x1 sofá Habbo Club verde-esmeralda capitonê com braços em madeira mogno.
+  | 'server_rack' // 1x1 rack de servidores 42U com porta de vidro e LEDs piscando.
+  | 'crt_workstation'; // 2x1 bancada retrô anos 2000 com monitor CRT bege, disquetes e gabinete torre.
 
 export interface FurnitureDef {
   mount: 'floor' | 'wall';
@@ -236,7 +249,7 @@ export const FURNITURE: Readonly<Record<FurnitureKind, FurnitureDef>> = {
   whiteboard: { mount: 'wall', footprint: { w: 3, h: 0 }, blocks: false },
   window: { mount: 'wall', footprint: { w: 2, h: 0 }, blocks: false },
   clock: { mount: 'wall', footprint: { w: 1, h: 0 }, blocks: false },
-  poster: { mount: 'wall', footprint: { w: 1, h: 0 }, blocks: false, variants: ['code', 'coffee', 'rocket', 'cat', 'bug', 'ship_it'] },
+  poster: { mount: 'wall', footprint: { w: 1, h: 0 }, blocks: false, variants: ['code', 'coffee', 'rocket', 'cat', 'bug', 'ship_it', 'squiggly', 'habbo_hc', 'oldweb'] },
   painting: { mount: 'wall', footprint: { w: 2, h: 0 }, blocks: false },
   tv: { mount: 'wall', footprint: { w: 2, h: 0 }, blocks: false },
   light_switch: { mount: 'wall', footprint: { w: 1, h: 0 }, blocks: false, variants: ['on', 'off'] },
@@ -263,10 +276,14 @@ export const FURNITURE: Readonly<Record<FurnitureKind, FurnitureDef>> = {
   sink: { mount: 'floor', footprint: { w: 1, h: 1 }, blocks: true },
   reception_desk: { mount: 'floor', footprint: { w: 3, h: 1 }, blocks: true },
   bench: { mount: 'floor', footprint: { w: 2, h: 1 }, blocks: false, seat: true },
+  hc_sofa: { mount: 'floor', footprint: { w: 3, h: 1 }, blocks: false, seat: true, variants: ['down', 'up'] },
+  server_rack: { mount: 'floor', footprint: { w: 1, h: 1 }, blocks: true },
+  crt_workstation: { mount: 'floor', footprint: { w: 2, h: 1 }, blocks: true },
 };
 
 export type FloorKind =
   | 'carpet' // salas de projeto (usa tint/tint2 do tema da sala)
+  | 'habbo_check' // piso quadriculado estilo Habbo Club / Old Web
   | 'wood' // lounge
   | 'tile_check' // copa (xadrez)
   | 'tile_white' // banheiro

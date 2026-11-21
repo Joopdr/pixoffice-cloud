@@ -3,12 +3,13 @@
 import { partsKey } from '../../../../shared/appearance';
 import type { AgentInfo, OfficeSnapshot, Provider, RoomInfo } from '../../../../shared/types';
 import type { ArtModule, Dir, RoomTheme } from '../../art/api';
+import { SQUIGGLY_STUDIO_THEME } from '../../art/theme';
 import type { WorldOptions } from '../api';
 import { COL_W, COMPACT_DELAY_MS, DISMANTLE_DELAY_MS, FOOT_DX, FOOT_DY, MISSING_DEBOUNCE_MS, RUN_SPEED, TILE, WALK_SPEED } from '../constants';
 import { assembleBuilding, type BuildingLayout } from '../layout/building';
 import { RECEPTION_ID } from '../layout/core';
 import { columnsFor, inRect } from '../layout/geometry';
-import { layoutProjectRoom } from '../layout/room';
+import { isSquigglyRoomName, layoutProjectRoom } from '../layout/room';
 import type { SpotDef, SpotKind } from '../layout/types';
 import { PathFinder } from '../path/astar';
 import { BLOCKED, FREE, SEAT } from '../path/grid';
@@ -161,6 +162,17 @@ export class Sim {
 
   applySnapshot(input: OfficeSnapshot, now: number): void {
     let snap = this.injected.rooms.length || this.injected.agents.length ? { ...input, rooms: [...input.rooms, ...this.injected.rooms], agents: [...input.agents, ...this.injected.agents] } : input;
+    if (this.options().squigglyFocusRoom) {
+      const squigglyRooms = snap.rooms.filter((r) => isSquigglyRoomName(r.name) || isSquigglyRoomName(r.id));
+      if (squigglyRooms.length > 0) {
+        const keepIds = new Set(squigglyRooms.map((r) => r.id));
+        snap = {
+          ...snap,
+          rooms: squigglyRooms,
+          agents: snap.agents.filter((a) => keepIds.has(a.roomId)),
+        };
+      }
+    }
     if (this.agentPatches.size) {
       const patches = this.agentPatches;
       snap = { ...snap, agents: snap.agents.map((a) => (patches.has(a.id) ? { ...a, ...patches.get(a.id) } : a)) };
@@ -250,16 +262,48 @@ export class Sim {
     if (this.lastSnapshot) this.applySnapshot(this.lastSnapshot, now);
   }
 
+  /** Reconstrói o tema/layout das salas quando o Modo Squiggly Studio muda ao vivo. */
+  rebuildRoomsForTheme(now: number): void {
+    for (const rs of this.rooms.values()) {
+      if (rs.ghost || rs.phase === 'gone') continue;
+      const isSq = this.isSquigglyRoom(rs.info);
+      let nextTheme = FALLBACK_THEME;
+      if (isSq) {
+        nextTheme = { ...SQUIGGLY_STUDIO_THEME, wall: { ...SQUIGGLY_STUDIO_THEME.wall } };
+      } else {
+        try {
+          nextTheme = this.art.roomTheme(rs.info.seed) ?? FALLBACK_THEME;
+        } catch {
+          nextTheme = FALLBACK_THEME;
+        }
+      }
+      rs.theme = nextTheme;
+      rs.layout = layoutProjectRoom({ id: rs.info.id, slot: rs.slot, seed: rs.info.seed, squiggly: isSq }, nextTheme);
+      rs.version++;
+    }
+    this.relayout();
+    if (this.lastSnapshot) this.applySnapshot(this.lastSnapshot, now);
+  }
+
+  private isSquigglyRoom(r: Pick<RoomInfo, 'id' | 'name'>): boolean {
+    return Boolean(this.options().squigglyStudioMode || isSquigglyRoomName(r.name) || isSquigglyRoomName(r.id));
+  }
+
   private createRoom(r: RoomInfo, first: boolean, now: number): RoomState {
+    const isSq = this.isSquigglyRoom(r);
     let theme = FALLBACK_THEME;
-    try {
-      theme = this.art.roomTheme(r.seed) ?? FALLBACK_THEME;
-    } catch {
-      theme = FALLBACK_THEME;
+    if (isSq) {
+      theme = { ...SQUIGGLY_STUDIO_THEME, wall: { ...SQUIGGLY_STUDIO_THEME.wall } };
+    } else {
+      try {
+        theme = this.art.roomTheme(r.seed) ?? FALLBACK_THEME;
+      } catch {
+        theme = FALLBACK_THEME;
+      }
     }
     // a primeira vaga livre do prédio (o slot do servidor só dá a ordem de chegada)
     const slot = this.freeSlot();
-    const layout = layoutProjectRoom({ id: r.id, slot, seed: r.seed }, theme);
+    const layout = layoutProjectRoom({ id: r.id, slot, seed: r.seed, squiggly: isSq }, theme);
     const rs = new RoomState(r, theme, layout, first ? 'ready' : 'building', now, first, slot);
     this.rooms.set(r.id, rs);
     return rs;
@@ -672,7 +716,8 @@ export class Sim {
   moveRoom(room: RoomState, slot: number, now: number): void {
     const before = room.layout;
     const ghostId = `${room.id}#mudança${++this.moveSeq}`;
-    const ghostLayout = layoutProjectRoom({ id: ghostId, slot: room.slot, seed: room.seed }, room.theme);
+    const isSq = this.isSquigglyRoom(room.info);
+    const ghostLayout = layoutProjectRoom({ id: ghostId, slot: room.slot, seed: room.seed, squiggly: isSq }, room.theme);
     const ghost = new RoomState({ ...room.info, id: ghostId, seed: room.seed }, room.theme, ghostLayout, 'ready', now, false, room.slot);
     ghost.ghost = true;
     ghost.listed = false;
@@ -688,7 +733,7 @@ export class Sim {
     });
 
     room.slot = slot;
-    room.layout = layoutProjectRoom({ id: room.id, slot, seed: room.seed }, room.theme);
+    room.layout = layoutProjectRoom({ id: room.id, slot, seed: room.seed, squiggly: isSq }, room.theme);
     room.setPhase('building', now);
     room.lightOn = false;
     room.lightAt = -1e9;

@@ -1,0 +1,2736 @@
+/* ============================================================================
+   Habblaud Tower — Tema Windows XP Luna & Tech Retrô Habbo Edition
+   Auditoria Completa de Contraste WCAG AAA + Elevador + Corte Vertical + Vozes
+   ============================================================================ */
+
+:root,
+.ui-root {
+  --xp-face: #ECE9D8;
+  --xp-face-hi: #F7F5EC;
+  --xp-face-lo: #D6D2C2;
+  --xp-border-dark: #7F9DB9;
+  --xp-btn-border: #003C74;
+  --xp-luna-blue-top: #3C94FF;
+  --xp-luna-blue-mid: #0054E3;
+  --xp-luna-blue-bot: #003CB5;
+  --xp-luna-border: #002375;
+  --xp-selection: #316AC5;
+  --xp-font: "Tahoma", "Trebuchet MS", Verdana, sans-serif;
+
+  /* Variáveis globais do Habblaud redefinidas para altíssimo contraste em tema claro XP */
+  --ui-bg: rgba(236, 233, 216, 0.97) !important;
+  --ui-bg-solid: #ECE9D8 !important;
+  --ui-bg-soft: #FFFFFF !important;
+  --ui-bg-hover: #FFF2C7 !important;
+  --ui-line: #7F9DB9 !important;
+  --ui-line-strong: #003C74 !important;
+  --ui-text: #111111 !important;
+  --ui-muted: #2B2B2B !important;
+  --ui-faint: #4A4A4A !important;
+  --ui-accent: #0054E3 !important;
+  --ui-accent-soft: rgba(0, 84, 227, 0.14) !important;
+
+  --font-ui: "Tahoma", "Trebuchet MS", Verdana, sans-serif !important;
+  font-family: var(--xp-font) !important;
+}
+
+/* ==========================================================================
+   1. BARRA SUPERIOR — Título Luna Blue + Contraste 100% Corrigido
+   ========================================================================== */
+.ui-topbar {
+  background: linear-gradient(
+    180deg,
+    #3C94FF 0%,
+    #1F73F0 14%,
+    #0054E3 50%,
+    #0044CA 86%,
+    #003CB5 100%
+  ) !important;
+  border-bottom: 2px solid #002375 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 2px 6px rgba(0, 0, 0, 0.35) !important;
+  color: #FFFFFF !important;
+  height: 48px !important;
+  padding: 0 10px !important;
+  z-index: 100 !important;
+}
+
+.ui-brand__title,
+.ui-wordmark {
+  color: #FFFFFF !important;
+  font-family: var(--xp-font) !important;
+  font-weight: 700 !important;
+  text-shadow: 1px 1px 0 #002375 !important;
+}
+
+.ui-pill {
+  background: rgba(0, 22, 82, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  color: #FFFFFF !important;
+}
+
+.ui-pill__text,
+.ui-version__text,
+.ui-version {
+  color: #FFFFFF !important;
+  font-family: var(--xp-font) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* CONTADORES DO TOPO — Correção crítica de contraste (antes ficava branco no branco!) */
+.ui-counters {
+  background: #F7F5EC !important;
+  border: 1px solid #002375 !important;
+  border-radius: 4px !important;
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  padding: 2px 6px !important;
+  gap: 6px !important;
+}
+
+.ui-counter {
+  color: #111111 !important;
+  background: transparent !important;
+}
+
+.ui-counter__value {
+  color: #002375 !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  text-shadow: none !important;
+}
+
+.ui-counter__label {
+  color: #222222 !important;
+  font-weight: 600 !important;
+  font-size: 10px !important;
+  text-shadow: none !important;
+}
+
+.ui-counter--waiting.is-alert .ui-counter__value,
+.ui-counter--waiting.is-alert .ui-counter__label {
+  color: #9A3412 !important;
+}
+
+/* CARD DE CONTA / USAGE NO TOPO — Compacto e sem transbordar da barra superior */
+.ui-usage-card,
+.ui-account-card {
+  background: #F7F5EC !important;
+  border: 1px solid #002375 !important;
+  border-radius: 4px !important;
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  color: #111111 !important;
+  padding: 2px 6px !important;
+  min-width: 0 !important;
+  max-width: 205px !important;
+  max-height: 38px !important;
+  overflow: hidden !important;
+}
+
+.ui-usage-card__email {
+  display: none !important;
+}
+
+.ui-usage-card *,
+.ui-account-card * {
+  text-shadow: none !important;
+}
+
+.ui-usage-card__head {
+  gap: 5px !important;
+}
+
+.ui-usage-card__name,
+.ui-account-card__name {
+  color: #002375 !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+}
+
+.ui-usage-card__plan,
+.ui-usage-card__msg,
+.ui-usage-card__msg-text,
+.ui-usage-card__msg-long,
+.ui-usage-card__msg-short,
+.ui-meter__pct {
+  color: #222222 !important;
+  font-weight: 600 !important;
+  font-size: 10px !important;
+}
+
+.ui-usage-card__how {
+  color: #0054E3 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+}
+
+.ui-provider-tag,
+.ui-prov {
+  background: #003CB5 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #002375 !important;
+  border-radius: 3px !important;
+  padding: 0 5px !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  line-height: 15px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Esconde botões legados redundantes na barra superior */
+.ui-squiggly-btn,
+.ui-squiggly-focus-btn {
+  display: none !important;
+}
+
+/* Botões rápidos de Prédio, Voz e Mudo na barra superior */
+.xp-top-voice-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 6px;
+}
+
+.xp-top-mute-btn.is-muted {
+  background: linear-gradient(180deg, #FEE2E2 0%, #FCA5A5 100%) !important;
+  border-color: #991B1B !important;
+  color: #7F1D1D !important;
+}
+
+/* Chips de Contas */
+.ui-acc-chip {
+  background: linear-gradient(180deg, #FFFFFF 0%, #ECE9D8 100%) !important;
+  border: 1px solid #003C74 !important;
+  border-radius: 3px !important;
+  color: #002375 !important;
+  font-family: var(--xp-font) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+/* ==========================================================================
+   2. BALÕES DE FALA MSN MESSENGER (Individuais por Boneco)
+   ========================================================================== */
+.xp-speech-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 112;
+  overflow: visible;
+}
+
+.xp-speech-balloon {
+  position: absolute;
+  pointer-events: auto;
+  transform: translate(-50%, -100%);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F4F8FF 100%);
+  border: 2px solid #0054E3;
+  border-radius: 12px;
+  box-shadow:
+    0 6px 20px rgba(0, 28, 96, 0.38),
+    inset 0 1px 0 #FFFFFF;
+  padding: 8px 11px;
+  min-width: 185px;
+  max-width: 290px;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  line-height: 1.42;
+  color: #111111;
+  animation: msn-pop 0.24s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  transition: opacity 0.32s ease, transform 0.25s ease;
+}
+
+.xp-speech-balloon.is-speaking {
+  z-index: 118;
+  box-shadow:
+    0 8px 24px rgba(0, 64, 184, 0.45),
+    0 0 0 2px rgba(60, 148, 255, 0.32),
+    inset 0 1px 0 #FFFFFF;
+}
+
+.xp-speech-balloon.is-recent {
+  opacity: 0.86;
+  z-index: 113;
+}
+
+@keyframes msn-pop {
+  0% { transform: translate(-50%, -82%) scale(0.75); opacity: 0; }
+  100% { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+}
+
+.xp-balloon-fade {
+  opacity: 0 !important;
+  transform: translate(-50%, -108%) scale(0.94) !important;
+}
+
+.xp-balloon-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  border-bottom: 1px solid #D9E5F8;
+  padding-bottom: 3px;
+}
+
+.xp-balloon-avatar {
+  font-size: 13px;
+}
+
+.xp-balloon-role {
+  font-size: 9.5px;
+  color: #444444;
+  font-weight: 600;
+}
+
+.xp-balloon-wave {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #0054E3;
+  background: #E8F1FF;
+  border: 1px solid #B5D0FA;
+  border-radius: 8px;
+  padding: 1px 5px;
+}
+
+.xp-balloon-body {
+  color: #111111;
+  font-size: 11.5px;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.xp-balloon-tail {
+  position: absolute;
+  bottom: -9px;
+  left: calc(50% + var(--tail-shift, 0px));
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 9px solid #0054E3;
+}
+
+.xp-speech-balloon.is-offscreen {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.xp-speech-balloon.is-parallel {
+  z-index: 114;
+  background: linear-gradient(180deg, #FFFDF7 0%, #F7F4EB 100%);
+  cursor: pointer;
+}
+
+.xp-speech-balloon.is-parallel:hover {
+  border-color: #D97706 !important;
+  box-shadow:
+    0 8px 22px rgba(217, 119, 6, 0.28),
+    0 0 0 2px rgba(245, 158, 11, 0.35),
+    inset 0 1px 0 #FFFFFF;
+}
+
+.xp-speech-balloon.is-tuned {
+  z-index: 120;
+  box-shadow:
+    0 10px 26px rgba(0, 84, 227, 0.48),
+    0 0 0 3px rgba(245, 158, 11, 0.55),
+    inset 0 1px 0 #FFFFFF;
+}
+
+.xp-speech-balloon.is-tuned .xp-balloon-wave {
+  background: #FEF3C7;
+  border-color: #D97706;
+  color: #92400E;
+}
+
+.xp-balloon-tune-btn {
+  margin-left: auto;
+  font-family: var(--xp-font);
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #002375;
+  background: linear-gradient(180deg, #FFFDF0 0%, #FDE68A 100%);
+  border: 1px solid #B45309;
+  border-radius: 10px;
+  padding: 1px 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 #FFFFFF;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.xp-balloon-tune-btn:hover {
+  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 100%);
+  color: #111111;
+  transform: scale(1.05);
+}
+
+.xp-balloon-tail::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -7px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 8px solid #F4F8FF;
+}
+
+/* Quando o agente está no topo da tela, o balão abre ABAIXO para nunca tampar a barra superior */
+.xp-speech-balloon.is-below .xp-balloon-tail {
+  bottom: auto;
+  top: -9px;
+  border-top: none;
+  border-bottom: 9px solid #0054E3;
+}
+
+.xp-speech-balloon.is-below .xp-balloon-tail::after {
+  top: 2px;
+  border-top: none;
+  border-bottom: 8px solid #FFFFFF;
+}
+
+/* ==========================================================================
+   3. PAINEL LATERAL DO ELEVADOR (Prédio Multi-Andar)
+   ========================================================================== */
+.xp-elevator-panel {
+  position: fixed;
+  top: 52px;
+  right: 10px;
+  width: 238px;
+  max-height: calc(100vh - 300px);
+  background: #ECE9D8;
+  border: 2px solid #0054E3;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.85),
+    0 6px 18px rgba(0, 0, 0, 0.42);
+  display: flex;
+  flex-direction: column;
+  z-index: 96;
+  font-family: var(--xp-font);
+  color: #111111;
+  overflow: hidden;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.xp-elevator-panel.is-collapsed {
+  transform: translateX(calc(100% + 20px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.xp-elev-head {
+  background: linear-gradient(180deg, #3C94FF 0%, #0054E3 55%, #003CB5 100%);
+  color: #FFFFFF;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #002375;
+}
+
+.xp-elev-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-shadow: 1px 1px 0 #002375;
+}
+
+.xp-elev-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.xp-elev-mini-btn {
+  background: linear-gradient(180deg, #FFFFFF 0%, #E3E0D1 100%);
+  border: 1px solid #002375;
+  border-radius: 3px;
+  color: #002375;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  cursor: pointer;
+}
+
+.xp-elev-mini-btn:hover {
+  background: #FFF2C7;
+}
+
+.xp-elev-close-btn,
+.xp-win-x {
+  width: 20px;
+  height: 18px;
+  background: linear-gradient(180deg, #F87171 0%, #DC2626 55%, #B91C1C 100%);
+  border: 1px solid #FFFFFF;
+  border-radius: 3px;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Visor LCD do elevador */
+.xp-elev-display {
+  margin: 6px 6px 4px;
+  background: #0C1B2E;
+  border: 2px inset #7F9DB9;
+  border-radius: 3px;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.xp-elev-lcd-floor {
+  color: #4ADE80;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.xp-elev-lcd-co {
+  color: #FDE68A;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xp-elev-list {
+  padding: 4px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.xp-floor-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F1EFE2 100%);
+  border: 1px solid #7F9DB9;
+  border-radius: 4px;
+  padding: 5px 6px;
+  cursor: pointer;
+  color: #111111;
+  font-family: var(--xp-font);
+}
+
+.xp-floor-btn:hover {
+  background: #FFF6D6;
+  border-color: #0054E3;
+}
+
+.xp-floor-btn.is-selected {
+  background: linear-gradient(180deg, #DBEAFE 0%, #BFDBFE 100%);
+  border: 2px solid #0054E3;
+  box-shadow: inset 0 1px 0 #FFFFFF;
+}
+
+.xp-floor-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ECE9D8;
+  border: 1px solid #003C74;
+  color: #002375;
+  font-size: 10.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.xp-floor-btn.is-selected .xp-floor-num {
+  background: #0054E3;
+  color: #FFFFFF;
+}
+
+.xp-floor-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.xp-floor-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.xp-floor-badge {
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.xp-floor-name {
+  color: #111111;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xp-floor-sub {
+  color: #374151;
+  font-size: 10px;
+}
+
+.xp-floor-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.xp-floor-led.is-busy {
+  background: #22C55E;
+  box-shadow: 0 0 6px #22C55E;
+}
+
+.xp-floor-led.is-idle {
+  background: #9CA3AF;
+}
+
+.xp-elev-foot {
+  background: #DFDAC8;
+  border-top: 1px solid #B6B19E;
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.xp-prov-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.xp-prov-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* Banner de chegada do elevador */
+.xp-elevator-banner {
+  position: fixed;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #FFFDF5;
+  border: 2px solid #0054E3;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 140;
+  color: #111111;
+  font-family: var(--xp-font);
+  font-size: 12px;
+  transition: opacity 0.35s ease;
+}
+
+.xp-elevator-banner[hidden] {
+  display: none !important;
+}
+
+.xp-elevator-banner.is-leaving {
+  opacity: 0;
+}
+
+.xp-elev-badge {
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 7px;
+  border-radius: 4px;
+}
+
+.xp-elev-sub {
+  font-size: 10.5px;
+  color: #374151;
+}
+
+/* ==========================================================================
+   4. CORTE VERTICAL DO PRÉDIO (Vista SimTower / Torre Corporativa)
+   ========================================================================== */
+.xp-building-cutaway {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 20, 48, 0.68);
+  backdrop-filter: blur(3px);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.xp-building-cutaway[hidden] {
+  display: none !important;
+}
+
+.xp-cut-window {
+  width: min(940px, 95vw);
+  max-height: 88vh;
+  background: #ECE9D8;
+  border: 2px solid #0054E3;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--xp-font);
+}
+
+.xp-cut-titlebar {
+  background: linear-gradient(180deg, #3C94FF 0%, #0054E3 55%, #003CB5 100%);
+  color: #FFFFFF;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-shadow: 1px 1px 0 #002375;
+}
+
+.xp-cut-sky {
+  background: linear-gradient(180deg, #1E3A8A 0%, #3B82F6 48%, #93C5FD 100%);
+  padding: 16px 20px 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.xp-cut-roof {
+  width: 100%;
+  max-width: 840px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.xp-cut-antenna {
+  width: 4px;
+  height: 18px;
+  background: #CBD5E1;
+  border-top: 4px solid #EF4444;
+}
+
+.xp-cut-neon {
+  width: 100%;
+  background: #1E293B;
+  border: 2px solid #64748B;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  color: #FDE047;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  padding: 6px;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 8px rgba(253, 224, 71, 0.55);
+}
+
+.xp-cut-tower-wrap {
+  width: 100%;
+  max-width: 840px;
+  display: flex;
+  background: #334155;
+  border: 3px solid #1E293B;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+}
+
+.xp-cut-shaft {
+  width: 54px;
+  background: linear-gradient(90deg, #1E293B 0%, #334155 50%, #1E293B 100%);
+  border-right: 3px solid #0F172A;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.xp-cut-cable {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #94A3B8;
+  transform: translateX(-50%);
+}
+
+.xp-cut-car {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  height: 44px;
+  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 100%);
+  border: 2px solid #78350F;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 10px rgba(250, 204, 21, 0.55);
+  transition: top 0.35s ease;
+}
+
+.xp-cut-stack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.xp-cut-floor {
+  display: flex;
+  border-bottom: 4px solid #1E293B;
+  background: #F8FAFC;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.xp-cut-floor:hover {
+  background: #FEF9C3;
+}
+
+.xp-cut-floor.is-selected {
+  background: #EFF6FF;
+  outline: 3px solid #2563EB;
+  outline-offset: -3px;
+}
+
+.xp-cut-floor-badge {
+  width: 58px;
+  background: #E2E8F0;
+  border-right: 2px solid #94A3B8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+.xp-cut-fnum {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.xp-cut-prov {
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.xp-cut-room {
+  flex: 1;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.xp-cut-room-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: #0F172A;
+  font-size: 12px;
+}
+
+.xp-cut-room-prov {
+  background: #E2E8F0;
+  color: #1E293B;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.xp-cut-room-sub {
+  color: #334155;
+  font-size: 11px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xp-cut-enter-cta {
+  color: #0054E3;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.xp-cut-interior {
+  background: linear-gradient(180deg, #E2E8F0 0%, #E2E8F0 65%, #CBD5E1 65%, #CBD5E1 100%);
+  border: 1px solid #94A3B8;
+  border-radius: 4px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.xp-cut-prop {
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.xp-cut-rack {
+  width: 14px;
+  height: 28px;
+  background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  border: 1px solid #475569;
+  box-shadow: inset 0 4px 0 #22C55E, inset 0 10px 0 #38BDF8;
+}
+
+.xp-cut-crt {
+  width: 22px;
+  height: 20px;
+  background: #E5DEC9;
+  border: 2px solid #78716C;
+  box-shadow: inset 0 0 0 3px #2563EB;
+}
+
+.xp-cut-hcsofa {
+  width: 34px;
+  height: 16px;
+  background: #1D7D4B;
+  border: 2px solid #7C3F21;
+  border-radius: 3px;
+  margin-left: auto;
+}
+
+.xp-cut-agents-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.xp-cut-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #FFFFFF;
+  border: 1px solid #64748B;
+  border-radius: 12px;
+  padding: 2px 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.xp-cut-agent.is-working {
+  border-color: #16A34A;
+  background: #F0FDF4;
+}
+
+.xp-cut-avatar {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16A34A;
+}
+
+.xp-cut-lobby {
+  width: 100%;
+  max-width: 840px;
+  background: #1E293B;
+  color: #F8FAFC;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 0 0 6px 6px;
+  text-align: center;
+}
+
+/* ==========================================================================
+   5. CENTRAL DE VOZES POPOVER (Neural PT-BR + Talk It! Retrô + Mudo)
+   ========================================================================== */
+.xp-voice-popover {
+  position: fixed;
+  bottom: 36px;
+  right: 12px;
+  width: 320px;
+  background: #ECE9D8;
+  border: 2px solid #0054E3;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  z-index: 135;
+  font-family: var(--xp-font);
+  color: #111111;
+  overflow: hidden;
+}
+
+.xp-voice-popover[hidden] {
+  display: none !important;
+}
+
+.xp-vp-head {
+  background: linear-gradient(180deg, #3C94FF 0%, #0054E3 55%, #003CB5 100%);
+  color: #FFFFFF;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-shadow: 1px 1px 0 #002375;
+}
+
+.xp-vp-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.xp-vp-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #111111;
+}
+
+.xp-vp-modes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.xp-vp-mode {
+  background: #FFFFFF;
+  border: 1px solid #7F9DB9;
+  border-radius: 4px;
+  padding: 6px 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #111111;
+  font-family: var(--xp-font);
+  font-size: 10.5px;
+}
+
+.xp-vp-mode small {
+  font-size: 9px;
+  color: #4B5563;
+}
+
+.xp-vp-mode.is-active {
+  background: #DBEAFE;
+  border: 2px solid #0054E3;
+  color: #002375;
+}
+
+.xp-vp-talkit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #111111;
+}
+
+.xp-vp-select {
+  background: #FFFFFF;
+  border: 1px solid #003C74;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  color: #111111;
+}
+
+.xp-vp-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+}
+
+.xp-vp-actions .ui-btn {
+  flex: 1;
+}
+
+.xp-vp-divider {
+  height: 1px;
+  background: #B6B19E;
+  box-shadow: 0 1px 0 #FFFFFF;
+}
+
+.xp-vp-sfx-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.xp-sfx-toggle {
+  background: linear-gradient(180deg, #FEE2E2 0%, #FCA5A5 100%);
+  border: 1px solid #991B1B;
+  border-radius: 3px;
+  color: #7F1D1D;
+  font-family: var(--xp-font);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+
+.xp-sfx-toggle.is-on {
+  background: linear-gradient(180deg, #DCFCE7 0%, #86EFAC 100%);
+  border-color: #166534;
+  color: #14532D;
+}
+
+.xp-vp-vol-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: #111111;
+}
+
+.xp-vp-vol-row input[type='range'] {
+  flex: 1;
+  accent-color: #0054E3;
+  cursor: pointer;
+}
+
+.xp-foley-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+.xp-foley-btn {
+  background: linear-gradient(180deg, #FFFFFF 0%, #EAE6D8 100%);
+  border: 1px solid #7F9DB9;
+  border-radius: 3px;
+  color: #111111;
+  font-family: var(--xp-font);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 4px 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.xp-foley-btn:hover {
+  background: #FFF2C7;
+  border-color: #0054E3;
+  color: #002375;
+}
+
+.xp-foley-btn:active {
+  background: #DBEAFE;
+}
+
+/* ==========================================================================
+   6. BARRA DE TAREFAS DO WINDOWS XP (BOTTOM TASKBAR)
+   ========================================================================== */
+.xp-taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: linear-gradient(
+    180deg,
+    #1F63C4 0%,
+    #2985F8 8%,
+    #1550B5 16%,
+    #1B58C0 92%,
+    #0E3E8C 100%
+  );
+  border-top: 1px solid #002375;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  z-index: 120;
+  user-select: none;
+}
+
+.xp-start-btn {
+  height: 32px;
+  background: linear-gradient(180deg, #53BD58 0%, #388E3C 12%, #43A047 50%, #2E7D32 86%, #1B5E20 100%);
+  border: none;
+  border-radius: 0 14px 14px 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 2px 0 4px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 15px 0 10px;
+  cursor: pointer;
+  color: #FFFFFF;
+  font-family: var(--xp-font);
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 700;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.65);
+  flex-shrink: 0;
+}
+
+.xp-start-btn:hover {
+  background: linear-gradient(180deg, #66CB6B 0%, #4CAF50 12%, #4DB452 50%, #388E3C 86%, #2E7D32 100%);
+}
+
+.xp-flag {
+  font-size: 15px;
+  font-style: normal;
+}
+
+.xp-quick-launch {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 8px;
+  border-right: 1px solid rgba(0, 35, 117, 0.45);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+.xp-ql-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: #FFFFFF;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+
+.xp-ql-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.xp-taskbar-tasks {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  overflow: hidden;
+}
+
+.xp-task-btn {
+  background: linear-gradient(180deg, #103B91 0%, #184CAE 50%, #1E5BC4 100%);
+  border: 1px solid #001A52;
+  border-radius: 3px;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.45);
+  color: #FFFFFF;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  height: 23px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xp-systray {
+  background: linear-gradient(180deg, #0F3F94 0%, #124DB5 45%, #185CD6 100%);
+  border-left: 1px solid #0A2660;
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.25);
+  height: 100%;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #FFFFFF;
+  font-family: var(--xp-font);
+  font-size: 11px;
+}
+
+.xp-tray-icon {
+  background: rgba(0, 20, 70, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+.xp-tray-icon:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.xp-tray-time {
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+/* ==========================================================================
+   7. SIDEBAR, FEED, BUSCA & PAINÉIS — Contraste 100% Auditado
+   ========================================================================== */
+.ui-sidebar {
+  position: fixed !important;
+  background: var(--xp-face) !important;
+  border: 2px solid #0054E3 !important;
+  border-radius: 8px 8px 3px 3px !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.42) !important;
+  color: #111111 !important;
+  overflow: hidden !important;
+  top: 52px !important;
+  bottom: 38px !important;
+  left: 10px !important;
+  width: 265px !important;
+  z-index: 92 !important;
+}
+
+.ui-side__head {
+  background: linear-gradient(180deg, #3C94FF 0%, #1F73F0 14%, #0054E3 50%, #0044CA 86%, #003CB5 100%) !important;
+  color: #FFFFFF !important;
+  border-bottom: 1px solid #002375 !important;
+  padding: 6px 8px 8px !important;
+}
+
+.ui-side__title h2 {
+  color: #FFFFFF !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  text-shadow: 1px 1px 0 #002375 !important;
+}
+
+/* CAMPO DE BUSCA NA SIDEBAR — Correção crítica de contraste (antes ficava escuro no azul!) */
+.ui-search {
+  background: #FFFFFF !important;
+  border: 1px solid #002375 !important;
+  border-radius: 3px !important;
+  color: #111111 !important;
+}
+
+.ui-search__input {
+  color: #111111 !important;
+  background: transparent !important;
+  font-family: var(--xp-font) !important;
+  font-size: 11px !important;
+}
+
+.ui-search__input::placeholder {
+  color: #555555 !important;
+  opacity: 1 !important;
+}
+
+.ui-search__icon {
+  color: #333333 !important;
+}
+
+.ui-kbd {
+  background: #ECE9D8 !important;
+  color: #111111 !important;
+  border: 1px solid #7F9DB9 !important;
+}
+
+/* Itens da lista de salas e agentes na Sidebar */
+.ui-room__head,
+.ui-room__name,
+.ui-room__count,
+.ui-room__path,
+.ui-row,
+.ui-row__name,
+.ui-row__role,
+.ui-row__sub,
+.ui-row__meta {
+  color: #111111 !important;
+  text-shadow: none !important;
+}
+
+.ui-room__path,
+.ui-row__sub {
+  color: #374151 !important;
+}
+
+/* Janela de Atividade (Feed) posicionada no canto inferior direito abaixo do Elevador */
+.ui-feed {
+  position: fixed !important;
+  bottom: 38px !important;
+  right: 10px !important;
+  left: auto !important;
+  width: 340px !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: 225px !important;
+  background: var(--xp-face) !important;
+  border: 2px solid #0054E3 !important;
+  border-radius: 8px 8px 3px 3px !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.42) !important;
+  overflow: hidden !important;
+  z-index: 94 !important;
+}
+
+.ui-feed__head {
+  background: linear-gradient(180deg, #3C94FF 0%, #0054E3 55%, #003CB5 100%) !important;
+  color: #FFFFFF !important;
+  border-bottom: 1px solid #002375 !important;
+  padding: 5px 10px !important;
+}
+
+.ui-feed__head *,
+.ui-feed__title h2,
+.ui-side__head .ui-icon-btn,
+.ui-feed__head .ui-icon-btn {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-shadow: 1px 1px 0 #002375 !important;
+}
+
+.ui-feed__scroll {
+  background: #FFFFFF !important;
+  border: 1px solid #7F9DB9 !important;
+  margin: 4px !important;
+  border-radius: 2px !important;
+  color: #111111 !important;
+}
+
+.ui-feed__row,
+.ui-feed__row * {
+  color: #111111 !important;
+  font-family: var(--xp-font) !important;
+  font-size: 11px !important;
+}
+
+.ui-feed__row {
+  border-bottom: 1px solid #EFECE4 !important;
+  padding: 3px 6px !important;
+}
+
+.ui-feed__row:hover {
+  background: var(--xp-selection) !important;
+}
+
+.ui-feed__row:hover,
+.ui-feed__row:hover * {
+  color: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   8. BOTÕES 3D LUNA & MODAIS
+   ========================================================================== */
+.ui-btn,
+button.ui-btn {
+  font-family: var(--xp-font) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #111111 !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F1EFE2 45%, #E3E0D1 88%, #D4D0C0 100%) !important;
+  border: 1px solid var(--xp-btn-border) !important;
+  border-radius: 3px !important;
+  box-shadow:
+    inset 0 1px 0 #FFFFFF,
+    inset 0 -1px 0 #C8C3B2,
+    1px 1px 2px rgba(0, 0, 0, 0.2) !important;
+  padding: 3px 8px !important;
+  cursor: pointer !important;
+  text-shadow: none !important;
+}
+
+.ui-btn:hover,
+button.ui-btn:hover {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF5E0 45%, #FFE9B8 88%, #FFD685 100%) !important;
+  color: #000000 !important;
+}
+
+.ui-dialog,
+.ui-popover,
+.ui-drawer {
+  background: #ECE9D8 !important;
+  border: 2px solid #0054E3 !important;
+  border-radius: 8px 8px 3px 3px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  color: #111111 !important;
+}
+
+.ui-dialog__head,
+.ui-popover__head,
+.ui-drawer__head {
+  background: linear-gradient(180deg, #3C94FF 0%, #0054E3 55%, #003CB5 100%) !important;
+  color: #FFFFFF !important;
+  border-bottom: 1px solid #002375 !important;
+}
+
+.ui-dialog__head *,
+.ui-popover__head *,
+.ui-drawer__head * {
+  color: #FFFFFF !important;
+}
+
+
+/* ==========================================================================
+   9. ATMOSFERAS ARQUITETÔNICAS POR ANDAR + PORTAS DO ELEVADOR
+   ========================================================================== */
+canvas[data-floor-style="luna_tech"] {
+  filter: none;
+}
+
+canvas[data-floor-style="retro_studio"] {
+  filter: saturate(1.16) contrast(1.03);
+}
+
+canvas[data-floor-style="warm_loft"] {
+  filter: sepia(0.16) saturate(1.12) brightness(0.99);
+}
+
+canvas[data-floor-style="cyber_neon"] {
+  filter: hue-rotate(-10deg) saturate(1.25) contrast(1.06);
+}
+
+canvas[data-floor-style="sunset_lounge"] {
+  filter: sepia(0.22) hue-rotate(-14deg) saturate(1.22) brightness(0.97);
+}
+
+.xp-cut-style-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.xp-cut-interior.is-dark-floor {
+  border-color: #334155;
+}
+
+/* Portas metálicas do elevador ao trocar de andar */
+.xp-elevator-doors {
+  position: fixed;
+  inset: 0;
+  z-index: 165;
+  pointer-events: none;
+  display: flex;
+  align-items: stretch;
+}
+
+.xp-elevator-doors[hidden] {
+  display: none !important;
+}
+
+.xp-door-left,
+.xp-door-right {
+  flex: 1;
+  background: linear-gradient(90deg, #64748B 0%, #94A3B8 45%, #CBD5E1 50%, #64748B 100%);
+  border: 2px solid #334155;
+  transition: transform 0.34s cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+
+.xp-elevator-doors.is-closing .xp-door-left {
+  transform: translateX(0%);
+}
+.xp-elevator-doors.is-closing .xp-door-right {
+  transform: translateX(0%);
+}
+.xp-elevator-doors.is-opening .xp-door-left {
+  transform: translateX(-100%);
+}
+.xp-elevator-doors.is-opening .xp-door-right {
+  transform: translateX(100%);
+}
+
+.xp-door-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.xp-door-sign {
+  background: #0F172A;
+  border: 2px solid #F59E0B;
+  border-radius: 8px;
+  padding: 12px 22px;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+  font-family: var(--xp-font);
+}
+
+.xp-door-sign strong {
+  color: #4ADE80;
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+
+.xp-door-sign span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #FDE68A;
+}
+
+.xp-door-sign small {
+  font-size: 11px;
+  color: #CBD5E1;
+}
+
+/* ==========================================================================
+   10. PARTÍCULAS SOCIAIS FLUTUANTES (💖 ⭐ 🎵 ✨) & JANELA VIDA REAL
+   ========================================================================== */
+.xp-life-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 125;
+}
+
+.xp-float-particle {
+  position: absolute;
+  font-size: 18px;
+  transform: translate(-50%, 0);
+  animation: xp-float-up 1.65s ease-out forwards;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
+@keyframes xp-float-up {
+  0% { opacity: 0; transform: translate(-50%, 4px) scale(0.6); }
+  18% { opacity: 1; transform: translate(-50%, -14px) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -56px) scale(0.95); }
+}
+
+.xp-life-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 20, 48, 0.62);
+  backdrop-filter: blur(2px);
+  z-index: 155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.xp-life-modal[hidden] {
+  display: none !important;
+}
+
+.xp-life-window {
+  width: min(860px, 95vw);
+  max-height: 85vh;
+  background: #ECE9D8;
+  border: 2px solid #0054E3;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.58);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--xp-font);
+  color: #111111;
+}
+
+.xp-life-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px 0;
+  background: #E2DEC9;
+  border-bottom: 1px solid #7F9DB9;
+}
+
+.xp-life-tab {
+  background: linear-gradient(180deg, #F6F4EC 0%, #DCD8C6 100%);
+  border: 1px solid #7F9DB9;
+  border-bottom: none;
+  border-radius: 5px 5px 0 0;
+  padding: 6px 12px;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  font-weight: 700;
+  color: #1F2937;
+  cursor: pointer;
+}
+
+.xp-life-tab.is-active {
+  background: #FFFFFF;
+  color: #002375;
+  border-color: #0054E3;
+  margin-bottom: -1px;
+  padding-bottom: 7px;
+}
+
+.xp-life-body {
+  padding: 12px;
+  overflow-y: auto;
+  background: #FFFFFF;
+  flex: 1;
+}
+
+.xp-life-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+  gap: 10px;
+}
+
+.xp-life-card {
+  background: #F8F7F2;
+  border: 1px solid #9CB0C9;
+  border-radius: 6px;
+  padding: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: inset 0 1px 0 #FFFFFF;
+}
+
+.xp-life-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #002375;
+}
+
+.xp-life-mood {
+  font-size: 10.5px;
+  font-weight: 700;
+  background: #E8F1FF;
+  color: #003CB5;
+  border-radius: 10px;
+  padding: 1px 6px;
+}
+
+.xp-life-arch {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #374151;
+}
+
+.xp-life-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10.5px;
+  color: #1F2937;
+}
+
+.xp-life-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.xp-life-bars > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #E5E7EB;
+  border-radius: 3px;
+  height: 12px;
+  padding-right: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.xp-life-bars small {
+  position: relative;
+  z-index: 1;
+  font-size: 9px;
+  font-weight: 700;
+  color: #111111;
+  padding-left: 5px;
+  width: 48px;
+}
+
+.xp-life-bars i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.xp-life-card-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.xp-life-card-actions .ui-btn {
+  flex: 1;
+  font-size: 10px !important;
+  padding: 3px 4px !important;
+}
+
+.xp-rel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.xp-rel-row {
+  background: #F8F7F2;
+  border: 1px solid #9CB0C9;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.xp-rel-names {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #111111;
+}
+
+.xp-rel-badge {
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.xp-rel-bar-wrap {
+  height: 8px;
+  background: #E2E8F0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.xp-rel-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.xp-rel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #374151;
+}
+
+.xp-gossip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.xp-gossip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #F8F7F2;
+  border: 1px solid #E2E8F0;
+  border-radius: 4px;
+  font-size: 11.5px;
+  color: #111111;
+}
+
+.xp-gossip-time {
+  font-family: Consolas, monospace;
+  font-size: 10px;
+  color: #475569;
+  font-weight: 700;
+}
+
+
+/* ==========================================================================
+   11. SALA DE REUNIÃO 3D WEBGL (Three.js + Slides Reais + Controles XP Luna)
+   ========================================================================== */
+.xp-top-meeting-btn {
+  background: linear-gradient(180deg, #E0F2FE 0%, #BAE6FD 48%, #7DD3FC 100%) !important;
+  border-color: #0369A1 !important;
+  color: #0C4A6E !important;
+  font-weight: 800 !important;
+}
+
+.xp-meeting-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 12, 28, 0.78);
+  backdrop-filter: blur(4px);
+  z-index: 170;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.xp-meeting-modal[hidden] {
+  display: none !important;
+}
+
+.xp-meeting-window {
+  width: min(1180px, 96vw);
+  height: min(740px, 92vh);
+  background: #ECE9D8;
+  border: 2px solid #0054E3;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.72);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--xp-font);
+  color: #111111;
+}
+
+.xp-meeting-titlebar {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.xp-meeting-title-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.xp-meeting-company-pill {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #FDE68A;
+  text-shadow: none;
+}
+
+.xp-meeting-cam-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.xp-meeting-cam-btn {
+  background: rgba(15, 23, 42, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  color: #FFFFFF;
+  font-family: var(--xp-font);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  cursor: pointer;
+}
+
+.xp-meeting-cam-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.xp-meeting-cam-btn.is-active {
+  background: #FDE68A;
+  color: #0F172A;
+  border-color: #FFFFFF;
+  text-shadow: none;
+}
+
+.xp-meeting-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.xp-meeting-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  background: #0B1528;
+  position: relative;
+}
+
+.xp-meeting-stage-wrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.xp-meeting-stage {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.xp-meeting-stage:active {
+  cursor: grabbing;
+}
+
+.xp-meeting-orbit-hint {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  background: rgba(10, 18, 38, 0.78);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 14px;
+  color: #E2E8F0;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  pointer-events: none;
+}
+
+.xp-meeting-subtitle {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 12px;
+  background: rgba(8, 17, 36, 0.9);
+  border: 1.5px solid #38BDF8;
+  border-radius: 10px;
+  padding: 8px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.xp-meeting-sub-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.xp-meeting-sub-speaker {
+  color: #FDE68A;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.xp-meeting-sub-status {
+  color: #7DD3FC;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.xp-meeting-sub-text {
+  color: #F8FAFC;
+  font-size: 12.5px;
+  line-height: 1.38;
+  font-weight: 500;
+}
+
+/* Gaveta de Perguntas ao Vivo */
+.xp-meeting-ask-drawer {
+  position: absolute;
+  top: 44px;
+  left: 16px;
+  width: min(460px, calc(100% - 32px));
+  background: #ECE9D8;
+  border: 2px solid #0054E3;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 6;
+}
+
+.xp-meeting-ask-drawer[hidden] {
+  display: none !important;
+}
+
+.xp-meeting-ask-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #002375;
+}
+
+.xp-meeting-ask-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.xp-meeting-chip {
+  background: #FFFFFF;
+  border: 1px solid #7F9DB9;
+  border-radius: 12px;
+  padding: 3px 9px;
+  font-family: var(--xp-font);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #002375;
+  cursor: pointer;
+}
+
+.xp-meeting-chip:hover {
+  background: #DBEAFE;
+  border-color: #0054E3;
+}
+
+.xp-meeting-ask-row {
+  display: flex;
+  gap: 6px;
+}
+
+.xp-meeting-input,
+.xp-meeting-textarea {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid #003C74;
+  border-radius: 3px;
+  padding: 5px 7px;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  color: #111111;
+  box-sizing: border-box;
+}
+
+/* Editor lateral de Slides */
+.xp-meeting-editor {
+  width: 290px;
+  flex-shrink: 0;
+  background: #ECE9D8;
+  border-left: 2px solid #0054E3;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.xp-meeting-editor[hidden] {
+  display: none !important;
+}
+
+.xp-meeting-editor-head {
+  background: #DFDAC8;
+  border-bottom: 1px solid #9CB0C9;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #002375;
+}
+
+.xp-meeting-editor-body {
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.xp-meeting-editor-body label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.xp-meeting-apply-btn {
+  background: linear-gradient(180deg, #DCFCE7 0%, #86EFAC 100%) !important;
+  border-color: #166534 !important;
+  color: #14532D !important;
+}
+
+/* Dock inferior de reprodução & aprovação */
+.xp-meeting-dock {
+  background: #DFDAC8;
+  border-top: 2px solid #7F9DB9;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.xp-meeting-playback,
+.xp-meeting-founder-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.xp-meeting-play-btn {
+  min-width: 96px;
+}
+
+.xp-meeting-pills {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.xp-meeting-pill {
+  background: #FFFFFF;
+  border: 1px solid #7F9DB9;
+  border-radius: 12px;
+  padding: 3px 9px;
+  font-family: var(--xp-font);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1F2937;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.xp-meeting-pill.is-active {
+  background: #0054E3;
+  border-color: #002375;
+  color: #FFFFFF;
+}
+
+.xp-meeting-approve-btn {
+  background: linear-gradient(180deg, #DCFCE7 0%, #86EFAC 55%, #4ADE80 100%) !important;
+  border-color: #166534 !important;
+  color: #052E16 !important;
+  font-weight: 800 !important;
+}
+
+
+/* ==========================================================================
+   12. SALA 3D TELA CHEIA + MODO SLIDE CHEIO (1280×720)
+   ========================================================================== */
+.xp-meeting-modal.is-fullscreen {
+  padding: 0;
+  background: #071329;
+}
+
+.xp-meeting-modal.is-fullscreen .xp-meeting-window {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  border: none;
+}
+
+.xp-meeting-slide-theater {
+  position: absolute;
+  inset: 0;
+  background: #061024;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 44px 16px 86px;
+}
+
+.xp-meeting-slide-theater[hidden] {
+  display: none !important;
+}
+
+.xp-meeting-theater-canvas {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 2px solid #38BDF8;
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.72);
+  background: #071329;
+}
+
+.xp-meeting-theater-back {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  background: linear-gradient(180deg, #3C94FF 0%, #0054E3 60%, #003CB5 100%);
+  border: 1px solid #FFFFFF;
+  border-radius: 6px;
+  color: #FFFFFF;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 11px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+.xp-meeting-theater-back:hover {
+  background: linear-gradient(180deg, #60A5FA 0%, #2563EB 60%, #1D4ED8 100%);
+}
+
+
+/* ==========================================================================
+   13. HABBLAUD PHONE PWA MODAL (Simulador Smartphone + Pareamento Remoto)
+   ========================================================================== */
+.xp-top-phone-btn {
+  background: linear-gradient(180deg, #DCFCE7 0%, #86EFAC 55%, #4ADE80 100%) !important;
+  border-color: #166534 !important;
+  color: #052E16 !important;
+  padding: 3px 6px !important;
+}
+
+.xp-phone-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 12, 28, 0.74);
+  backdrop-filter: blur(4px);
+  z-index: 175;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.xp-phone-modal[hidden] {
+  display: none !important;
+}
+
+.xp-phone-window {
+  width: min(860px, 95vw);
+  max-height: 90vh;
+  background: #ECE9D8;
+  border: 2px solid #0054E3;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.68);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--xp-font);
+  color: #111111;
+}
+
+.xp-phone-body {
+  display: flex;
+  gap: 16px;
+  padding: 14px;
+  overflow-y: auto;
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.xp-phone-device {
+  width: 342px;
+  height: 615px;
+  background: #0F172A;
+  border: 6px solid #1E293B;
+  border-radius: 32px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.48), inset 0 0 0 2px #475569;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.xp-phone-notch {
+  width: 110px;
+  height: 16px;
+  background: #0F172A;
+  border-radius: 0 0 12px 12px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.xp-phone-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #071122;
+}
+
+.xp-phone-side {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.xp-phone-card {
+  background: #FFFFFF;
+  border: 1px solid #9CB0C9;
+  border-radius: 6px;
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  box-shadow: inset 0 1px 0 #FFFFFF;
+}
+
+.xp-phone-card h4 {
+  margin: 0;
+  font-size: 12px;
+  color: #002375;
+}
+
+.xp-phone-card p {
+  margin: 0;
+  font-size: 11px;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.xp-phone-url-row {
+  display: flex;
+  gap: 6px;
+}
+
+.xp-phone-url-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.xp-phone-tip {
+  font-size: 10px;
+  color: #475569;
+  line-height: 1.35;
+}
+
+.xp-phone-tip code {
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  border-radius: 3px;
+  padding: 0 4px;
+  font-family: Consolas, monospace;
+  color: #0F172A;
+}
+
+.xp-phone-sim-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.xp-phone-list {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 11px;
+  color: #1F2937;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   14. BANNER OFICIAL DE CONVOCAÇÃO AUTOMÁTICA DE REUNIÃO 3D
+   ========================================================================== */
+.xp-summon-banner {
+  position: fixed;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 160;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #EFF6FF 100%);
+  border: 2px solid #0054E3;
+  border-radius: 8px;
+  padding: 6px 14px;
+  box-shadow:
+    0 8px 24px rgba(0, 84, 227, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 #FFFFFF;
+  animation: xp-summon-slide 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 680px;
+}
+
+@keyframes xp-summon-slide {
+  from { opacity: 0; transform: translate(-50%, -18px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.xp-summon-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.xp-summon-text {
+  font-family: var(--xp-font);
+  font-size: 12px;
+  color: #0F172A;
+  line-height: 1.4;
+}
+
+.xp-summon-text strong {
+  color: #0054E3;
+}
+
+.xp-summon-enter-btn {
+  font-family: var(--xp-font);
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: linear-gradient(180deg, #10B981 0%, #059669 100%);
+  border: 1px solid #047857;
+  border-radius: 4px;
+  padding: 5px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.1s ease, filter 0.1s ease;
+}
+
+.xp-summon-enter-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.03);
+}
+
+.xp-summon-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: #64748B;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.xp-summon-close-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #0F172A;
+}
+
+.has-summon-pulse {
+  animation: summon-pulse 1.8s infinite ease-in-out !important;
+  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 100%) !important;
+  border-color: #B45309 !important;
+  color: #78350F !important;
+  font-weight: 800 !important;
+}
+
+@keyframes summon-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+}
+
+/* ==========================================================================
+   15. AUDITORIA PROFUNDA DE CONTRASTE WCAG AAA (Fundo Claro #ECE9D8 / #FFFFFF)
+       Elimina textos claros herdados do tema dark original + corrige chips AG
+   ========================================================================== */
+
+/* 15.1 Ajuda, Contas e Uso, Sobre e Documentação (corrige #c9d1e2 sobre #ECE9D8) */
+.ui-help,
+.ui-help__intro,
+.ui-help__lead,
+.ui-help__list,
+.ui-help__list li,
+.ui-help__usage,
+.ui-help__usage p,
+.ui-help__usage li,
+.ui-help__shell,
+.ui-shell-legend,
+.ui-shell-legend div,
+.ui-shell-legend span,
+.ui-about,
+.ui-about p,
+.ui-about li,
+.ui-empty__text,
+.ui-usage-setup,
+.ui-usage-setup p,
+.ui-usage-setup li,
+.ui-dialog__body,
+.ui-dialog__body p,
+.ui-dialog__body li {
+  color: #0F172A !important;
+}
+
+.ui-help__list li::before {
+  background: #0054E3 !important;
+}
+
+.ui-help h3,
+.ui-help h4,
+.ui-about h3,
+.ui-dialog h2,
+.ui-dialog h3 {
+  color: #002375 !important;
+  font-weight: 800 !important;
+}
+
+/* 15.2 Chips de Traços de Personalidade (.ui-trait: Cafeína, Timidez, Sonecas)
+        Corrige #e3d9ff (quase branco) sobre fundo lilás transparente em bege! */
+.ui-trait {
+  color: #1E1B4B !important;
+  background: #E0E7FF !important;
+  border: 1px solid #6366F1 !important;
+  font-weight: 700 !important;
+  box-shadow: inset 0 1px 0 #FFFFFF !important;
+}
+
+/* 15.3 Chip de Conta (C, X, AG) — impede que siglas de 2 letras ("AG") vazem da caixa de 16px */
+.ui-acc-chip {
+  width: auto !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 4px !important;
+  font-size: 9.5px !important;
+  line-height: 16px !important;
+  font-weight: 800 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.ui-acc-chip--md {
+  min-width: 24px !important;
+  height: 20px !important;
+  padding: 0 5px !important;
+  font-size: 10.5px !important;
+  line-height: 18px !important;
+}
+
+.ui-acc-chip--lg {
+  min-width: 32px !important;
+  height: 30px !important;
+  padding: 0 6px !important;
+  font-size: 13px !important;
+  line-height: 28px !important;
+}
+
+.ui-acc-chip[data-provider='codex'] {
+  background: #EFF6FF !important;
+  color: #003CB5 !important;
+  border: 1.5px solid #0054E3 !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+}
+
+/* 15.4 Demais textos que herdavam cores pastel claras (#d3c2ff, #ffd34d, #cfe9ff, #9fe8c0) em fundo claro */
+.ui-role,
+.ui-role--sub {
+  color: #3B0764 !important;
+  background: #F3E8FF !important;
+  border: 1px solid #A855F7 !important;
+}
+
+.ui-social__balance,
+.ui-social__coins,
+.ui-social__entry.is-plus .ui-social__delta,
+.ui-feed__item.is-social .ui-feed__text {
+  color: #92400E !important;
+  font-weight: 700 !important;
+}
+
+.ui-social__entry.is-minus .ui-social__delta,
+.ui-activity.is-error .ui-activity__text,
+.ui-feed__item.is-error .ui-feed__text,
+.ui-now__text.is-error,
+.ui-tl.is-error .ui-tl__text {
+  color: #991B1B !important;
+  font-weight: 700 !important;
+}
+
+.ui-activity.is-waiting .ui-activity__text,
+.ui-agent.is-waiting .ui-activity__text {
+  color: #9A3412 !important;
+  font-weight: 700 !important;
+}
+
+.ui-activity.is-shell .ui-activity__text,
+.ui-shell__badge--bg {
+  color: #0F766E !important;
+}
+
+.ui-activity.is-shell-ok .ui-activity__text,
+.ui-tl.is-shell-ok .ui-tl__text,
+.ui-feed__item.is-shell-ok .ui-feed__text {
+  color: #166534 !important;
+}
+
+/* 15.5 Faixa de Telemetria da Sessão na Sala de Reunião 3D */
+.xp-meeting-session-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 6px 14px;
+  background: #EFF6FF;
+  border-bottom: 1px solid #93C5FD;
+  color: #0F172A;
+  font-family: var(--xp-font);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.xp-sess-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #0F172A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xp-sess-item:first-child {
+  color: #002375;
+  font-weight: 800;
+}
+
+.xp-pixoffice-wordmark {
+  font-family: var(--xp-font) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.3px !important;
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0, 18, 70, 0.85) !important;
+  line-height: 1.1 !important;
+}
+
+/* Tela de Splash (fundo escuro #12151d) — garante texto claro legível */
+.ui-splash {
+  background: radial-gradient(circle at 50% 35%, #1E293B 0%, #0F172A 75%) !important;
+  color: #F8FAFC !important;
+}
+
+.ui-splash__text {
+  color: #E2E8F0 !important;
+  font-weight: 600 !important;
+}

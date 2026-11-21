@@ -25,6 +25,10 @@ export interface UiPrefs {
   hiddenAccounts: string[];
   /** Habblaud World: aviso quando o primeiro visitante entra no seu prédio (a cada conexão). Ligado por padrão. */
   worldVisitNotify: boolean;
+  /** Escritório Squiggly Studio (Habbo + Old Web XP). */
+  squigglyStudioMode: boolean;
+  /** Focar apenas na sala do Squiggly Studio quando ela estiver aberta. */
+  squigglyFocusRoom: boolean;
 }
 
 export const DEFAULT_PREFS: UiPrefs = {
@@ -33,13 +37,15 @@ export const DEFAULT_PREFS: UiPrefs = {
   liveliness: DEFAULT_WORLD_OPTIONS.liveliness,
   daylight: 'auto',
   theme: 'auto',
-  sound: false,
+  sound: true,
   sounds: DEFAULT_SOUND_SETTINGS,
   browserNotifications: false,
   sidebarOpen: true,
   feedOpen: true,
   hiddenAccounts: [],
   worldVisitNotify: true,
+  squigglyStudioMode: false,
+  squigglyFocusRoom: false,
 };
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
@@ -66,6 +72,8 @@ export function sanitizePrefs(raw: unknown): UiPrefs {
     feedOpen: bool(o.feedOpen, d.feedOpen),
     hiddenAccounts: Array.isArray(o.hiddenAccounts) ? o.hiddenAccounts.filter((x): x is string => typeof x === 'string').slice(0, 20) : [],
     worldVisitNotify: bool(o.worldVisitNotify, d.worldVisitNotify),
+    squigglyStudioMode: bool(o.squigglyStudioMode, d.squigglyStudioMode),
+    squigglyFocusRoom: bool(o.squigglyFocusRoom, d.squigglyFocusRoom),
   };
 }
 
@@ -90,7 +98,16 @@ export function savePrefs(storage: StorageLike | null, prefs: UiPrefs): void {
 
 /** Parte das preferências que o mundo (canvas) consome. */
 export function worldOptionsFrom(p: UiPrefs): Partial<WorldOptions> {
-  return { showNames: p.showNames, bubbles: p.bubbles, liveliness: p.liveliness, dayNight: p.daylight !== 'day', daylight: p.daylight, theme: p.theme };
+  return {
+    showNames: p.showNames,
+    bubbles: p.bubbles,
+    liveliness: p.liveliness,
+    dayNight: p.daylight !== 'day',
+    daylight: p.daylight,
+    theme: p.theme,
+    squigglyStudioMode: p.squigglyStudioMode,
+    squigglyFocusRoom: p.squigglyFocusRoom,
+  };
 }
 
 /** localStorage com proteção contra navegadores que lançam exceção ao acessá-lo. */

@@ -107,6 +107,10 @@ export interface MainInput {
   startedAt: number;
   status: AgentStatus;
   waitingFor?: string;
+  /** Nome explícito opcional (sobrepõe sorteio automático do NameStore). */
+  name?: string;
+  /** Gênero visual opcional ('m' | 'f'). */
+  look?: 'f' | 'm';
 }
 
 export interface SubInput {
@@ -324,10 +328,12 @@ export class Office {
     }
     const roomId = normalizeCwd(p.cwd);
     this.ensureRoom(roomId, now);
-    const chosen = this.roomCharacter(roomId, p.id, p.sessionId);
+    const chosen = p.name ? undefined : this.roomCharacter(roomId, p.id, p.sessionId);
     // A mesma sessão retomada noutro processo (ex.: "Assumir aqui") mantém o nome, mesmo com o processo antigo
     // ainda saindo do escritório.
-    const person = chosen ?? this.deps.names.assign(p.sessionId, this.takenNames(undefined, p.sessionId));
+    const person = p.name
+      ? { name: p.name, look: p.look ?? 'm' }
+      : (chosen ?? this.deps.names.assign(p.sessionId, this.takenNames(undefined, p.sessionId)));
     const info: AgentInfo = {
       id: p.id,
       kind: 'main',
@@ -357,6 +363,20 @@ export class Office {
     this.agents.set(p.id, rec);
     const acc = this.deps.accountName(p.account);
     this.notice('arrive', p.id, 'info', tr('👋 {0} chegou em {1}{2}', [info.name, this.roomName(roomId), acc ? ` (${acc})` : '']), roomId);
+    this.markDirty();
+  }
+
+  /** Move um agente principal para outra sala/departamento (usado ao trocar de andar no prédio). */
+  moveMainRoom(id: string, cwd: string): void {
+    const rec = this.agents.get(id);
+    if (!rec) return;
+    const roomId = normalizeCwd(cwd);
+    if (rec.info.roomId === roomId) return;
+    this.ensureRoom(roomId, this.now());
+    rec.info.roomId = roomId;
+    const occupied = new Set([...this.agents.values()].map((r) => r.info.roomId));
+    for (const rid of [...this.rooms.keys()]) if (!occupied.has(rid)) this.rooms.delete(rid);
+    this.recomputeRoomNames();
     this.markDirty();
   }
 

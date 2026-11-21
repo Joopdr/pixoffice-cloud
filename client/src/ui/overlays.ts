@@ -47,9 +47,9 @@ export class Splash implements UiComponent {
       return;
     }
     const waited = performance.now() - this.startedAt;
-    let text = tr('Conectando ao escritório…');
-    if (waited > DISCONNECTED_BANNER_MS) text = tr('O servidor do Habblaud não responde. Confira se ele está rodando (npm run dev ou npm start); seguimos tentando.');
-    else if (store.connection === 'closed') text = tr('Não foi possível conectar ao servidor do Habblaud. Tentando de novo…');
+    let text = tr('Conectando ao escritório PixOffice…');
+    if (waited > DISCONNECTED_BANNER_MS) text = tr('O servidor do PixOffice não responde. Confira se ele está rodando (npm run dev ou npm start); seguimos tentando.');
+    else if (store.connection === 'closed') text = tr('Não foi possível conectar ao servidor do PixOffice. Tentando de novo…');
     setText(this.text, text);
     // Reavalia o texto mesmo sem eventos novos.
     this.tick ??= setTimeout(() => {

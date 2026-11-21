@@ -8,6 +8,8 @@ import '@fontsource/pixelify-sans/500.css';
 import '@fontsource/pixelify-sans/600.css';
 import '@fontsource/pixelify-sans/700.css';
 import './styles.css';
+import './xp-luna-theme.css';
+import { AgentVoiceAndChat } from './xp-voice';
 
 import type { OfficeStore } from '../net/store';
 import type { Selection, WorldApi } from '../world/api';
@@ -62,6 +64,17 @@ function isTypingTarget(t: EventTarget | null): boolean {
 export function createUI(root: HTMLElement, store: OfficeStore, world: WorldApi, city?: CitySceneHost): void {
   const storage = safeLocalStorage();
   let prefs: UiPrefs = loadPrefs(storage);
+  if (typeof location !== 'undefined' && new URLSearchParams(location.search).has('squiggly')) {
+    prefs = { ...prefs, squigglyStudioMode: true };
+  }
+  const syncSquigglyThemeClass = () => {
+    const on = Boolean(prefs.squigglyStudioMode);
+    root.classList.toggle('ui-squiggly-xp', on);
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.toggle('ui-squiggly-xp', on);
+    }
+  };
+  syncSquigglyThemeClass();
   let selection: Selection = world.getSelection();
   let skew = 0;
   const narrowMq = typeof matchMedia === 'function' ? matchMedia(NARROW_QUERY) : null;
@@ -96,6 +109,7 @@ export function createUI(root: HTMLElement, store: OfficeStore, world: WorldApi,
     updatePrefs(patch) {
       prefs = { ...prefs, ...patch };
       savePrefs(storage, prefs);
+      syncSquigglyThemeClass();
       world.setOptions(worldOptionsFrom(prefs));
       invalidate();
     },
@@ -484,4 +498,5 @@ export function createUI(root: HTMLElement, store: OfficeStore, world: WorldApi,
   world.setOptions(worldOptionsFrom(prefs));
   applyLayout();
   renderAll();
+  new AgentVoiceAndChat(root, world, store, sound, ctx);
 }

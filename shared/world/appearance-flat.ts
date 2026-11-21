@@ -90,6 +90,11 @@ export const ACC_COLORS: Record<Accessory, readonly string[]> = {
   beanie: ['#e2604f', '#efb54a', '#4bab72', '#8d66cf', '#3d4352', '#36b0b0'],
   earrings: ['#f2c14e', '#d9dde3'],
   bow: ['#e2604f', '#e47aa8', '#efb54a', '#4a86d8', '#8d66cf'],
+  crown: ['#f5c542', '#e8a825', '#d9e2ec'],
+  beret: ['#b8324a', '#2b2b33', '#2e7d4f', '#3f63a8', '#d97706', '#8d66cf'],
+  flower: ['#f472b6', '#fb7185', '#facc15', '#c084fc', '#f8fafc'],
+  visor: ['#38bdf8', '#22c55e', '#f43f5e', '#a855f7', '#f59e0b'],
+  scarf: ['#dc2626', '#2563eb', '#16a34a', '#d97706', '#9333ea', '#f1f5f9'],
 };
 const LANYARDS = ['#f2b33d', '#e2604f', '#4a86d8', '#4bab72', '#8d66cf', '#36b0b0'] as const;
 
@@ -107,13 +112,13 @@ const HAIR_W: Record<'f' | 'm', Weights<HairStyle>> = {
 };
 
 const TOP_W: Record<'f' | 'm', Weights<TopStyle>> = {
-  m: { tshirt: 20, hoodie: 16, shirt_tie: 10, sweater: 13, jacket: 13, blouse: 2, polo: 14 },
-  f: { tshirt: 17, hoodie: 14, shirt_tie: 5, sweater: 14, jacket: 12, blouse: 20, polo: 8 },
+  m: { tshirt: 15, hoodie: 14, shirt_tie: 9, sweater: 10, jacket: 11, blouse: 1, polo: 10, blazer: 10, overalls: 5, vest: 7, dress: 0.5, cyber_jacket: 8 },
+  f: { tshirt: 12, hoodie: 11, shirt_tie: 4, sweater: 10, jacket: 10, blouse: 14, polo: 6, blazer: 9, overalls: 6, vest: 5, dress: 12, cyber_jacket: 7 },
 };
 
 const ACC_W: Record<'f' | 'm', Weights<Accessory>> = {
-  m: { none: 40, glasses: 18, sunglasses: 4, headphones: 13, cap: 7, beanie: 6, earrings: 2, bow: 0.3 },
-  f: { none: 36, glasses: 16, sunglasses: 4, headphones: 11, cap: 4, beanie: 5, earrings: 13, bow: 7 },
+  m: { none: 28, glasses: 14, sunglasses: 5, headphones: 12, cap: 6, beanie: 6, earrings: 2, bow: 0.2, crown: 3, beret: 4, flower: 0.5, visor: 5, scarf: 6 },
+  f: { none: 24, glasses: 12, sunglasses: 5, headphones: 10, cap: 3, beanie: 5, earrings: 10, bow: 6, crown: 4, beret: 7, flower: 7, visor: 4, scarf: 7 },
 };
 
 const FACIAL_W: Weights<FacialHair> = { none: 62, stubble: 12, beard: 13, mustache: 7, goatee: 6 };

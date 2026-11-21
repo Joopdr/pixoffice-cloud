@@ -56,16 +56,29 @@ export function isLoopbackHost(host: string | undefined): boolean {
   return !!name && isLoopbackName(name);
 }
 
+function isCloudOrTunnelHost(name: string): boolean {
+  return (
+    name.endsWith('.trycloudflare.com') ||
+    name.endsWith('.cfargotunnel.com') ||
+    name.endsWith('.fly.dev') ||
+    name.endsWith('.up.railway.app') ||
+    name.endsWith('.onrender.com') ||
+    name.endsWith('.ts.net')
+  );
+}
+
 /**
  * Host aceito? IP literal (não há DNS envolvido, logo não há rebinding), `localhost`/`*.localhost`
- * (os navegadores resolvem sempre para o loopback) ou um nome de HABBLAUD_ALLOWED_HOSTS.
+ * (os navegadores resolvem sempre para o loopback), domínios de túnel/cloud (Cloudflare Tunnel, Fly.io, Railway, Render, Tailscale)
+ * ou um nome de HABBLAUD_ALLOWED_HOSTS (incluindo `*`).
  * Sem cabeçalho Host (HTTP/1.0, ferramentas de linha de comando): aceito — navegadores sempre enviam.
  */
 export function hostAllowed(host: string | undefined, allowed: ReadonlySet<string>): boolean {
   if (host === undefined) return true;
+  if (allowed.has('*')) return true;
   const name = hostnameOf(host);
   if (!name) return false;
-  return isIP(name) !== 0 || isLoopbackName(name) || allowed.has(name);
+  return isIP(name) !== 0 || isLoopbackName(name) || isCloudOrTunnelHost(name) || allowed.has(name);
 }
 
 /**
@@ -83,8 +96,9 @@ export function originAllowed(origin: string | undefined, host: string | undefin
   }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
   if (host !== undefined && url.host.toLowerCase() === host.trim().toLowerCase()) return true;
+  if (allowed.has('*')) return true;
   const name = hostnameOf(url.host);
-  return !!name && (isLoopbackName(name) || allowed.has(name));
+  return !!name && (isLoopbackName(name) || isCloudOrTunnelHost(name) || allowed.has(name));
 }
 
 export function isJsonContentType(value: string | undefined): boolean {

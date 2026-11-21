@@ -118,6 +118,25 @@ function paintTile(b: PixelBuf, kind: FloorKind, tx: number, ty: number, o: Floo
       }
       break;
     }
+    case 'habbo_check': {
+      // Piso quadriculado clássico estilo Habbo Hotel / Old Web com brilho especular e rejunte nítido.
+      const a = o.tint ?? '#e8f1ff';
+      const c = o.tint2 ?? '#b9d2f2';
+      for (let qy = 0; qy < 2; qy++) {
+        for (let qx = 0; qx < 2; qx++) {
+          const col = (qx + qy + tx + ty) % 2 ? c : a;
+          const x0 = qx * 8;
+          const y0 = qy * 8;
+          b.rect(x0, y0, 8, 8, col);
+          b.hline(x0, x0 + 6, y0, shade(col, 0.09));
+          b.vline(x0, y0, y0 + 6, shade(col, 0.06));
+          b.set(x0 + 1, y0 + 1, shade(col, 0.12));
+          b.hline(x0, x0 + 7, y0 + 7, shade(col, -0.1));
+          b.vline(x0 + 7, y0, y0 + 7, shade(col, -0.1));
+        }
+      }
+      break;
+    }
     case 'tile_white': {
       const col = '#eef2f5';
       const grout = '#d3dae1';

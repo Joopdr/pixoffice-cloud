@@ -34,6 +34,7 @@ import { createMessageRoutes } from './messages/http';
 import { MessageRegistry } from './messages/registry';
 import type { CodexLive } from './sources/codex/live';
 import { ClaudeWatcher } from './sources/watcher';
+import { AntigravitySource } from './sources/antigravity/source';
 import { discoverCodexDirs } from './sources/codex/accounts';
 import { CodexHistory } from './sources/codex/history';
 import { CodexSource } from './sources/codex/source';
@@ -134,7 +135,8 @@ const office = new Office({
 // pastas do Codex; HABBLAUD_CODEX=0 desliga), com o histórico dela no HistorySet abaixo e as contas registradas por
 // ela mesma (accounts.setProviderAccounts). `codex` também recebe os eventos dos hooks do Codex (CodexLive).
 const claude = new ClaudeWatcher({ accounts, office, inDocker: config.inDocker });
-const agents = new SourceSet([claude]);
+const antigravity = new AntigravitySource({ accounts, office });
+const agents = new SourceSet([claude, antigravity]);
 const codexDirs = config.codex ? discoverCodexDirs(process.env, config.home) : [];
 const codex = codexDirs.length ? new CodexSource({ accounts, office, dirs: codexDirs, env: process.env, home: config.home }) : undefined;
 if (codex) agents.add(codex);
@@ -349,6 +351,10 @@ const api = createApiHandler({
   office,
   hub,
   accounts,
+  building: {
+    floors: () => antigravity.getBuildingFloors(hub.current()),
+    select: (id: string) => antigravity.selectFloor(id, hub.current()),
+  },
   sources: () => agents.sources(),
   version: config.version,
   inDocker: config.inDocker,

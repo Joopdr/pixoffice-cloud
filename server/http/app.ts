@@ -22,6 +22,9 @@ import { AUDIO_BODY_MAX, type DictationService } from '../dictation/dictation';
 import type { DeliveryIndex } from '../deliveries/deliveries';
 import type { FileFetcher } from '../deliveries/fetcher';
 import { HOST_WAIT_MS } from '../host-wait';
+import { handleTtsRoute } from './tts';
+import { handlePresentationRoute } from './presentation';
+import { handlePhoneRoute } from './phone';
 
 export interface ApiDeps {
   office: Office;
@@ -94,6 +97,11 @@ export interface ApiDeps {
    * local com Host local: pela porta do celular, nem com login (403 `local_only`).
    */
   world?: (req: IncomingMessage, res: ServerResponse, url: URL) => void;
+  /** Prédio corporativo multi-andar (GET /api/building/floors, POST /api/building/select). */
+  building?: {
+    floors(): unknown[];
+    select(id: string): unknown | undefined;
+  };
 }
 
 /** GET /api/agents/:id/terminal (ids nunca contêm '/'). */
@@ -327,8 +335,29 @@ export function createApiHandler(deps: ApiDeps): (req: IncomingMessage, res: Ser
     else sendJson(res, 500, { error: tr('erro interno') });
   };
 
+  const resolveActiveFloor = () => {
+    const rawList = (deps.building?.floors() ?? []) as Array<Record<string, any>>;
+    const sel = rawList.find((f) => f?.isSelected || f?.active) ?? rawList[0];
+    if (!sel) return undefined;
+    const rawCompany = String(sel.companyName || sel.company || 'PixOffice HQ');
+    const company = /squiggly/i.test(rawCompany) ? 'PixOffice HQ' : rawCompany;
+    return {
+      floor: Number(sel.floorNumber ?? sel.floor ?? 1),
+      company,
+      badge: String(sel.providerBadge ?? sel.badge ?? 'AG'),
+      styleLabel: String(sel.styleLabel ?? 'Startup Tech · Azul Luna'),
+    };
+  };
+
   return (req, res, url) => {
     const path = url.pathname;
+    if (path === '/phone' || path === '/phone/' || path === '/phone/manifest.webmanifest') {
+      return handlePhoneRoute(req, res, path, {
+        snapshot: () => hub.current(),
+        port: Number(process.env.HABBLAUD_PORT || 4747),
+        activeFloor: resolveActiveFloor,
+      });
+    }
     if (path !== '/api' && !path.startsWith('/api/')) return false;
     const method = req.method ?? 'GET';
     const isRead = method === 'GET' || method === 'HEAD';
@@ -348,6 +377,43 @@ export function createApiHandler(deps: ApiDeps): (req: IncomingMessage, res: Ser
         req.resume();
         sendJson(res, 403, { error: { code: 'local_only', message: tr('o Habblaud World só é usado pelo próprio computador (http://localhost)') } });
       } else deps.world(req, res, url);
+      return true;
+    }
+    if (path === '/api/tts' || path === '/api/tts/voices' || path === '/api/tts/play') {
+      return handleTtsRoute(req, res, path, url);
+    }
+    if (path.startsWith('/api/presentation/')) {
+      return handlePresentationRoute(req, res, path, {
+        snapshot: () => hub.current(),
+        activeFloor: resolveActiveFloor,
+      });
+    }
+    if (path.startsWith('/api/phone/')) {
+      return handlePhoneRoute(req, res, path, {
+        snapshot: () => hub.current(),
+        port: Number(process.env.HABBLAUD_PORT || 4747),
+        activeFloor: resolveActiveFloor,
+      });
+    }
+    if (path === '/api/building/floors') {
+      if (!isRead) methodNotAllowed(res, 'GET');
+      else sendJson(res, 200, { floors: deps.building ? deps.building.floors() : [] });
+      return true;
+    }
+    if (path === '/api/building/select') {
+      if (method !== 'POST') {
+        methodNotAllowed(res, 'POST');
+        return true;
+      }
+      void readJson(req, 4096)
+        .then((body: any) => {
+          const id = typeof body?.floorId === 'string' ? body.floorId : '';
+          if (!id || !deps.building) return sendJson(res, 400, { error: 'floorId obrigatório' });
+          const selected = deps.building.select(id);
+          if (!selected) return sendJson(res, 404, { error: 'andar não encontrado' });
+          sendJson(res, 200, { ok: true, floor: selected, floors: deps.building.floors() });
+        })
+        .catch((err) => fail(res, err));
       return true;
     }
     if (path === '/api/stream') {

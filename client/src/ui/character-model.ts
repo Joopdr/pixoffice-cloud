@@ -86,11 +86,13 @@ const STYLE_LABELS: Partial<Record<PartKey, Readonly<Record<string, string>>>> =
   topStyle: {
     tshirt: tr('Camiseta'), hoodie: tr('Moletom'), shirt_tie: tr('Camisa e gravata'), sweater: tr('Suéter'), jacket: tr('Jaqueta'),
     blouse: tr('Blusa'), polo: 'Polo',
+    blazer: tr('Blazer Executivo'), overalls: tr('Macacão'), vest: tr('Colete'), dress: tr('Vestido'), cyber_jacket: tr('Jaqueta Cyber'),
   },
   bottomStyle: { pants: tr('Calça'), shorts: tr('Bermuda'), skirt: tr('Saia') },
   accessory: {
     none: tr('Nenhum'), glasses: tr('Óculos'), sunglasses: tr('Óculos escuros'), headphones: tr('Fone'), cap: tr('Boné'), beanie: tr('Gorro'),
     earrings: tr('Brincos'), bow: tr('Laço'),
+    crown: tr('Coroa HC'), beret: tr('Boina'), flower: tr('Flor'), visor: tr('Viseira Cyber'), scarf: tr('Cachecol'),
   },
   facialHair: { none: tr('Sem barba'), stubble: tr('Por fazer'), beard: tr('Barba'), mustache: tr('Bigode'), goatee: tr('Cavanhaque') },
 };

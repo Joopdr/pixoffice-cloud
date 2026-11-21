@@ -749,3 +749,103 @@ export function bench(): BufFurniture {
   contact(b, 0, 13, 32, 3, 0.22);
   return { base: s };
 }
+
+/** Sofá Habbo Club (HC Sofa) — couro verde-esmeralda capitonê com braços e base em mogno clássico. */
+export function hcSofa(variant: string | undefined): BufFurniture {
+  const up = variant === 'up';
+  const hc = ramp('#1d7d4b', 0.08);
+  const hcSeat = ramp('#289b5e', 0.07);
+  const wood = ramp('#7c3f21', 0.08);
+  const gold = '#e8c15a';
+
+  const s = floorSheet(3, 1, 15);
+  const b = s.buf;
+
+  if (!up) {
+    // Moldura superior em madeira mogno esculpida (assinatura do HC Sofa)
+    b.rect(4, -13, 40, 3, wood.base);
+    b.hline(5, 42, -13, wood.hi);
+    b.hline(4, 43, -11, wood.dk);
+    // Detalhe central dourado no topo
+    b.rect(22, -13, 4, 2, gold);
+    b.hline(23, 24, -13, '#fff0ad');
+
+    // Encosto de couro verde-esmeralda com capitonê (botões afundados)
+    b.rect(5, -10, 38, 12, hc.base);
+    b.hline(6, 41, -10, hc.lt);
+    b.hline(5, 42, 1, hc.dd);
+    for (let i = 0; i < 3; i++) {
+      const cx = 6 + i * 12;
+      b.rect(cx + 1, -9, 10, 9, hc.base);
+      b.hline(cx + 1, cx + 10, -9, hc.lt);
+      b.vline(cx, -9, 0, hc.dk);
+      // Botão capitonê central com brilho e sombra
+      b.set(cx + 5, -5, hc.dd);
+      b.set(cx + 6, -5, hc.dd);
+      b.set(cx + 5, -6, hc.hi);
+      b.set(cx + 6, -4, hc.lt);
+    }
+
+    // Assento fofo em 3 gomos verde-esmeralda brilhante
+    for (let i = 0; i < 3; i++) {
+      const cx = 6 + i * 12;
+      b.rect(cx, 2, 12, 7, hcSeat.base);
+      b.hline(cx + 1, cx + 10, 2, hcSeat.hi);
+      b.hline(cx + 1, cx + 10, 3, hcSeat.lt);
+      b.hline(cx, cx + 11, 8, hc.dk);
+      b.vline(cx, 2, 8, hc.dk);
+    }
+
+    // Base frontal em madeira mogno + tachinhas douradas
+    b.rect(4, 9, 40, 5, wood.base);
+    b.hline(5, 42, 9, wood.lt);
+    b.hline(4, 43, 13, wood.dd);
+    for (const tx of [7, 15, 24, 33, 40]) b.set(tx, 11, gold);
+
+    // Braços largos de couro verde + remate de madeira mogno
+    for (const ax of [0, 42]) {
+      b.rect(ax, -6, 6, 15, hc.base);
+      b.hline(ax + 1, ax + 4, -6, hcSeat.hi);
+      b.hline(ax, ax + 5, -5, hcSeat.lt);
+      b.vline(ax, -5, 8, hc.lt);
+      b.vline(ax + 5, -5, 8, hc.dd);
+      b.rect(ax, 9, 6, 5, wood.base);
+      b.hline(ax, ax + 5, 9, wood.lt);
+      b.hline(ax, ax + 5, 13, wood.dd);
+    }
+
+    // Pés torneados de mogno
+    for (const lx of [1, 7, 39, 45]) {
+      b.rect(lx, 14, 2, 2, wood.dd);
+      b.set(lx, 14, wood.lt);
+    }
+
+    b.outline();
+    contact(b, -1, 13, 50, 4, 0.26);
+    return { base: s };
+  }
+
+  // Variante de costas ('up')
+  b.rect(5, -3, 38, 5, hcSeat.base);
+  b.hline(5, 42, -3, hcSeat.lt);
+  for (const ax of [0, 42]) {
+    b.rect(ax, -7, 6, 15, hc.base);
+    b.hline(ax + 1, ax + 4, -7, hcSeat.hi);
+  }
+  b.outline();
+  contact(b, -1, 13, 50, 4, 0.26);
+
+  const front = floorSheet(3, 1, 15);
+  const f = front.buf;
+  f.rect(0, 1, 48, 3, wood.base);
+  f.hline(1, 46, 1, wood.hi);
+  f.rect(0, 4, 48, 8, hc.dk);
+  f.hline(0, 47, 4, hc.base);
+  f.rect(0, 12, 48, 2, wood.dd);
+  for (const lx of [2, 23, 44]) {
+    f.rect(lx, 14, 2, 2, wood.dd);
+    f.set(lx, 14, wood.lt);
+  }
+  f.outline();
+  return { base: s, front };
+}

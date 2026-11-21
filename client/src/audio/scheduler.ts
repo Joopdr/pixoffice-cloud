@@ -13,6 +13,15 @@ export const CATEGORY_OF: Readonly<Record<SoundKind, SoundCategory>> = {
   chime: 'alerts',
   pop: 'alerts',
   keys: 'keys',
+  mouse: 'keys',
+  server: 'keys',
+  printer: 'keys',
+  paper: 'keys',
+  step: 'social',
+  chair: 'social',
+  coffee: 'social',
+  water: 'social',
+  cheer: 'social',
   elevator: 'elevator',
   pingpong: 'social',
   table: 'social',
@@ -23,18 +32,36 @@ export const CATEGORY_OF: Readonly<Record<SoundKind, SoundCategory>> = {
 export const MIN_GAP_MS: Readonly<Record<SoundKind, number>> = {
   chime: 1_200,
   pop: 1_200,
-  keys: 600,
-  elevator: 1_500,
+  keys: 450,
+  mouse: 650,
+  step: 220,
+  printer: 3_500,
+  paper: 1_200,
+  coffee: 2_800,
+  water: 2_600,
+  chair: 900,
+  server: 2_200,
+  cheer: 1_800,
+  elevator: 1_400,
   pingpong: 200,
   table: 200,
   arcade: 450,
 };
 
-/** O sino e o estalo dividem o mesmo canal (um não atropela o outro). */
+/** Canais independentes para que passos, teclado, impressora e café possam conviver sem atropelo. */
 const CHANNEL: Readonly<Record<SoundKind, string>> = {
   chime: 'alerts',
   pop: 'alerts',
   keys: 'keys',
+  mouse: 'mouse',
+  step: 'step',
+  printer: 'printer',
+  paper: 'paper',
+  coffee: 'coffee',
+  water: 'water',
+  chair: 'chair',
+  server: 'server',
+  cheer: 'cheer',
   elevator: 'elevator',
   pingpong: 'pingpong',
   table: 'pingpong',
@@ -42,7 +69,7 @@ const CHANNEL: Readonly<Record<SoundKind, string>> = {
 };
 
 /** Teto global: no máximo isto de sons por segundo (o sino de alerta sempre passa). */
-export const MAX_PER_SECOND = 7;
+export const MAX_PER_SECOND = 14;
 
 export interface SoundSettings {
   /** Volume mestre (0–1). */
@@ -53,7 +80,7 @@ export interface SoundSettings {
   social: boolean;
 }
 
-export const DEFAULT_SOUND_SETTINGS: SoundSettings = { volume: 0.6, alerts: true, keys: true, elevator: true, social: true };
+export const DEFAULT_SOUND_SETTINGS: SoundSettings = { volume: 0.72, alerts: true, keys: true, elevator: true, social: true };
 
 /** Valida campo a campo (preferência corrompida cai no padrão). */
 export function sanitizeSoundSettings(raw: unknown): SoundSettings {

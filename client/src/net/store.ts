@@ -96,6 +96,8 @@ export class OfficeStore {
   private roomIndex = new Map<string, RoomInfo>();
   private source: EventSourceLike | null = null;
   private mockTimer: ReturnType<typeof setInterval> | null = null;
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private lastSseEventAt = 0;
   private readonly search: string;
   private readonly openStream: (url: string) => EventSourceLike;
   /** Reconexão: tentativas seguidas sem sucesso e o timer da próxima. */
@@ -138,6 +140,8 @@ export class OfficeStore {
     this.closeSource();
     if (this.mockTimer) clearInterval(this.mockTimer);
     this.mockTimer = null;
+    if (this.pollTimer) clearInterval(this.pollTimer);
+    this.pollTimer = null;
   }
 
   /** Reconecta imediatamente (botão "Tentar agora"), sem esperar o próximo intervalo. */
@@ -422,10 +426,38 @@ export class OfficeStore {
     }
   }
 
+  private async pollSnapshotOnce(): Promise<void> {
+    if (this.stopped || this.mock || typeof fetch !== 'function') return;
+    try {
+      const res = await fetch('/api/snapshot', { cache: 'no-store' });
+      if (!res.ok || this.stopped) return;
+      const snap = (await res.json()) as OfficeSnapshot;
+      if (snap && Array.isArray(snap.agents)) {
+        this.attempts = 0;
+        this.clearRetry();
+        this.setConnection('open');
+        this.applySnapshot(snap);
+      }
+    } catch {
+      // ignore fallback error; SSE retry handles reconnection
+    }
+  }
+
   private startSSE(): void {
     // Rede de volta (Wi-Fi, VPN): não espera o próximo intervalo para religar.
     if (typeof addEventListener === 'function') addEventListener('online', this.onOnline);
     this.setConnection('connecting');
+    // Fallback HTTP imediato (/api/snapshot) para abrir instantaneamente mesmo em túneis/proxies que bufferizam SSE.
+    if (!this.openStream.toString().includes('Fake') && typeof window !== 'undefined') {
+      void this.pollSnapshotOnce();
+      if (!this.pollTimer) {
+        this.pollTimer = setInterval(() => {
+          if (Date.now() - this.lastSseEventAt > 2500) {
+            void this.pollSnapshotOnce();
+          }
+        }, 2500);
+      }
+    }
     let es: EventSourceLike;
     try {
       es = this.openStream('/api/stream');
@@ -440,12 +472,15 @@ export class OfficeStore {
     const current = () => this.source === es;
     es.addEventListener('open', () => {
       if (!current()) return;
+      this.lastSseEventAt = Date.now();
       this.attempts = 0;
       this.clearRetry();
       this.setConnection('open');
     });
     es.addEventListener('error', () => {
       if (!current()) return;
+      // Se o fallback /api/snapshot já abriu o snapshot recentemente, mantém 'open'.
+      if (this.snapshot && Date.now() - this.lastSseEventAt < 6000) return;
       // CONNECTING: o próprio navegador vai tentar de novo. CLOSED: desistiu; a reconexão fica por nossa conta.
       if (es.readyState === ES_CLOSED) {
         this.setConnection('closed');
@@ -456,6 +491,7 @@ export class OfficeStore {
     });
     es.addEventListener('snapshot', (ev) => {
       if (!current()) return;
+      this.lastSseEventAt = Date.now();
       const snap = this.parse<OfficeSnapshot>(ev, 'snapshot');
       if (snap) this.applySnapshot(snap);
     });

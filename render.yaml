@@ -1,0 +1,19 @@
+# Render.com Blueprint — Hospedagem Cloud 24/7 (Funciona com seu PC 100% desligado!)
+services:
+  - type: web
+    name: pixoffice-cloud
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4747"
+      - key: HABBLAUD_HOST
+        value: 0.0.0.0
+      - key: HABBLAUD_PORT
+        value: "4747"
+      - key: HABBLAUD_ALLOWED_HOSTS
+        value: "*"

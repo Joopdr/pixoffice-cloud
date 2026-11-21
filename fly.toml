@@ -1,0 +1,25 @@
+# Fly.io Cloud 24/7 Config — Roda nos servidores da Fly.io no Brasil (gru) com seu PC desligado
+app = "pixoffice-hq"
+primary_region = "gru"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  HABBLAUD_HOST = "0.0.0.0"
+  HABBLAUD_PORT = "4747"
+  HABBLAUD_ALLOWED_HOSTS = "*"
+
+
+[http_service]
+  internal_port = 4747
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

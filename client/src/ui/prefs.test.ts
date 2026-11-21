@@ -54,8 +54,27 @@ describe('preferências', () => {
     expect(() => savePrefs(broken, DEFAULT_PREFS)).not.toThrow();
   });
   it('extrai só as opções do mundo', () => {
-    expect(worldOptionsFrom({ ...DEFAULT_PREFS, daylight: 'day' })).toEqual({ showNames: true, bubbles: 'important', liveliness: 'normal', dayNight: false, daylight: 'day', theme: 'auto' });
+    expect(worldOptionsFrom({ ...DEFAULT_PREFS, daylight: 'day' })).toEqual({
+      showNames: true,
+      bubbles: 'important',
+      liveliness: 'normal',
+      dayNight: false,
+      daylight: 'day',
+      theme: 'auto',
+      squigglyStudioMode: false,
+      squigglyFocusRoom: false,
+    });
     expect(worldOptionsFrom({ ...DEFAULT_PREFS, daylight: 'night' })).toMatchObject({ dayNight: true, daylight: 'night' });
+  });
+  it('Squiggly Studio: valida modo Habbo/Old Web e foco exclusivo no estúdio', () => {
+    expect(sanitizePrefs({ squigglyStudioMode: true, squigglyFocusRoom: 'yes' })).toMatchObject({
+      squigglyStudioMode: true,
+      squigglyFocusRoom: false,
+    });
+    expect(worldOptionsFrom({ ...DEFAULT_PREFS, squigglyStudioMode: true, squigglyFocusRoom: true })).toMatchObject({
+      squigglyStudioMode: true,
+      squigglyFocusRoom: true,
+    });
   });
   it('ciclo dia/noite: valida o modo e migra o interruptor antigo', () => {
     expect(DEFAULT_PREFS.daylight).toBe('auto');

@@ -76,8 +76,10 @@ export class Hub {
       Connection: 'keep-alive',
       'X-Accel-Buffering': 'no',
     });
+    res.flushHeaders?.();
     const snapshot = this.current();
-    res.write('retry: 2000\n\n');
+    // Padding inicial (2 KB) força proxies HTTP/2 e Cloudflare Tunnel a descarregar o stream imediatamente.
+    res.write(`: ${' '.repeat(2048)}\nretry: 2000\n\n`);
     res.write(frame('snapshot', snapshot));
     res.write(frame('feed', this.office.recentFeed(50)));
     this.clients.add(res);

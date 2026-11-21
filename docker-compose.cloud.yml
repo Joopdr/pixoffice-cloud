@@ -1,0 +1,18 @@
+# PixOffice + Cloudflare Tunnel (HTTPS público 24/7 sem abrir portas no roteador)
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.cloud.yml up -d --build
+#   docker logs pixoffice-tunnel
+services:
+  habblaud:
+    container_name: pixoffice
+    environment:
+      HABBLAUD_ALLOWED_HOSTS: "*"
+      HABBLAUD_BIND: "0.0.0.0"
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: pixoffice-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --url http://habblaud:4747
+    depends_on:
+      - habblaud

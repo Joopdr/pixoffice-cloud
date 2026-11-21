@@ -53,10 +53,10 @@ export function layoutReception(): AreaLayout {
   b.seat('armchair', 'armchair', 12, 8, 'left', 'left', { order: 0.61 });
   b.furn('plant_tall', 14, 9, 'palm', { order: 0.22 });
 
-  // banco de espera (olhando para baixo)
-  const bench = b.furn('bench', 2, 7, undefined, { order: 0.5 });
-  for (let i = 0; i < 2; i++) b.seat('bench', 'bench', 2 + i, 7, 'down', undefined, { noFurniture: true, furnitureId: bench });
-  b.furn('plant_small', 4, 7, 'fern', { order: 0.52 });
+  // sofá Habbo Club esmeralda na espera da recepção (olhando para baixo)
+  const hcBench = b.furn('hc_sofa', 2, 7, 'down', { order: 0.5 });
+  for (let i = 0; i < 3; i++) b.seat('bench', 'hc_sofa', 2 + i, 7, 'down', 'down', { noFurniture: true, furnitureId: hcBench });
+  b.furn('plant_small', 5, 7, 'fern', { order: 0.52 });
   b.furn('water_cooler', 1, 7, undefined, { order: 0.53 });
   b.spot('water', 1, 8, 'up', { dy: -3 });
 
@@ -205,9 +205,9 @@ export function layoutLounge(): AreaLayout {
   b.wall('tv', 4.5, undefined, { order: 0.4 });
   b.wall('painting', 1.75, undefined, { order: 0.5 });
 
-  // sofá de costas para a câmera, de frente para a TV
-  const sofa = b.furn('sofa', 3, 6, 'up', { order: 0.5 });
-  for (let i = 0; i < 3; i++) b.seat('sofa', 'sofa', 3 + i, 6, 'up', 'up', { noFurniture: true, furnitureId: sofa });
+  // sofá Habbo Club esmeralda de frente para a TV
+  const sofa = b.furn('hc_sofa', 3, 6, 'up', { order: 0.5 });
+  for (let i = 0; i < 3; i++) b.seat('sofa', 'hc_sofa', 3 + i, 6, 'up', 'up', { noFurniture: true, furnitureId: sofa });
   b.furn('coffee_table', 3, 4, undefined, { dx: TILE / 2, order: 0.45 });
   b.block(5, 4, 1, 1);
   b.seat('armchair', 'armchair', 2, 4, 'right', 'right', { order: 0.55 });
@@ -227,7 +227,7 @@ export function layoutLounge(): AreaLayout {
   }
   b.furn('bookshelf', 10, 2, undefined, { order: 0.3 });
   b.spot('shelf', 10, 3, 'up', { dx: 8, dy: -2 });
-  b.furn('binder_shelf', 12, 2, undefined, { order: 0.31 });
+  b.furn('server_rack', 12, 2, undefined, { order: 0.31 });
   // planta baixa sob o quadro (uma alta cobriria a pintura)
   b.furn('plant_small', 1, 2, 'fern', { order: 0.2 });
   b.furn('plant_tall', 6, 2, 'palm', { order: 0.21 });

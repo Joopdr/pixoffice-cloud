@@ -20,17 +20,19 @@ export const SEAT_DROP = 4;
 export const POSE_FRAMES: Readonly<Record<Pose, number>> = {
   stand: 2, walk: 4, run: 4, sit: 2, type: 4, sleep: 2, drink: 2, use: 2, raise_hand: 2, talk: 2, stretch: 2,
   read: 2, play: 2, wait: 2, cheer: 2, laugh: 2, game: 2, rps: 2, groom: 2, sulk: 2,
+  dance: 4, flirt: 2, wave: 2, clap: 2,
 };
 
 export const POSE_DURATION: Readonly<Record<Pose, number>> = {
   stand: 650, walk: 140, run: 95, sit: 800, type: 120, sleep: 1000, drink: 700, use: 380, raise_hand: 320, talk: 280,
   stretch: 800, read: 1100, play: 200, wait: 480, cheer: 260, laugh: 190, game: 150, rps: 300, groom: 420, sulk: 1300,
+  dance: 220, flirt: 420, wave: 240, clap: 190,
 };
 
 const SEATED_ONLY: ReadonlySet<Pose> = new Set<Pose>(['sit', 'type', 'sleep', 'wait']);
 const NEVER_SEATED: ReadonlySet<Pose> = new Set<Pose>(['walk', 'run', 'stretch', 'play', 'groom']);
 /** Poses que posicionam as mãos (e o item) por conta própria: a lógica genérica de itens não mexe nelas. */
-const OWN_HANDS: ReadonlySet<Pose> = new Set<Pose>(['play', 'drink', 'raise_hand', 'stretch', 'cheer', 'laugh', 'game', 'rps', 'groom', 'sulk']);
+const OWN_HANDS: ReadonlySet<Pose> = new Set<Pose>(['play', 'drink', 'raise_hand', 'stretch', 'cheer', 'laugh', 'game', 'rps', 'groom', 'sulk', 'dance', 'flirt', 'wave', 'clap']);
 /** Gestos do jokenpô (a mão vira pedra, papel ou tesoura). */
 const GESTURES: ReadonlySet<HeldItem> = new Set<HeldItem>(['rock', 'paper', 'scissors']);
 
@@ -297,6 +299,18 @@ function makeRig(req: CharacterFrameRequest, view: HeadView): Rig {
     case 'rps':
       rpsRig(rig, view, f, held);
       break;
+    case 'dance':
+      danceRig(rig, view, f);
+      break;
+    case 'flirt':
+      flirtRig(rig, view, f);
+      break;
+    case 'wave':
+      waveRig(rig, view, f);
+      break;
+    case 'clap':
+      clapRig(rig, view, f);
+      break;
     case 'groom':
       groomRig(rig, view, f, held);
       break;
@@ -438,6 +452,78 @@ function laughRig(rig: Rig, view: HeadView, f: number): void {
   }
   rig.armB = arm([16, 18], [17, 21], [14, 22]);
   rig.armA = f === 0 ? arm([6, 18], [6, 22]) : arm([6, 18], [5, 21], [4, 23]);
+}
+
+/** 'dance' (dançando): braços alternando no ritmo, pulinho e balanço alegre de cabeça (4 frames). */
+function danceRig(rig: Rig, view: HeadView, f: number): void {
+  const step = f % 4;
+  rig.eyes = 'happy';
+  rig.mouth = step % 2 === 0 ? 'wide' : 'open';
+  const bounce = step % 2 === 1 ? -1 : 0;
+  rig.ub += bounce;
+  rig.lean = step === 1 ? 1 : step === 3 ? -1 : 0;
+  if (!rig.seated && bounce < 0) {
+    rig.legA = { dx: step === 1 ? -1 : 0, dy: -1 };
+    rig.legB = { dx: step === 3 ? 1 : 0, dy: 0 };
+  }
+  if (view === 'side') {
+    rig.armA = step < 2 ? arm([12, 18], [15, 14], [17, 8]) : arm([12, 18], [14, 20], [11, 18]);
+    rig.armB = step < 2 ? arm([10, 18], [7, 20], [5, 17]) : arm([10, 18], [7, 13], [5, 7]);
+    return;
+  }
+  if (step < 2) {
+    rig.armA = arm([6, 18], [3, 13], [2, 6]);
+    rig.armB = arm([16, 18], [19, 20], [18, 22]);
+  } else {
+    rig.armA = arm([6, 18], [3, 20], [4, 22]);
+    rig.armB = arm([16, 18], [19, 13], [20, 6]);
+  }
+}
+
+/** 'flirt' (flertando / apaixonado): olhos alegres, sorriso doce, mão mandando beijo/coração. */
+function flirtRig(rig: Rig, view: HeadView, f: number): void {
+  rig.eyes = 'happy';
+  rig.mouth = 'wide';
+  rig.lean = f === 1 ? 1 : 0;
+  if (view === 'side') {
+    rig.armA = f === 0 ? arm([12, 18], [10, 17], [9, 14]) : arm([12, 18], [8, 16], [5, 14]);
+    rig.armB = arm([10, 18], [11, 22]);
+    return;
+  }
+  rig.armA = arm([6, 18], [5, 22]);
+  rig.armB = f === 0 ? arm([16, 18], [15, 16], [13, 14]) : arm([16, 18], [18, 15], [19, 12]);
+}
+
+/** 'wave' (acenando): braço levantado oscilando amigavelmente para o colega. */
+function waveRig(rig: Rig, view: HeadView, f: number): void {
+  rig.eyes = 'happy';
+  rig.mouth = 'wide';
+  if (view === 'side') {
+    rig.armA = f === 0 ? arm([12, 18], [14, 13], [16, 6]) : arm([12, 18], [13, 12], [13, 5]);
+    rig.armB = arm([10, 18], [10, 22]);
+    return;
+  }
+  rig.armA = arm([6, 18], [6, 22]);
+  rig.armB = f === 0 ? arm([16, 18], [19, 13], [20, 5]) : arm([16, 18], [18, 12], [17, 4]);
+}
+
+/** 'clap' (batendo palmas): duas mãos alternando juntas e abertas na frente do peito. */
+function clapRig(rig: Rig, view: HeadView, f: number): void {
+  rig.eyes = 'happy';
+  rig.mouth = f === 1 ? 'open' : 'wide';
+  rig.ub += f === 1 ? -1 : 0;
+  if (view === 'side') {
+    rig.armA = f === 0 ? arm([12, 18], [9, 19], [7, 18]) : arm([12, 18], [10, 20], [8, 19]);
+    rig.armB = f === 0 ? arm([10, 18], [8, 19], [7, 18]) : arm([10, 18], [8, 18], [6, 17]);
+    return;
+  }
+  if (f === 0) {
+    rig.armA = arm([6, 18], [8, 20], [10, 19]);
+    rig.armB = arm([16, 18], [14, 20], [12, 19]);
+  } else {
+    rig.armA = arm([6, 18], [6, 20], [8, 19]);
+    rig.armB = arm([16, 18], [16, 20], [14, 19]);
+  }
 }
 
 /**
@@ -855,6 +941,62 @@ function drawAccessory(dc: Dc): void {
       else b.stamp(rows, ox + 7, oy + 1, pal);
       break;
     }
+    case 'crown': {
+      // Coroa VIP / Habbo Club dourada com joias coloridas no topo da cabeça
+      const rows = ['o..o..o', 'ohohoHo', 'oroboro', 'ddddddd'];
+      const pal = { o: it.base, h: it.lt, H: it.hi, d: it.dk, r: '#e11d48', b: '#2563eb' };
+      b.stamp(rows, ox + (v === 'side' ? 3 : 3), oy - 1, pal);
+      break;
+    }
+    case 'beret': {
+      // Boina artística inclinada estilo café retrô
+      const rows = ['.....oo.......', '...oohhhho....', '.oohhhHhoood..', '.ooooooooood..', '..dddddddd....'];
+      b.stamp(rows, ox, oy + 1, { o: it.base, h: it.lt, H: it.hi, d: it.dk });
+      break;
+    }
+    case 'flower': {
+      // Flor vibrante presa no cabelo
+      const rows = ['.o.', 'oYo', '.o.'];
+      const pal = { o: it.base, Y: '#fde047' };
+      if (v === 'down') b.stamp(rows, ox + 9, oy + 3, pal);
+      else if (v === 'up') b.stamp(rows, ox + 2, oy + 3, pal);
+      else b.stamp(rows, ox + 7, oy + 3, pal);
+      break;
+    }
+    case 'visor': {
+      // Viseira cyber retrô luminosa nos olhos
+      if (v === 'down') {
+        for (let cx = 2; cx <= 11; cx++) {
+          put(cx, 10, cx % 3 === 0 ? it.hi : it.base);
+          put(cx, 11, it.lt);
+        }
+        put(1, 10, it.dk);
+        put(12, 10, it.dk);
+      } else if (v === 'side') {
+        for (let cx = 1; cx <= 6; cx++) {
+          put(cx, 10, cx === 2 ? it.hi : it.base);
+          put(cx, 11, it.lt);
+        }
+      } else {
+        put(0, 10, it.dk);
+        put(13, 10, it.dk);
+      }
+      break;
+    }
+    case 'scarf': {
+      // Cachecol estiloso enrolado no pescoço (logo abaixo da cabeça)
+      const sy = oy + 14;
+      if (v === 'side') {
+        b.rect(ox + 2, sy, 8, 2, it.base);
+        b.hline(ox + 3, ox + 8, sy, it.lt);
+        b.rect(ox + 7, sy + 2, 2, 3, it.dk);
+      } else {
+        b.rect(ox + 2, sy, 10, 2, it.base);
+        b.hline(ox + 3, ox + 10, sy, it.lt);
+        if (v === 'down') b.rect(ox + 8, sy + 2, 2, 3, it.dk);
+      }
+      break;
+    }
     case 'none':
       break;
   }
@@ -1201,6 +1343,69 @@ function drawTorso(dc: Dc): void {
         b.set(11, y + 1, t.dk);
         b.set(11, y + 2, ac.lt);
       } else b.rect(9, y, 6, 1, ac.base);
+      break;
+    case 'blazer':
+      // Blazer executivo com lapela escura, camisa interna clara e lenço no bolso
+      if (front) {
+        b.rect(11, y, 2, 4, ac.lt);
+        b.set(10, y, t.dd);
+        b.set(13, y, t.dd);
+        b.set(10, y + 1, t.dd);
+        b.set(13, y + 1, t.dd);
+        b.set(11, y + 4, t.dd); // botão central
+        b.set(14, y + 2, ac.hi); // lenço no bolso
+      } else {
+        b.vline(11, y + 3, y + 5, t.dd);
+      }
+      break;
+    case 'overalls':
+      // Macacão criativo: camisa clara por baixo + alças e peitilho da cor da roupa
+      b.rect(8, y, 8, 2, ac.lt);
+      b.rect(9, y + 2, 6, 4, t.base);
+      if (front) {
+        b.vline(9, y, y + 2, t.lt);
+        b.vline(14, y, y + 2, t.dk);
+        b.set(9, y + 2, '#f5c542'); // botão metálico esquerdo
+        b.set(14, y + 2, '#f5c542'); // botão metálico direito
+        b.rect(10, y + 3, 4, 2, t.dk); // bolso frontal
+      } else {
+        b.vline(10, y, y + 2, t.dk);
+        b.vline(13, y, y + 2, t.dk);
+      }
+      break;
+    case 'vest':
+      // Colete tech/retrô sobre camisa clara nas mangas e gola
+      if (front) {
+        b.rect(11, y, 2, 2, ac.lt);
+        b.vline(11, y + 2, y + 5, t.dd);
+        b.set(12, y + 3, ac.hi);
+        b.set(12, y + 4, ac.hi);
+      } else {
+        b.rect(9, y, 6, 1, ac.lt);
+      }
+      b.rect(8, y + 5, 8, 1, t.dd);
+      break;
+    case 'dress':
+      // Vestido elegante com decote suave, cinto contrastante e barra fluida
+      if (front) {
+        b.rect(10, y, 4, 1, p.skin.base);
+      }
+      b.rect(8, y + 3, 8, 1, ac.base); // cinto
+      b.set(11, y + 3, '#fde047'); // fivela
+      b.rect(7, y + 5, 10, 2, t.base);
+      b.hline(7, 16, y + 6, t.dk);
+      break;
+    case 'cyber_jacket':
+      // Jaqueta Cyber Tech anos 2000 com gola alta, zíper metálico e listra neon
+      b.rect(9, y, 6, 1, t.dd);
+      b.hline(8, 15, y + 1, ac.hi); // faixa neon nos ombros
+      if (front) {
+        b.vline(11, y + 1, y + 5, '#cbd5e1'); // zíper prateado
+        b.set(13, y + 3, ac.hi); // emblema cyber
+      } else {
+        b.rect(10, y + 2, 4, 2, ac.base); // detalhe nas costas
+      }
+      b.rect(8, y + 5, 8, 1, t.dd);
       break;
   }
   drawLanyard(dc);

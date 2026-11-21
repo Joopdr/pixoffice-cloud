@@ -169,6 +169,44 @@ export function poster(variant: string | undefined): BufFurniture {
       b.set(ix + 1, iy + 2, '#f7d154');
       break;
     }
+    case 'squiggly': {
+      // Mini janela Windows XP + tela de desenho Squiggly com rabisco colorido!
+      b.rect(ix, iy, iw, ih, '#ece9d8');
+      b.rect(ix, iy, iw, 3, '#0058e6');
+      b.set(ix + iw - 2, iy + 1, '#e84a3c');
+      b.rect(ix + 1, iy + 4, iw - 2, ih - 5, '#ffffff');
+      b.line(ix + 2, iy + 9, ix + 5, iy + 6, '#e2604f');
+      b.line(ix + 5, iy + 6, ix + 7, iy + 10, '#3f7fd8');
+      b.set(ix + 7, iy + 7, '#ffb703');
+      b.set(ix + 3, iy + 11, '#4cae6a');
+      break;
+    }
+    case 'habbo_hc': {
+      // Brasão Habbo Club dourado sobre fundo roxo-real.
+      b.rect(ix, iy, iw, ih, '#3e2c6b');
+      b.hline(ix, ix + iw - 1, iy, '#6a4fc2');
+      b.hline(ix, ix + iw - 1, iy + ih - 1, '#6a4fc2');
+      // Coroa HC em pixel art.
+      b.rect(ix + 2, iy + 7, 6, 3, '#f7d154');
+      b.set(ix + 2, iy + 5, '#f7d154');
+      b.set(ix + 4, iy + 4, '#fff1a8');
+      b.set(ix + 5, iy + 4, '#fff1a8');
+      b.set(ix + 7, iy + 5, '#f7d154');
+      b.set(ix + 4, iy + 8, '#e2604f');
+      b.set(ix + 5, iy + 8, '#3cd8d2');
+      break;
+    }
+    case 'oldweb': {
+      // Monitor CRT nostálgico + estrela GeoCities amarela.
+      b.rect(ix, iy, iw, ih, '#16284c');
+      b.rect(ix + 2, iy + 3, 6, 5, '#d8d0be');
+      b.rect(ix + 3, iy + 4, 4, 3, '#2d7ad6');
+      b.set(ix + 4, iy + 5, '#f7e7a1');
+      b.rect(ix + 3, iy + 8, 4, 1, '#9c9482');
+      b.set(ix + 1, iy + 1, '#f7d154');
+      b.set(ix + 8, iy + 11, '#ff79c6');
+      break;
+    }
     default: {
       // code: editor escuro com linhas coloridas e "</>".
       b.rect(ix, iy, iw, ih, '#1f2433');

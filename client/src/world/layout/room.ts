@@ -20,6 +20,12 @@ export interface RoomInput {
   id: string;
   slot: number;
   seed: number;
+  squiggly?: boolean;
+}
+
+export function isSquigglyRoomName(nameOrId: string | undefined): boolean {
+  if (!nameOrId) return false;
+  return /squiggly|wigglypaint/i.test(nameOrId);
 }
 
 const PLANTS_TALL = ['palm', 'ficus', 'monstera', 'bonsai'] as const;
@@ -93,9 +99,13 @@ export function layoutProjectRoom(room: RoomInput, theme: RoomTheme): AreaLayout
   const wallItem = (kind: FurnitureKind, cx: number, variant?: string, o: { ly?: number; on?: 'face' | 'south'; order?: number } = {}) => b.wall(kind, mir ? 16 - cx : cx, variant, o);
   const rug = (lx: number, ly: number, w: number, h: number, color: string, seed: number) => b.rug(fx(lx, w), ly, w, h, color, seed);
 
-  // ---- piso: porcelanato claro (o banheiro é que usa azulejo); leve tom do tema dá identidade
-  b.floor('marble', 0, 0, 16, 12, room.seed);
-  area.floorTint = theme.carpet;
+  // ---- piso: Habbo quadriculado exclusivo no Squiggly Studio; porcelanato claro nas demais
+  if (room.squiggly) {
+    b.floor('habbo_check', 0, 0, 16, 12, room.seed);
+  } else {
+    b.floor('marble', 0, 0, 16, 12, room.seed);
+    area.floorTint = theme.carpet;
+  }
   // tapete na cor do tema sob a ilha (identidade da sala)
   rug(1.5, 3.25, 7, 5.5, theme.carpet, room.seed);
   // tapetinho na entrada
@@ -122,10 +132,12 @@ export function layoutProjectRoom(room: RoomInput, theme: RoomTheme): AreaLayout
   // ---- itens de parede
   const signCx = north ? 8 : 10.5;
   area.signId = wallItem('sign', signCx, undefined, { order: 0.95 });
+  const posterVar = room.squiggly ? 'squiggly' : pick(POSTERS);
   if (north) {
     wallItem('whiteboard', 4.5, undefined, { order: 0.6 });
     wallItem('clock', 10, undefined, { order: 0.7 });
-    wallItem('poster', 11.1, pick(POSTERS), { order: 0.5 });
+    wallItem('poster', 11.1, posterVar, { order: 0.5 });
+    if (room.squiggly) wallItem('poster', 2.2, 'habbo_hc', { order: 0.5 });
     wallItem('window', 12.75, undefined, { order: 0.4 });
     // interruptor ao lado da porta, na mureta (por dentro)
     wallItem('light_switch', DOOR_X - 0.5, 'on', { ly: 12, on: 'south', order: 0.8 });
@@ -134,7 +146,8 @@ export function layoutProjectRoom(room: RoomInput, theme: RoomTheme): AreaLayout
     wallItem('whiteboard', 2.5, undefined, { order: 0.6 });
     wallItem('light_switch', DOOR_X - 0.5, 'on', { order: 0.8 });
     wallItem('clock', 12.3, undefined, { order: 0.7 });
-    wallItem('poster', 13.35, pick(POSTERS), { order: 0.5 });
+    wallItem('poster', 13.35, posterVar, { order: 0.5 });
+    if (room.squiggly) wallItem('poster', 1.2, 'oldweb', { order: 0.5 });
     spot('switch', DOOR_X - 1, 2, 'up', { dy: -3 });
   }
   spot('whiteboard', north ? 4 : 2, 2, 'up', { dx: 8, dy: 2 });
@@ -194,17 +207,30 @@ export function layoutProjectRoom(room: RoomInput, theme: RoomTheme): AreaLayout
     furn('floor_lamp', 14, 8, undefined, { order: 0.34 });
   } else if (column === 1) {
     furn('binder_shelf', 14, 4, undefined, { order: 0.3 });
-    furn('binder_shelf', 14, 5, undefined, { order: 0.31 });
+    furn('server_rack', 14, 5, undefined, { order: 0.31 });
     furn('floor_lamp', 14, 8, undefined, { order: 0.34 });
   } else {
-    furn('floor_lamp', 14, 4, undefined, { order: 0.3 });
+    furn('server_rack', 14, 4, undefined, { order: 0.3 });
     furn('filing_cabinet', 14, 6, undefined, { order: 0.32 });
     furn('plant_tall', 14, 8, pick(PLANTS_TALL), { order: 0.34 });
   }
 
   // ---- cantos da parte de baixo (linhas 9–10; a passagem da porta, colunas 6–9, fica livre)
-  corner(v.left, 'left');
-  corner(v.right, 'right');
+  if (room.squiggly) {
+    // Canto esquerdo Tech Retrô Habbo (Sofá HC + Planta + Luminária) + Canto direito Servidores, CRT & Fliperama
+    rug(1.4, 8.85, 4.2, 2, '#2d7a4f', room.seed + 3);
+    const sqSofa = furn('hc_sofa', 2, 10, 'up', { order: 0.61 });
+    for (let i = 0; i < 3; i++) seat('nook', 'hc_sofa', 2 + i, 10, 'up', 'up', { noFurniture: true, furnitureId: sqSofa });
+    furn('plant_tall', 1, 10, 'palm', { order: 0.21 });
+
+    furn('crt_workstation', 10, 10, undefined, { order: 0.25 });
+    furn('server_rack', 12, 10, undefined, { order: 0.26 });
+    furn('arcade', 13, 10, undefined, { order: 0.27 });
+    furn('plant_tall', 14, 10, 'bonsai', { order: 0.28 });
+  } else {
+    corner(v.left, 'left');
+    corner(v.right, 'right');
+  }
 
   function corner(style: CornerStyle, where: 'left' | 'right'): void {
     // a zona da esquerda ocupa as colunas 1–5; a da direita, 10–14
@@ -221,9 +247,9 @@ export function layoutProjectRoom(room: RoomInput, theme: RoomTheme): AreaLayout
         return;
       }
       case 'print': {
-        // estação de impressão com estante de pastas e arquivo
-        furn('printer', x0, 10, undefined, { order: o });
-        furn('binder_shelf', x0 + 1, 10, undefined, { order: o + 0.01 });
+        // estação de servidores e impressão tech retrô
+        furn('server_rack', x0, 10, undefined, { order: o });
+        furn('printer', x0 + 1, 10, undefined, { order: o + 0.01 });
         furn('binder_shelf', x0 + 2, 10, undefined, { order: o + 0.02 });
         furn('filing_cabinet', x0 + 3, 10, undefined, { order: o + 0.03 });
         furn('trash_bin', x0 + 4, 10, undefined, { order: o + 0.04 });
@@ -239,17 +265,19 @@ export function layoutProjectRoom(room: RoomInput, theme: RoomTheme): AreaLayout
         return;
       }
       case 'standdesk': {
-        // mesa de pé com notebook (lugar de trabalho em pé, de frente para a câmera)
-        furn('cafe_table', x0 + 2, 10, undefined, { order: o });
+        // bancada CRT anos 2000 com disquetes e rack de servidor
+        furn('crt_workstation', x0 + 1, 10, undefined, { order: o });
         spot('stand', x0 + 2, 9, 'down', { dy: -1 });
-        furn('plant_small', x0 + 4, 10, pick(PLANTS_SMALL), { order: o + 0.01 });
-        furn('trash_bin', x0, 10, undefined, { order: o + 0.02 });
+        furn('server_rack', x0 + 3, 10, undefined, { order: o + 0.01 });
+        furn('plant_small', x0 + 4, 10, pick(PLANTS_SMALL), { order: o + 0.02 });
+        furn('trash_bin', x0, 10, undefined, { order: o + 0.03 });
         return;
       }
       case 'stands': {
-        // pontos em pé junto ao quadro móvel/estante baixa
-        furn('filing_cabinet', x0 + 4, 10, undefined, { order: o });
-        furn('plant_small', x0, 10, pick(PLANTS_SMALL), { order: o + 0.01 });
+        // pontos em pé com bancada CRT retrô e rack de servidor
+        furn('crt_workstation', x0 + 2, 10, undefined, { order: o });
+        furn('server_rack', x0 + 4, 10, undefined, { order: o + 0.01 });
+        furn('plant_small', x0, 10, pick(PLANTS_SMALL), { order: o + 0.02 });
         spot('stand', x0 + 1, 9, 'up', { dy: -2 });
         spot('stand', x0 + 2, 9, 'up', { dy: -2 });
         return;
