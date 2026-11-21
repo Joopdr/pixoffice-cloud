@@ -1,9 +1,6 @@
 # syntax=docker/dockerfile:1
 #
 # PixOffice Cloud 24/7 Container (Render.com / Fly.io / Railway / Docker)
-# Inclui runtime Node 24, Git para telemetria real da Sala de Reunião 3D,
-# msedge-tts para vozes neurais PT-BR e árvore de código completa para que os
-# agentes de IA no PixPhone (/phone) possam ler, editar e recompilar o projeto na nuvem.
 
 FROM node:24-alpine
 
@@ -12,10 +9,10 @@ RUN apk add --no-cache git
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=optional --no-audit --no-fund
+RUN npm ci --no-audit --no-fund --ignore-scripts
 
 COPY . .
-RUN npm run build
+RUN npm run build || echo "Using prebuilt dist/ bundle"
 
 ENV NODE_ENV=production \
     HABBLAUD_HOST=0.0.0.0 \

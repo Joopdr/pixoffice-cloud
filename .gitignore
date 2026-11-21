@@ -1,5 +1,5 @@
 node_modules/
-dist/
+*.map
 .DS_Store
 *.log
 .env

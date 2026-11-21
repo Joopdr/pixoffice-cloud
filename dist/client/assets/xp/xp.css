@@ -1,0 +1,285 @@
+/* ============================================================================
+   XP.css (Local Offline Windows XP Luna Theme Integration)
+   Authentic Luna aesthetic: glossy blue title bars with 8px rounded top corners,
+   vibrant red 3D close buttons, #ECE9D8 surfaces, 3D beveled controls,
+   segmented green progress bars, and Tahoma 11px typography.
+   ============================================================================ */
+
+:root {
+  --xp-face: #ECE9D8;
+  --xp-face-hi: #F6F4EC;
+  --xp-face-lo: #D6D2C2;
+  --xp-border-dark: #7F9DB9;
+  --xp-btn-border: #003C74;
+  --xp-luna-blue-top: #3C94FF;
+  --xp-luna-blue-mid: #0054E3;
+  --xp-luna-blue-bot: #003CB5;
+  --xp-luna-border: #0831D9;
+  --xp-close-top: #F28B79;
+  --xp-close-mid: #DC4029;
+  --xp-close-bot: #A91D0F;
+  --xp-tab-orange: #E68B2C;
+  --xp-font: "Tahoma", "Trebuchet MS", Verdana, sans-serif;
+}
+
+/* Base Tahoma 11px for XP chrome (tool palette buttons keep >=12px for R3 legibility) */
+body.xp-luna-active,
+.xp-window,
+.xp-modal,
+.xp-dialog {
+  font-family: var(--xp-font);
+}
+
+/* Authentic XP.css Window & Modal Chrome */
+.xp-window,
+.xp-modal-box,
+.modal-box {
+  background: var(--xp-face);
+  border: 1px solid var(--xp-luna-border);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.75),
+    inset -1px -1px 0 rgba(0, 28, 128, 0.35),
+    3px 4px 12px rgba(0, 0, 0, 0.38);
+  font-family: var(--xp-font);
+  font-size: 11px;
+  color: #000000;
+}
+
+.xp-titlebar,
+.xp-title-bar,
+.modal-header {
+  background: linear-gradient(
+    180deg,
+    #3C94FF 0%,
+    #1F73F0 14%,
+    #0054E3 50%,
+    #0044CA 86%,
+    #003CB5 100%
+  );
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  color: #FFFFFF;
+  font-family: var(--xp-font);
+  font-size: 11px;
+  font-weight: 700;
+  text-shadow: 1px 1px 0 #002375;
+  padding: 4px 6px;
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  user-select: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.52);
+}
+
+/* Vibrant 3D Red Close Button (XP.css authentic) */
+.xp-win-btn.close,
+.xp-close-btn,
+button[data-xp-close],
+#btn-close-window {
+  background: linear-gradient(
+    180deg,
+    #F39686 0%,
+    #E0533C 32%,
+    #CC2F1A 74%,
+    #A91D0F 100%
+  ) !important;
+  border: 1px solid #FFFFFF !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 1px #7A1409;
+  color: #FFFFFF !important;
+  font-family: var(--xp-font);
+  font-weight: 700;
+  border-radius: 3px;
+  text-shadow: 0 1px 0 #690E05;
+}
+
+.xp-win-btn.close:hover,
+.xp-close-btn:hover,
+button[data-xp-close]:hover,
+#btn-close-window:hover {
+  background: linear-gradient(
+    180deg,
+    #FFB0A2 0%,
+    #F16650 34%,
+    #DC3823 76%,
+    #BC2112 100%
+  ) !important;
+}
+
+/* 3D Beveled XP Buttons */
+.xp-btn,
+.xp-button,
+.xp-dialog button:not(.xp-close-btn),
+.modal-box button:not(.xp-close-btn):not(.an-tool-btn):not(.quick-swatch) {
+  font-family: var(--xp-font);
+  font-size: 11px;
+  color: #000000;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F1EFE2 45%, #E3E0D1 88%, #D4D0C0 100%);
+  border: 1px solid var(--xp-btn-border);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 1px 0 #FFFFFF,
+    inset 0 -1px 0 #C8C3B2;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.xp-btn:hover,
+.xp-button:hover,
+.xp-dialog button:not(.xp-close-btn):hover,
+.modal-box button:not(.xp-close-btn):not(.an-tool-btn):not(.quick-swatch):hover {
+  box-shadow:
+    inset 0 1px 0 #FFFFFF,
+    inset 0 -2px 0 #E59700,
+    inset 2px 0 0 rgba(255, 198, 92, 0.65),
+    inset -2px 0 0 rgba(255, 198, 92, 0.65);
+}
+
+.xp-btn:active,
+.xp-button:active {
+  background: linear-gradient(180deg, #D5D2C3 0%, #E7E4D6 100%);
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* XP Progress Bar (classic segmented green) */
+.xp-progress-track,
+#box-export-progress {
+  background: #FFFFFF;
+  border: 1px solid #686868;
+  border-radius: 3px;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+  padding: 2px;
+}
+
+.xp-progress-fill,
+#bar-export-progress {
+  background: repeating-linear-gradient(
+    90deg,
+    #2AD12A 0px,
+    #2AD12A 7px,
+    transparent 7px,
+    transparent 9px
+  ),
+  linear-gradient(180deg, #A2F39F 0%, #24B624 45%, #118E11 100%) !important;
+  border-radius: 1px;
+}
+
+/* XP Groupbox / Fieldset */
+.xp-groupbox {
+  background: #F4F2E8;
+  border: 1px solid #D0D0BF;
+  border-radius: 4px;
+  padding: 8px 10px;
+  box-shadow: inset 1px 1px 0 #FFFFFF;
+}
+
+/* Inline Isometric XP Icons & MSN Emoticons */
+.xp-ico-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.msn-emo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+.msn-emo-bounce {
+  animation: msnBounce 1.4s ease-in-out infinite;
+}
+
+.msn-emo-wink {
+  animation: msnWink 2.6s ease-in-out infinite;
+}
+
+@keyframes msnBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.06); }
+}
+
+@keyframes msnWink {
+  0%, 88%, 100% { transform: scaleY(1); }
+  92%, 96% { transform: scaleY(0.88) rotate(-3deg); }
+}
+
+/* MSN Nudge / Cutucar window shake animation */
+@keyframes msnNudgeShake {
+  0%, 100% { transform: translate(0, 0); }
+  12% { transform: translate(-6px, -4px); }
+  25% { transform: translate(6px, 4px); }
+  37% { transform: translate(-5px, 3px); }
+  50% { transform: translate(5px, -3px); }
+  62% { transform: translate(-4px, -2px); }
+  75% { transform: translate(4px, 2px); }
+  87% { transform: translate(-2px, 1px); }
+}
+
+.xp-nudge-active {
+  animation: msnNudgeShake 0.48s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msn-emo-bounce,
+  .msn-emo-wink,
+  .xp-nudge-active {
+    animation: none !important;
+  }
+}
+
+/* XP Modal Backdrop Overlay (#cc0-brushes-modal & XP dialogs) */
+#cc0-brushes-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(0, 18, 56, 0.45);
+  align-items: center;
+  justify-content: center;
+}
+
+#cc0-brushes-modal.open {
+  display: flex;
+}
+
+/* Olive / Silver / Classic Theme Overrides preserved */
+body.theme-olive .xp-titlebar,
+body.theme-olive .xp-title-bar,
+body.theme-olive .modal-header {
+  background: linear-gradient(180deg, #A4B87C 0%, #869D5E 25%, #6B8246 82%, #556836 100%);
+  text-shadow: 1px 1px 0 #374421;
+}
+
+body.theme-silver .xp-titlebar,
+body.theme-silver .xp-title-bar,
+body.theme-silver .modal-header {
+  background: linear-gradient(180deg, #E2E5EE 0%, #B8BDCD 45%, #8D94AA 85%, #757C94 100%);
+  color: #1A1E28;
+  text-shadow: 0 1px 0 #FFFFFF;
+}
+
+body.theme-classic .xp-window,
+body.theme-classic .xp-modal-box,
+body.theme-classic .modal-box {
+  border-radius: 0;
+  border: 2px outset #DFDFDF;
+  background: #D4D0C8;
+}
+body.theme-classic .xp-titlebar,
+body.theme-classic .xp-title-bar,
+body.theme-classic .modal-header {
+  border-radius: 0;
+  background: linear-gradient(90deg, #0A246A 0%, #A6CAF0 100%);
+}

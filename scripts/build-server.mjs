@@ -10,7 +10,10 @@ await build({
   platform: 'node',
   target: 'node20',
   format: 'esm',
-  packages: 'external',
+  external: ['node-pty', '@xterm/*', 'vite'],
+  banner: {
+    js: "import { createRequire as __createRequire } from 'node:module'; const require = __createRequire(import.meta.url);",
+  },
   sourcemap: true,
   logLevel: 'info',
 });
