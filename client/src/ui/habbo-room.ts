@@ -309,6 +309,7 @@ export class HabboRoomController {
     this.hostEl.id = 'pixhotel-iso-stage';
     this.hostEl.className = 'pixhotel-stage';
     if (!this.active) this.hostEl.style.display = 'none';
+    document.body.classList.toggle('is-pixhotel-iso', this.active);
 
     this.canvas = document.createElement('canvas');
     this.canvas.className = 'pixhotel-canvas';
@@ -704,6 +705,7 @@ export class HabboRoomController {
     toggleBtn.addEventListener('click', () => {
       this.active = !this.active;
       this.hostEl.style.display = this.active ? 'block' : 'none';
+      document.body.classList.toggle('is-pixhotel-iso', this.active);
       try {
         localStorage.setItem(STORAGE_KEY_MODE, this.active ? '1' : '0');
       } catch {

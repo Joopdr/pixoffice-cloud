@@ -2740,12 +2740,16 @@ canvas[data-floor-style="sunset_lounge"] {
    ========================================================================== */
 .pixhotel-stage {
   position: fixed;
-  inset: 42px 0 0 0;
+  inset: 38px 0 30px 0;
   z-index: 48;
   background: #0b0e17;
   overflow: hidden;
   font-family: Tahoma, Verdana, sans-serif;
   user-select: none;
+}
+
+body.is-pixhotel-iso .xp-balloon-layer {
+  display: none !important;
 }
 
 .pixhotel-canvas {
@@ -2757,22 +2761,22 @@ canvas[data-floor-style="sunset_lounge"] {
 
 .pixhotel-mode-toggle-btn {
   position: fixed;
-  top: 48px;
-  right: 16px;
-  z-index: 90;
+  top: 6px;
+  left: 240px;
+  z-index: 140;
   display: inline-flex;
   align-items: center;
   gap: 7px;
   background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
   color: #0f172a;
-  border: 2px solid #78350f;
-  border-radius: 6px;
-  padding: 6px 12px;
+  border: 1.5px solid #78350f;
+  border-radius: 5px;
+  padding: 4px 10px;
   font-family: Tahoma, Verdana, sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .pixhotel-mode-toggle-btn:hover {
