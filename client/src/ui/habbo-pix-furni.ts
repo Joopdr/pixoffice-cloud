@@ -1,4 +1,4 @@
-// Habbo Hotel Classic Pixel Art Furni Generator (2005–2009 Style)
+// Habbo Hotel Classic Pixel Art Furni Generator (2005–2009 Style) — Rodada 2 HD Polish
 // Desenha pixel a pixel em resolução nativa 1x (para renderização com imageSmoothingEnabled = false em 2 * zoom)
 // todos os 11 Mobis isométricos 2:1 do quarto corporativo PixOffice.
 
@@ -96,12 +96,10 @@ function drawIsoPrism(
   const backY = topCy - Math.floor(rx / 2) - Math.floor(ry / 2);
 
   for (let x = minX; x <= maxX; x++) {
-    // Limite inferior do losango superior
     const yFront =
       x < cx
         ? topCy - Math.floor((cx - 1 - x) / 2)
         : topCy - Math.floor((x - cx) / 2);
-    // Limite superior (traseiro) do losango
     const yBack =
       x < backX
         ? backY + Math.floor((backX - 1 - x) / 2)
@@ -110,14 +108,12 @@ function drawIsoPrism(
     for (let y = yBack; y <= yFront; y++) {
       let col = pal.top;
       if (opts.woodGrainTop && opts.woodColor) {
-        // Veios de madeira isométricos sutis
-        if (((x + y * 2) % 7 === 0) || ((x - y * 2) % 11 === 0)) {
+        if (((x + y * 2) % 6 === 0) || ((x - y * 2) % 9 === 0)) {
           col = opts.woodColor;
         }
       }
       buf.set(x, y, col);
     }
-    // Brilho de 1px nas duas quinas frontais superiores
     if (opts.bevelTop !== false) {
       buf.set(x, yFront, ltCol);
     }
@@ -161,37 +157,39 @@ function bufToCanvas(buf: PixelBuf): HTMLCanvasElement {
 }
 
 // ============================================================================
-// 1. CLUB_SOFA — Sofá PixClub VIP (2x1 tiles, 56x48 px)
+// 1. CLUB_SOFA — Sofá PixClub VIP (2x1 tiles, 58x48 px)
+// Braços laterais arredondados e volumosos com medalhão dourado na frente,
+// encosto curvo acolchoado com capitonê profundo e almofadas com brilho especular.
 // ============================================================================
 function buildClubSofa(rot: 0 | 1): PixFurniSprite {
-  const buf = new PixelBuf(56, 48);
-  const ax = 22;
-  const ay = 43;
+  const buf = new PixelBuf(58, 48);
+  const ax = 23;
+  const ay = 44;
 
-  // Sombra de contato 2:1 no chão
-  buf.shadow(27, 36, 22, 9, '#0f172a', 0.28);
+  // Sombra de contato 2:1 ampla no chão
+  buf.shadow(28, 36, 23, 9, '#0f172a', 0.3);
 
-  const burgundy = {
+  const velvet = {
     top: '#be123c',
     left: '#9f1239',
     right: '#881337',
     lt: '#f43f5e',
   };
-  const darkBurgundy = {
+  const velvetDeep = {
     top: '#9f1239',
     left: '#881337',
     right: '#4c0519',
     lt: '#e11d48',
   };
-  const gold = ramp('#fbbf24', 0.09);
+  const gold = ramp('#fbbf24', 0.1);
   const wood = ramp('#78350f', 0.08);
 
-  // 4 Pés de madeira torneados com ponteiras douradas
+  // 4 Pés de madeira torneados com ponteiras de latão dourado
   const feet: Array<[number, number]> = [
     [10, 36], // esquerda-trás
-    [22, 42], // frente-baixo
-    [36, 35], // meio-direita
-    [48, 29], // direita-frente
+    [23, 43], // frente-baixo
+    [37, 36], // meio-direita
+    [50, 29], // direita-frente
   ];
   for (const [fx, fy] of feet) {
     buf.rect(fx - 1, fy - 3, 3, 2, wood.base);
@@ -200,67 +198,100 @@ function buildClubSofa(rot: 0 | 1): PixFurniSprite {
     buf.set(fx, fy - 1, gold.hi);
   }
 
-  // Base inferior estofada bordô imperial (2x1 tiles: wx=13, wy=27, h=5)
-  drawIsoPrism(buf, 22, 40, 13, 27, 5, darkBurgundy);
+  // Saia / Base estofada inferior bordô imperial (2x1 tiles: wx=14, wy=28, h=5)
+  drawIsoPrism(buf, 23, 41, 14, 28, 5, velvetDeep);
 
-  // Friso frontal dourado imperial ao longo da base
-  drawIsoLine(buf, 21, 38, 12, 'left-up', gold.base);
-  drawIsoLine(buf, 22, 38, 26, 'right-up', gold.base);
-  buf.set(22, 38, gold.hi);
-  buf.set(28, 35, gold.hi);
-  buf.set(36, 31, gold.hi);
+  // Friso frontal dourado real com gemas de brilho especular
+  drawIsoLine(buf, 22, 39, 13, 'left-up', gold.base);
+  drawIsoLine(buf, 23, 39, 27, 'right-up', gold.base);
+  for (let gx = 23; gx <= 47; gx += 4) {
+    buf.set(gx, 39 - Math.floor((gx - 23) / 2), gold.hi);
+  }
 
-  // Braço lateral traseiro-direito (desenhado antes das almofadas para profundidade)
-  drawIsoPrism(buf, 46, 28, 13, 5, 11, burgundy);
-  // Escudo dourado frontal do braço direito
-  buf.rect(47, 20, 2, 4, gold.base);
-  buf.set(47, 20, gold.hi);
+  // --- Braço Lateral Traseiro-Direito Volumoso & Arredondado (Rolled Armrest) ---
+  drawIsoPrism(buf, 47, 29, 13, 6, 9, velvet);
+  // Topo abaulado do braço direito (camada superior arredondada)
+  drawIsoPrism(buf, 46, 20, 12, 4, 2, {
+    top: '#e11d48',
+    left: '#be123c',
+    right: '#9f1239',
+    lt: '#fda4af',
+  });
+  // Medalhão dourado imperial cravado na face frontal do braço direito
+  buf.rect(47, 21, 3, 4, gold.dk);
+  buf.rect(48, 22, 2, 2, gold.base);
+  buf.set(48, 22, gold.hi);
 
-  // Encosto alto acolchoado em capitonê (wx=5, wy=27, h=17)
-  drawIsoPrism(buf, 14, 31, 5, 27, 17, burgundy);
+  // --- Encosto Alto Curvo Acolchoado em Capitonê (Tufted Backrest) ---
+  drawIsoPrism(buf, 15, 32, 6, 28, 16, velvet);
+  // Crista superior curva acolchoada do encosto (2 gomos macios)
+  drawIsoPrism(buf, 15, 16, 4, 13, 2, {
+    top: '#e11d48',
+    left: '#be123c',
+    right: '#9f1239',
+    lt: '#fda4af',
+  });
+  drawIsoPrism(buf, 28, 9, 4, 13, 2, {
+    top: '#e11d48',
+    left: '#be123c',
+    right: '#9f1239',
+    lt: '#fda4af',
+  });
 
-  // Textura Capitonê (Tufted) no encosto: losangos + 4 botões dourados/escuros afundados
-  const buttons: Array<[number, number]> = [
-    [19, 17],
-    [25, 14],
-    [31, 11],
-    [37, 8],
+  // Textura Capitonê (Tufted) rica no encosto: sulcos diagonais + 5 botões dourados afundados
+  const tuftedButtons: Array<[number, number]> = [
+    [19, 19],
+    [24, 16],
+    [29, 14],
+    [34, 11],
+    [39, 9],
   ];
-  for (const [bx, by] of buttons) {
-    // Dobras em X ao redor do botão
+  for (const [bx, by] of tuftedButtons) {
+    // Losango de sombra do estofado
     buf.set(bx - 1, by - 1, '#4c0519');
     buf.set(bx + 1, by - 1, '#4c0519');
     buf.set(bx - 1, by + 1, '#4c0519');
+    buf.set(bx, by - 2, '#6b0722');
+    // Volume iluminado abaixo do botão
     buf.set(bx + 1, by + 1, '#f43f5e');
-    // Botão dourado afundado
-    buf.set(bx, by, gold.base);
-    buf.set(bx, by - 1, '#4c0519');
+    buf.set(bx, by + 1, '#fda4af');
+    // Botão dourado cravado
+    buf.set(bx, by, gold.hi);
+    buf.set(bx, by - 1, '#3b0413');
   }
 
-  // 2 Almofadas de assento macias separadas por costura de 1px
-  // Almofada 2 (direita-cima)
-  drawIsoPrism(buf, 35, 29, 8, 11, 4, {
+  // --- 2 Almofadas de Assento Estofadas com Brilho Especular na Quina Frontal ---
+  const cushionPal = {
     top: '#e11d48',
     left: '#be123c',
     right: '#9f1239',
     lt: '#fda4af',
-  });
-  // Almofada 1 (esquerda-baixo)
-  drawIsoPrism(buf, 24, 34, 8, 11, 4, {
-    top: '#e11d48',
-    left: '#be123c',
-    right: '#9f1239',
-    lt: '#fda4af',
-  });
-  // Costura divisória escura entre as 2 almofadas
-  drawIsoLine(buf, 34, 26, 7, 'left-up', '#4c0519');
+  };
+  // Almofada Direita-Superior
+  drawIsoPrism(buf, 36, 30, 9, 11, 5, cushionPal);
+  drawIsoLine(buf, 36, 25, 10, 'right-up', '#ffe4e6'); // brilho especular na quina frontal
+  // Almofada Esquerda-Inferior
+  drawIsoPrism(buf, 25, 35, 9, 11, 5, cushionPal);
+  drawIsoLine(buf, 25, 30, 10, 'right-up', '#ffe4e6'); // brilho especular na quina frontal
+  // Costura profunda separando os 2 assentos
+  drawIsoLine(buf, 35, 26, 8, 'left-up', '#4c0519');
+  buf.vline(35, 26, 30, '#4c0519');
 
-  // Braço lateral frontal-esquerdo (wx=13, wy=5, h=11)
-  drawIsoPrism(buf, 22, 40, 13, 5, 11, burgundy);
-  // Detalhe arredondado e escudo dourado frontal no braço esquerdo
-  buf.rect(23, 32, 2, 4, gold.base);
-  buf.set(23, 32, gold.hi);
-  drawIsoLine(buf, 21, 29, 11, 'left-up', '#fda4af');
+  // --- Braço Lateral Frontal-Esquerdo Volumoso & Arredondado (Rolled Armrest) ---
+  drawIsoPrism(buf, 23, 41, 14, 6, 9, velvet);
+  // Topo abaulado do braço esquerdo (rolo estofado macio)
+  drawIsoPrism(buf, 22, 32, 13, 4, 2, {
+    top: '#e11d48',
+    left: '#be123c',
+    right: '#9f1239',
+    lt: '#fda4af',
+  });
+  // Brilho especular ao longo do rolo do braço
+  drawIsoLine(buf, 21, 30, 11, 'left-up', '#ffe4e6');
+  // Medalhão dourado imperial na frente do braço esquerdo
+  buf.rect(23, 33, 3, 4, gold.dk);
+  buf.rect(24, 34, 2, 2, gold.base);
+  buf.set(24, 34, gold.hi);
 
   buf.outline();
   const finalBuf = rot === 1 ? buf.flipped() : buf;
@@ -272,109 +303,156 @@ function buildClubSofa(rot: 0 | 1): PixFurniSprite {
 }
 
 // ============================================================================
-// 2. DEV_DESK — Bancada Dual-Monitor Dev (1x1 tile, 44x48 px)
+// 2. DEV_DESK — Bancada Dual-Monitor Dev + Gabinete PC Gamer RGB (1x1 tile, 48x50 px)
+// Tampo de carvalho largo com borda chanfrada clara, Gabinete PC Workstation com
+// vidro temperado e LED RGB interno animado, 2 monitores widescreen moldura fina,
+// teclado mecânico RGB, mousepad e caneca fumegante.
 // ============================================================================
 function buildDevDesk(rot: 0 | 1, frame: number): PixFurniSprite {
-  const buf = new PixelBuf(44, 48);
-  const ax = 22;
-  const ay = 42;
+  const buf = new PixelBuf(48, 50);
+  const ax = 24;
+  const ay = 44;
 
-  buf.shadow(22, 37, 16, 7, '#0f172a', 0.26);
+  buf.shadow(24, 39, 19, 8, '#0f172a', 0.28);
 
-  const oak = {
-    top: '#e5c08d',
-    left: '#c89d66',
-    right: '#9c7241',
-    lt: '#f7dcb4',
-  };
+  const f = frame % 4;
+  const rgbCycle = ['#22c55e', '#38bdf8', '#f472b6', '#a855f7'];
+  const rgbCol1 = rgbCycle[f];
+  const rgbCol2 = rgbCycle[(f + 1) % 4];
+  const rgbCol3 = rgbCycle[(f + 2) % 4];
+
   const steel = {
     top: '#cbd5e1',
     left: '#94a3b8',
     right: '#475569',
-    lt: '#f1f5f9',
+    lt: '#f8fafc',
   };
 
-  // Perna lateral esquerda em aço escovado
-  drawIsoPrism(buf, 11, 36, 3, 3, 12, steel);
-  // Barra transversal inferior
-  drawIsoLine(buf, 12, 33, 14, 'right-up', '#64748b');
+  // Perna lateral esquerda em aço escovado com sapata preta
+  drawIsoPrism(buf, 11, 38, 3, 3, 13, steel);
+  buf.rect(9, 37, 3, 2, '#0f172a');
+  // Calha organizadora de cabos sob o tampo
+  drawIsoLine(buf, 12, 33, 15, 'right-up', '#334155');
 
-  // Gaveteiro à direita com 2 puxadores pixelados
-  drawIsoPrism(buf, 27, 39, 9, 7, 12, {
-    top: '#94a3b8',
-    left: '#64748b',
-    right: '#334155',
-    lt: '#cbd5e1',
+  // --- Gabinete PC Gamer / Workstation sob o lado direito da bancada ---
+  // Chassis em aço grafite escuro (wx=10, wy=7, h=13)
+  drawIsoPrism(buf, 31, 42, 10, 7, 13, {
+    top: '#334155',
+    left: '#1e293b',
+    right: '#0f172a',
+    lt: '#64748b',
   });
-  // Divisória das gavetas e 2 puxadores cromados na face direita/esquerda
-  drawIsoLine(buf, 26, 33, 7, 'left-up', '#1e293b');
-  buf.hline(21, 23, 30, '#f8fafc'); // puxador gaveta superior
-  buf.hline(21, 23, 34, '#f8fafc'); // puxador gaveta inferior
+  // Janela lateral esquerda de vidro temperado mostrando cooler RGB e GPU iluminada
+  for (let dx = 2; dx <= 7; dx++) {
+    const gx = 31 - dx;
+    const gyBot = 40 - Math.floor(dx / 2);
+    buf.vline(gx, gyBot - 8, gyBot - 1, '#091024');
+  }
+  // Cooler CPU circular RGB + placa de vídeo iluminada lá dentro
+  buf.rect(25, 32, 3, 3, rgbCol1);
+  buf.set(26, 33, '#ffffff'); // núcleo brilhante do cooler
+  buf.hline(24, 28, 36, rgbCol2); // barra LED da GPU RTX
+  // Reflexo diagonal de vidro na janela do gabinete
+  buf.set(28, 31, 'rgba(255,255,255,0.65)');
+  buf.set(27, 32, 'rgba(255,255,255,0.65)');
+  // Fita LED frontal na face direita do gabinete + botão power
+  buf.vline(34, 30, 38, rgbCol3);
+  buf.set(33, 29, '#22c55e');
 
-  // Tampo de carvalho claro com veios de madeira pixelados e borda chanfrada
-  drawIsoPrism(buf, 22, 29, 13, 15, 3, oak, {
-    woodGrainTop: true,
-    woodColor: '#cfa56e',
-  });
+  // --- Tampo Largo de Carvalho Claro com Veios de Madeira e Borda Chanfrada Clara ---
+  drawIsoPrism(
+    buf,
+    24,
+    31,
+    16,
+    18,
+    3,
+    {
+      top: '#eac896',
+      left: '#d4a66a',
+      right: '#a67942',
+      lt: '#fff1d6',
+    },
+    {
+      woodGrainTop: true,
+      woodColor: '#d1a368',
+    },
+  );
+  // Chanfro duplo extra claro na quina frontal do tampo
+  drawIsoLine(buf, 23, 28, 15, 'left-up', '#fffbeb');
+  drawIsoLine(buf, 24, 28, 17, 'right-up', '#fde68a');
 
-  // Suportes articulados dos 2 monitores
-  buf.rect(16, 20, 2, 4, '#334155');
-  buf.rect(26, 18, 2, 4, '#334155');
-  buf.hline(15, 18, 24, '#64748b');
-  buf.hline(25, 28, 22, '#64748b');
+  // --- Pedestais Metálicos Articulados para os 2 Monitores Widescreen ---
+  buf.rect(17, 21, 2, 4, '#475569');
+  buf.hline(15, 19, 25, '#94a3b8');
+  buf.rect(29, 18, 2, 4, '#475569');
+  buf.hline(27, 31, 22, '#94a3b8');
 
-  // Monitor 1 (Esquerdo - inclinado)
-  buf.rect(10, 11, 13, 10, '#1e293b');
-  buf.hline(10, 22, 11, '#64748b'); // topo iluminado da moldura
-  buf.vline(10, 11, 20, '#475569');
-  buf.rect(11, 12, 11, 8, '#0f172a'); // tela escura
-  buf.set(21, 20, '#22c55e'); // LED power verde
+  // --- Monitor 1 (Esquerdo Widescreen — Moldura Fina) ---
+  buf.rect(9, 11, 15, 11, '#1e293b');
+  buf.hline(9, 23, 11, '#94a3b8'); // chanfro superior metálico
+  buf.vline(9, 11, 21, '#64748b');
+  buf.rect(10, 12, 13, 9, '#090f1d'); // display IPS alta densidade
+  buf.hline(10, 22, 12, '#1e3a8a'); // barra de título da IDE
+  buf.set(22, 21, '#22c55e'); // LED power
 
-  // Monitor 2 (Direito - inclinado em 2:1)
-  buf.rect(23, 9, 13, 10, '#1e293b');
-  buf.hline(23, 35, 9, '#64748b');
-  buf.vline(23, 9, 18, '#475569');
-  buf.rect(24, 10, 11, 8, '#0f172a');
-  buf.set(34, 18, '#22c55e');
+  // --- Monitor 2 (Direito Widescreen — Moldura Fina) ---
+  buf.rect(24, 8, 15, 11, '#1e293b');
+  buf.hline(24, 38, 8, '#94a3b8');
+  buf.vline(24, 8, 18, '#64748b');
+  buf.rect(25, 9, 13, 9, '#090f1d');
+  buf.hline(25, 37, 9, '#1e3a8a'); // barra de título do terminal/dashboard
+  buf.set(37, 18, '#22c55e');
 
-  // Linhas de código coloridas animadas conforme frame % 4
-  const f = frame % 4;
-  const codeColors = ['#22c55e', '#38bdf8', '#facc15', '#f472b6'];
-  // Monitor 1 código
-  buf.hline(12, 16 + (f % 3), 13, codeColors[f % 4]);
-  buf.hline(13, 19, 15, codeColors[(f + 1) % 4]);
-  buf.hline(12, 15 + ((f + 2) % 4), 17, codeColors[(f + 2) % 4]);
-  buf.hline(14, 20, 18, codeColors[(f + 3) % 4]);
-  // Monitor 2 código
-  buf.hline(25, 31, 11, codeColors[(f + 1) % 4]);
-  buf.hline(26, 29 + (f % 3), 13, codeColors[(f + 2) % 4]);
-  buf.hline(25, 33, 15, codeColors[(f + 3) % 4]);
-  buf.hline(26, 30 + ((f + 1) % 3), 16, codeColors[f % 4]);
+  // --- Código Colorido Animado em Alta Definição nos 2 Monitores ---
+  const codePalette = ['#22c55e', '#38bdf8', '#facc15', '#f472b6'];
+  // Monitor 1: Sidebar + indentação de código
+  buf.vline(11, 13, 20, '#334155');
+  buf.hline(13, 17 + (f % 3), 14, codePalette[f % 4]);
+  buf.hline(14, 20, 15, codePalette[(f + 1) % 4]);
+  buf.hline(14, 18 + ((f + 1) % 3), 17, codePalette[(f + 2) % 4]);
+  buf.hline(13, 21, 18, codePalette[(f + 3) % 4]);
+  buf.hline(15, 19, 19, '#a855f7');
 
-  // Teclado mecânico isométrico com pontinhos de keycaps
-  buf.rect(17, 23, 9, 3, '#334155');
-  for (let kx = 18; kx <= 25; kx += 2) {
-    buf.set(kx, 23, '#e2e8f0');
+  // Monitor 2: Código + mini-gráfico de telemetria à direita
+  buf.hline(26, 31 + (f % 2), 11, codePalette[(f + 1) % 4]);
+  buf.hline(27, 33, 12, codePalette[(f + 2) % 4]);
+  buf.hline(26, 30 + ((f + 2) % 3), 14, codePalette[(f + 3) % 4]);
+  buf.hline(27, 32, 15, codePalette[f % 4]);
+  // Mini barras de build no canto do Monitor 2
+  buf.vline(35, 14 - (f % 2), 16, '#22c55e');
+  buf.vline(36, 12, 16, '#38bdf8');
+
+  // --- Teclado Mecânico Custom com Underglow RGB e Keycaps ---
+  buf.rect(18, 23, 10, 4, '#1e293b');
+  buf.hline(18, 27, 26, rgbCol1); // borda inferior iluminada RGB
+  for (let kx = 19; kx <= 26; kx += 2) {
+    buf.set(kx, 23, '#f8fafc');
     buf.set(kx - 1, 24, '#cbd5e1');
   }
-  buf.set(20, 25, '#38bdf8'); // barra de espaço custom
+  buf.set(19, 23, '#ef4444'); // tecla ESC vermelha
+  buf.hline(21, 24, 25, '#38bdf8'); // spacebar ciano
 
-  // Mouse sobre mousepad azul
-  buf.rect(27, 22, 4, 3, '#1d4ed8');
-  buf.rect(28, 22, 2, 2, '#e2e8f0');
+  // --- Mousepad Deskmat Escuro + Mouse Sem Fio ---
+  buf.rect(29, 21, 5, 4, '#1e3a8a');
+  buf.hline(29, 33, 24, '#38bdf8');
+  buf.rect(30, 22, 2, 2, '#f8fafc');
+  buf.set(30, 22, '#22c55e'); // scroll LED
 
-  // Caneca de café vermelha na ponta esquerda
-  buf.rect(12, 22, 3, 3, '#ef4444');
-  buf.hline(12, 14, 22, '#fca5a5');
-  buf.set(13, 22, '#451a03'); // café
+  // --- Caneca de Café Vermelha na Esquerda ---
+  buf.rect(12, 22, 3, 4, '#ef4444');
+  buf.hline(12, 14, 22, '#fee2e2');
+  buf.set(13, 22, '#451a03'); // espresso escuro
   buf.set(11, 23, '#dc2626'); // alça
+  buf.set(11, 24, '#b91c1c');
 
   buf.outline();
 
-  // Fumaça pixelada subindo da caneca (desenhada após outline para ficar leve)
+  // Vapor fumegante subindo da caneca
   const sy = 20 - (f % 2);
-  buf.set(13, sy, 'rgba(255,255,255,0.75)');
-  buf.set(12 + (f % 2), sy - 2, 'rgba(255,255,255,0.5)');
+  buf.set(13, sy, 'rgba(255,255,255,0.85)');
+  buf.set(12 + (f % 2), sy - 2, 'rgba(255,255,255,0.6)');
+  buf.set(14 - (f % 2), sy - 3, 'rgba(255,255,255,0.4)');
 
   const finalBuf = rot === 1 ? buf.flipped() : buf;
   return {
@@ -385,66 +463,70 @@ function buildDevDesk(rot: 0 | 1, frame: number): PixFurniSprite {
 }
 
 // ============================================================================
-// 3. EXEC_CHAIR — Poltrona Executiva Mesh (1x1 tile, 32x38 px)
+// 3. EXEC_CHAIR — Poltrona Executiva Mesh (1x1 tile, 34x40 px)
+// Vista 3/4 traseira/lateral rica para quando o agente senta olhando para a bancada (NW):
+// coluna vertebral ergonômica preta/cromada ("spine"), suporte lombar, estofado azul royal,
+// braços curvos e base estrela de 5 rodízios bem nítida.
 // ============================================================================
 function buildExecChair(rot: 0 | 1): PixFurniSprite {
-  const buf = new PixelBuf(32, 38);
-  const ax = 16;
-  const ay = 34;
+  const buf = new PixelBuf(34, 40);
+  const ax = 17;
+  const ay = 36;
 
-  buf.shadow(16, 32, 10, 5, '#0f172a', 0.26);
+  buf.shadow(17, 33, 11, 5, '#0f172a', 0.28);
 
-  // Base estrela de 5 pontas preta + rodízios pixelados
-  buf.hline(9, 23, 31, '#1e293b');
-  buf.hline(12, 20, 30, '#334155');
-  buf.line(16, 30, 10, 33, '#1e293b');
-  buf.line(16, 30, 22, 33, '#1e293b');
-  buf.line(16, 30, 16, 34, '#334155');
-  // Rodízios
+  // --- Base Estrela de 5 Pontas Cromada/Preta com 5 Rodízios Duplos Nítidos ---
+  buf.hline(9, 25, 32, '#1e293b');
+  buf.hline(13, 21, 31, '#94a3b8'); // anel central cromado
+  buf.line(17, 31, 9, 34, '#334155');
+  buf.line(17, 31, 25, 34, '#334155');
+  buf.line(17, 31, 13, 36, '#1e293b');
+  buf.line(17, 31, 21, 36, '#1e293b');
+
   const casters: Array<[number, number]> = [
-    [9, 32],
-    [10, 34],
-    [16, 35],
-    [22, 34],
-    [23, 32],
+    [9, 34],
+    [13, 36],
+    [17, 35],
+    [21, 36],
+    [25, 34],
   ];
   for (const [cx, cy] of casters) {
-    buf.set(cx, cy, '#0f172a');
-    buf.set(cx, cy - 1, '#64748b');
+    buf.rect(cx - 1, cy, 2, 2, '#0f172a');
+    buf.set(cx, cy - 1, '#cbd5e1'); // garfo cromado do rodízio
   }
 
-  // Pistão pneumático cromado central
-  buf.vline(15, 25, 30, '#cbd5e1');
-  buf.vline(16, 25, 30, '#64748b');
-  buf.set(15, 27, '#f8fafc');
+  // Pistão pneumático telescópico cromado
+  buf.vline(16, 26, 31, '#e2e8f0');
+  buf.vline(17, 26, 31, '#475569');
+  buf.set(16, 28, '#ffffff');
 
-  // Assento anatômico azul royal com borda iluminada
+  // --- Assento Anatômico Azul Royal com Borda Frontal Chanfrada ---
   const royalBlue = {
     top: '#2563eb',
     left: '#1d4ed8',
     right: '#1e3a8a',
     lt: '#60a5fa',
   };
-  drawIsoPrism(buf, 16, 26, 7, 7, 3, royalBlue);
+  drawIsoPrism(buf, 17, 27, 8, 8, 3, royalBlue);
 
-  // Braço lateral direito em T (atrás)
-  buf.vline(22, 18, 23, '#334155');
-  buf.hline(20, 24, 18, '#475569');
-  buf.set(21, 18, '#94a3b8');
+  // Braço Curvo Direito (atrás)
+  buf.vline(24, 18, 24, '#1e293b');
+  buf.hline(21, 25, 18, '#334155');
+  buf.hline(22, 24, 17, '#94a3b8'); // almofada superior do braço
 
-  // Encosto alto ergonômico em Mesh com textura respirável (dithering)
+  // --- Encosto Alto Ergonômico em Mesh Azul Royal com Moldura Curva ---
   drawIsoPrism(
     buf,
+    14,
+    23,
+    4,
+    8,
     13,
-    22,
-    3,
-    7,
-    12,
     {
       top: '#3b82f6',
-      left: '#1e40af',
+      left: '#1d4ed8',
       right: '#172554',
-      lt: '#60a5fa',
+      lt: '#93c5fd',
     },
     {
       ditherLeft: '#1e3a8a',
@@ -452,18 +534,29 @@ function buildExecChair(rot: 0 | 1): PixFurniSprite {
     },
   );
 
-  // Apoio de cabeça acolchoado no topo
-  drawIsoPrism(buf, 13, 10, 3, 6, 3, {
+  // --- Coluna Vertebral Ergonômica Externa ("Exoskeleton Spine" Preta/Cromada) ---
+  // Suporte lombar horizontal abraçando o encosto
+  drawIsoLine(buf, 13, 18, 4, 'left-up', '#1e293b');
+  drawIsoLine(buf, 14, 18, 7, 'right-up', '#334155');
+  // Eixo central cromado/preto subindo da base do assento até o apoio de cabeça
+  buf.vline(13, 11, 24, '#0f172a');
+  buf.vline(14, 11, 24, '#cbd5e1');
+  buf.set(14, 15, '#ffffff'); // articulação cromada da coluna
+  buf.set(14, 19, '#ffffff');
+
+  // --- Apoio de Cabeça Anatômico no Topo ---
+  drawIsoPrism(buf, 14, 10, 4, 7, 3, {
     top: '#3b82f6',
     left: '#2563eb',
     right: '#1e3a8a',
     lt: '#93c5fd',
   });
 
-  // Braço lateral esquerdo em T (frente)
-  buf.vline(11, 20, 25, '#475569');
-  buf.hline(9, 13, 20, '#64748b');
-  buf.set(10, 20, '#cbd5e1');
+  // Braço Curvo Esquerdo (frente) com acabamento cromado
+  buf.vline(11, 20, 26, '#334155');
+  buf.vline(12, 21, 26, '#94a3b8');
+  buf.hline(9, 13, 20, '#1e293b');
+  buf.hline(10, 12, 19, '#e2e8f0');
 
   buf.outline();
   const finalBuf = rot === 1 ? buf.flipped() : buf;
@@ -475,88 +568,109 @@ function buildExecChair(rot: 0 | 1): PixFurniSprite {
 }
 
 // ============================================================================
-// 4. ESPRESSO_BAR — Máquina Espresso Barista (1x1 tile, 40x48 px)
+// 4. ESPRESSO_BAR — Máquina Espresso Barista + Moedor de Grãos (1x1 tile, 42x48 px)
+// Balcão de mogno com tampo de mármore/inox, Máquina Italiana Vermelha/Cromada,
+// Moedor de Café com cúpula transparente cheia de grãos marrons ao lado,
+// manômetro, 2 portafiltros, xícaras empilhadas e vapor animado.
 // ============================================================================
 function buildEspressoBar(rot: 0 | 1, frame: number): PixFurniSprite {
-  const buf = new PixelBuf(40, 48);
-  const ax = 20;
+  const buf = new PixelBuf(42, 48);
+  const ax = 21;
   const ay = 43;
 
-  buf.shadow(20, 38, 15, 7, '#0f172a', 0.28);
+  buf.shadow(21, 38, 16, 7, '#0f172a', 0.28);
 
-  // Balcão de mogno com prateleira frontal
+  // Balcão de mogno com prateleira frontal e friso dourado
   const mahogany = {
     top: '#92400e',
     left: '#78350f',
     right: '#451a03',
     lt: '#b45309',
   };
-  drawIsoPrism(buf, 20, 40, 11, 11, 14, mahogany);
+  drawIsoPrism(buf, 21, 40, 12, 12, 14, mahogany);
+  drawIsoLine(buf, 20, 33, 10, 'left-up', '#fbbf24');
+  drawIsoLine(buf, 21, 33, 10, 'right-up', '#d97706');
 
-  // Detalhe de prateleira frontal e friso dourado no balcão
-  drawIsoLine(buf, 19, 33, 9, 'left-up', '#fbbf24');
-  drawIsoLine(buf, 20, 33, 9, 'right-up', '#d97706');
-
-  // Tampo de mármore/inox polido
-  drawIsoPrism(buf, 20, 26, 12, 12, 2, {
-    top: '#f1f5f9',
+  // Tampo de mármore Carrara & Inox polido
+  drawIsoPrism(buf, 21, 26, 13, 13, 2, {
+    top: '#f8fafc',
     left: '#cbd5e1',
     right: '#94a3b8',
     lt: '#ffffff',
   });
 
+  // --- Moedor de Grãos de Café Barista (à esquerda sobre o balcão) ---
+  // Base metálica do moedor
+  drawIsoPrism(buf, 14, 23, 3, 3, 5, {
+    top: '#64748b',
+    left: '#475569',
+    right: '#1e293b',
+    lt: '#94a3b8',
+  });
+  // Cúpula transparente (Hopper) cheia de grãos de café torrados marrons
+  buf.rect(12, 13, 5, 5, '#bae6fd'); // vidro translúcido
+  buf.rect(13, 15, 3, 3, '#78350f'); // massa de grãos
+  buf.set(13, 15, '#b45309'); // grão claro
+  buf.set(15, 16, '#451a03'); // grão escuro
+  buf.set(14, 14, '#92400e');
+  buf.set(12, 14, '#ffffff'); // reflexo da cúpula
+  buf.hline(12, 16, 12, '#334155'); // tampa preta da cúpula
+
   // Bandeja pingadeira de inox na frente da cafeteira
-  drawIsoPrism(buf, 21, 23, 6, 6, 1, {
+  drawIsoPrism(buf, 23, 23, 6, 7, 1, {
     top: '#94a3b8',
     left: '#64748b',
     right: '#475569',
     lt: '#e2e8f0',
   });
 
-  // Cafeteira Italiana Vermelha & Cromada no topo
+  // --- Cafeteira Italiana Vermelha & Cromada Principal ---
   const crimson = {
     top: '#ef4444',
     left: '#dc2626',
     right: '#991b1b',
     lt: '#fca5a5',
   };
-  drawIsoPrism(buf, 19, 22, 8, 8, 10, crimson);
+  drawIsoPrism(buf, 22, 22, 7, 8, 10, crimson);
 
-  // Topo cromado aquecedor de xícaras
-  drawIsoPrism(buf, 19, 12, 8, 8, 2, {
+  // Topo cromado aquecedor de xícaras com grade protetora
+  drawIsoPrism(buf, 22, 12, 7, 8, 2, {
     top: '#e2e8f0',
     left: '#cbd5e1',
     right: '#94a3b8',
     lt: '#ffffff',
   });
 
-  // Manômetro circular 3x3 px na face frontal
-  buf.rect(15, 14, 3, 3, '#f8fafc');
-  buf.set(16, 15, '#ef4444'); // ponteiro
-  buf.set(15, 14, '#94a3b8');
+  // Manômetro circular 3x3 px com aro cromado e ponteiro vermelho
+  buf.rect(18, 14, 3, 3, '#f8fafc');
+  buf.set(19, 15, '#ef4444');
+  buf.set(18, 14, '#64748b');
 
   // 2 Cachimbos (Portafiltros) cromados com cabos pretos
-  buf.rect(19, 17, 2, 2, '#cbd5e1');
-  buf.hline(17, 18, 18, '#0f172a'); // cabo 1
-  buf.rect(23, 15, 2, 2, '#cbd5e1');
-  buf.hline(25, 26, 16, '#0f172a'); // cabo 2
+  buf.rect(22, 17, 2, 2, '#cbd5e1');
+  buf.hline(20, 21, 18, '#0f172a');
+  buf.rect(26, 15, 2, 2, '#cbd5e1');
+  buf.hline(28, 29, 16, '#0f172a');
 
-  // Xícaras brancas sob os cachimbos e empilhadas no aquecedor superior
-  buf.rect(19, 20, 2, 2, '#ffffff');
-  buf.rect(23, 18, 2, 2, '#ffffff');
-  // Xícaras no topo
-  buf.rect(16, 7, 2, 2, '#ffffff');
-  buf.rect(19, 6, 2, 2, '#e2e8f0');
-  buf.rect(22, 7, 2, 2, '#ffffff');
+  // Xícaras brancas de espresso servidas na bandeja + pilhas de xícaras no aquecedor
+  buf.rect(22, 20, 2, 2, '#ffffff');
+  buf.set(22, 20, '#78350f'); // crema do café
+  buf.rect(26, 18, 2, 2, '#ffffff');
+  // Pilha dupla de xícaras brancas no topo
+  buf.rect(19, 7, 2, 3, '#ffffff');
+  buf.set(19, 8, '#cbd5e1');
+  buf.rect(22, 6, 2, 3, '#f8fafc');
+  buf.set(22, 7, '#cbd5e1');
+  buf.rect(25, 7, 2, 2, '#ffffff');
 
   buf.outline();
 
-  // Puffs de vapor branco que sobem conforme frame % 4
+  // Puffs de vapor branco perfumado subindo conforme frame % 4
   const f = frame % 4;
-  const puffY = 6 - f;
-  buf.rect(20, puffY, 2, 2, 'rgba(255,255,255,0.85)');
-  buf.set(18 + (f % 2), puffY - 2, 'rgba(255,255,255,0.65)');
-  buf.set(22 - (f % 2), puffY - 3, 'rgba(255,255,255,0.45)');
+  const puffY = 5 - f;
+  buf.rect(22, puffY, 2, 2, 'rgba(255,255,255,0.88)');
+  buf.set(20 + (f % 2), puffY - 2, 'rgba(255,255,255,0.68)');
+  buf.set(24 - (f % 2), puffY - 3, 'rgba(255,255,255,0.48)');
 
   const finalBuf = rot === 1 ? buf.flipped() : buf;
   return {
@@ -568,6 +682,8 @@ function buildEspressoBar(rot: 0 | 1, frame: number): PixFurniSprite {
 
 // ============================================================================
 // 5. VENDING_DRINKS — Máquina PixCola Neon (1x1 tile, 40x56 px)
+// Letreiro superior arredondado vermelho/ciano estilo retrô com pixels escritos,
+// vitrine rica com fileiras de latinhas contrastadas e grade de ventilação na base.
 // ============================================================================
 function buildVendingDrinks(rot: 0 | 1, frame: number): PixFurniSprite {
   const buf = new PixelBuf(40, 56);
@@ -577,9 +693,9 @@ function buildVendingDrinks(rot: 0 | 1, frame: number): PixFurniSprite {
   buf.shadow(20, 45, 15, 7, '#0f172a', 0.3);
 
   // Pés niveladores
-  buf.rect(10, 42, 2, 2, '#1e293b');
-  buf.rect(19, 46, 2, 2, '#1e293b');
-  buf.rect(28, 42, 2, 2, '#1e293b');
+  buf.rect(10, 42, 2, 2, '#0f172a');
+  buf.rect(19, 46, 2, 2, '#0f172a');
+  buf.rect(28, 42, 2, 2, '#0f172a');
 
   // Gabinete alto azul/ciano
   const cabinet = {
@@ -588,57 +704,78 @@ function buildVendingDrinks(rot: 0 | 1, frame: number): PixFurniSprite {
     right: '#0369a1',
     lt: '#7dd3fc',
   };
-  drawIsoPrism(buf, 20, 47, 11, 11, 32, cabinet);
+  drawIsoPrism(buf, 20, 47, 11, 11, 31, cabinet);
 
-  // Letreiro luminoso Neon no topo
+  // --- Domo / Letreiro Superior Arredondado Vermelho/Ciano Retrô com Pixels Escritos ---
+  drawIsoPrism(buf, 20, 16, 10, 10, 4, {
+    top: '#f43f5e',
+    left: '#e11d48',
+    right: '#be123c',
+    lt: '#fda4af',
+  });
+  // Crista arredondada no topo do domo
+  drawIsoPrism(buf, 20, 12, 8, 8, 2, {
+    top: '#fb7185',
+    left: '#f43f5e',
+    right: '#e11d48',
+    lt: '#ffe4e6',
+  });
+  // Moldura ciano neon + pixels escritos "PIX" brilhando no letreiro
   const neonOn = frame % 2 === 0;
-  for (let dx = 1; dx < 9; dx++) {
-    const x = 20 + dx;
-    const y = 18 - Math.floor(dx / 2);
-    buf.vline(x, y, y + 3, neonOn ? '#fde047' : '#38bdf8');
-    buf.set(x, y + 1, '#ffffff');
-  }
+  drawIsoLine(buf, 20, 16, 9, 'right-up', '#38bdf8');
+  drawIsoLine(buf, 20, 12, 9, 'right-up', neonOn ? '#fde047' : '#7dd3fc');
+  // Letras pixeladas brancas/amarelas no letreiro vermelho
+  buf.set(22, 14, '#ffffff');
+  buf.set(22, 13, '#ffffff');
+  buf.set(24, 13, neonOn ? '#fde047' : '#ffffff');
+  buf.set(26, 12, '#ffffff');
+  buf.set(27, 11, '#ffffff');
 
-  // Vitrine de vidro iluminada na face direita (frontal-direita)
+  // --- Vitrine de Vidro Iluminada com Fileiras de Latinhas Bem Contrastadas ---
   for (let dx = 1; dx <= 6; dx++) {
     const x = 20 + dx;
-    const yTop = 23 - Math.floor(dx / 2);
-    buf.vline(x, yTop, yTop + 14, '#e0f2fe');
-    // Reflexo diagonal no vidro
-    if (dx === 2 || dx === 5) {
-      buf.set(x, yTop + 2, '#ffffff');
-      buf.set(x, yTop + 3, '#ffffff');
-    }
+    const yTop = 21 - Math.floor(dx / 2);
+    buf.vline(x, yTop, yTop + 14, '#082f49'); // fundo escuro contrastado da vitrine
+    buf.set(x, yTop, '#7dd3fc'); // iluminação LED de teto da vitrine
   }
 
-  // 3 Fileiras de latinhas coloridas (vermelha, azul, dourada, verde) dentro da vitrine
-  const canColors = ['#ef4444', '#3b82f6', '#eab308', '#22c55e'];
+  // 3 Fileiras de latinhas coloridas com anel prateado no topo
+  const canColors = ['#ef4444', '#38bdf8', '#facc15', '#22c55e'];
   for (let row = 0; row < 3; row++) {
-    const ry = 26 + row * 4;
-    // Prateleira interna
-    drawIsoLine(buf, 21, ry + 2, 6, 'right-up', '#475569');
+    const ry = 24 + row * 4;
+    drawIsoLine(buf, 21, ry + 2, 6, 'right-up', '#94a3b8'); // prateleira cromada
     for (let c = 0; c < 3; c++) {
       const cx = 21 + c * 2;
       const cy = ry - c;
       const col = canColors[(row + c) % canColors.length];
-      buf.vline(cx, cy, cy + 1, col);
-      buf.set(cx, cy, shade(col, 0.2));
+      buf.set(cx, cy, '#ffffff'); // lacre prateado da latinha
+      buf.set(cx, cy + 1, col); // corpo vibrante da lata
     }
   }
+  // Reflexo diagonal branco no vidro da vitrine
+  buf.set(22, 23, 'rgba(255,255,255,0.65)');
+  buf.set(23, 22, 'rgba(255,255,255,0.65)');
 
-  // Painel lateral de botões e leitor de moedas
-  buf.vline(28, 21, 33, '#0f172a');
-  buf.set(28, 22, '#22c55e'); // leitor verde
-  buf.set(28, 24, '#facc15'); // moeda
-  buf.set(28, 26, '#ef4444'); // botão 1
-  buf.set(28, 28, '#38bdf8'); // botão 2
+  // Painel lateral de seleção com visor digital e botões iluminados
+  buf.vline(28, 19, 32, '#0f172a');
+  buf.set(28, 20, '#22c55e'); // display preço
+  buf.set(28, 22, '#facc15'); // moedeiro
+  buf.set(28, 24, '#ef4444');
+  buf.set(28, 26, '#38bdf8');
+  buf.set(28, 28, '#22c55e');
 
-  // Abertura escura de retirada de latas na base
+  // Abertura escura de retirada de latas
   for (let dx = 2; dx <= 8; dx++) {
     const x = 20 + dx;
-    const y = 42 - Math.floor(dx / 2);
-    buf.vline(x, y - 3, y, '#0f172a');
-    buf.set(x, y - 3, '#334155');
+    const y = 40 - Math.floor(dx / 2);
+    buf.vline(x, y - 3, y, '#090d16');
+    buf.set(x, y - 3, '#475569');
+  }
+
+  // --- Grade de Ventilação na Base (Esquerda e Direita) ---
+  for (let gy = 41; gy <= 44; gy += 2) {
+    drawIsoLine(buf, 18, gy, 7, 'left-up', '#0c4a6e');
+    drawIsoLine(buf, 22, gy + 1, 6, 'right-up', '#082f49');
   }
 
   buf.outline();
@@ -660,12 +797,10 @@ function buildServerRack(rot: 0 | 1, frame: number): PixFurniSprite {
 
   buf.shadow(20, 47, 15, 7, '#020617', 0.32);
 
-  // Pés reforçados de datacenter
   buf.rect(10, 44, 2, 2, '#0f172a');
   buf.rect(19, 48, 2, 2, '#0f172a');
   buf.rect(28, 44, 2, 2, '#0f172a');
 
-  // Gabinete em aço grafite com porta lateral perfurada (dithering)
   drawIsoPrism(
     buf,
     20,
@@ -684,25 +819,21 @@ function buildServerRack(rot: 0 | 1, frame: number): PixFurniSprite {
     },
   );
 
-  // Exaustor circular superior no topo do rack
   buf.ellipse(20, 9, 4, 2, '#1e293b');
   buf.set(20, 9, '#38bdf8');
 
-  // 6 Gavetas de servidores blade na face frontal-direita com LEDs piscando a cada frame % 4
   const f = frame % 4;
   const ledColors = ['#22c55e', '#38bdf8', '#f59e0b', '#22c55e'];
 
   for (let b = 0; b < 6; b++) {
     const baseY = 20 + b * 5;
-    // Moldura escura da blade
     for (let dx = 1; dx <= 9; dx++) {
       const x = 20 + dx;
       const y = baseY - Math.floor(dx / 2);
       buf.vline(x, y, y + 3, '#0f172a');
-      buf.set(x, y, '#475569'); // trilho metálico
+      buf.set(x, y, '#475569');
     }
 
-    // LEDs de atividade (verde, ciano, âmbar) piscando em padrão dinâmico
     const c1 = ledColors[(b + f) % 4];
     const c2 = ledColors[(b * 2 + f + 1) % 4];
     const c3 = (b + f) % 3 === 0 ? '#ef4444' : '#22c55e';
@@ -738,15 +869,12 @@ function buildHoloScreen(rot: 0 | 1, frame: number): PixFurniSprite {
     lt: '#ffffff',
   };
 
-  // Base pedestal duplo em alumínio escovado com friso neon
   drawIsoPrism(buf, 24, 47, 10, 28, 3, alu);
   drawIsoLine(buf, 24, 45, 27, 'right-up', '#38bdf8');
 
-  // 2 Colunas verticais do pedestal
   drawIsoPrism(buf, 28, 43, 3, 4, 8, alu);
   drawIsoPrism(buf, 44, 35, 3, 4, 8, alu);
 
-  // Moldura panorâmica isométrica (wx=4, wy=32, h=24)
   drawIsoPrism(buf, 22, 39, 4, 32, 24, {
     top: '#64748b',
     left: '#334155',
@@ -754,25 +882,21 @@ function buildHoloScreen(rot: 0 | 1, frame: number): PixFurniSprite {
     lt: '#38bdf8',
   });
 
-  // Borda interna neon ciano ao redor da tela
   drawIsoLine(buf, 23, 16, 30, 'right-up', '#38bdf8');
   drawIsoLine(buf, 23, 37, 30, 'right-up', '#0284c7');
   buf.vline(23, 16, 37, '#38bdf8');
   buf.vline(52, 2, 23, '#38bdf8');
 
-  // Fundo azul-profundo de alta densidade do display
   for (let dx = 2; dx <= 29; dx++) {
     const x = 22 + dx;
     const yTop = 17 - Math.floor(dx / 2);
     const yBot = 36 - Math.floor(dx / 2);
     buf.vline(x, yTop, yBot, '#091024');
-    // Grade holográfica sutil
     if (dx % 5 === 0) {
       buf.vline(x, yTop + 1, yBot - 1, '#112240');
     }
   }
 
-  // Mini-gráfico de barras de commits em pixel art (verde/ciano/ouro)
   const f = frame % 4;
   const barColors = ['#22c55e', '#38bdf8', '#fbbf24', '#a855f7', '#22c55e', '#38bdf8'];
   const barHeights = [6, 10, 8, 13, 11, 15];
@@ -788,23 +912,19 @@ function buildHoloScreen(rot: 0 | 1, frame: number): PixFurniSprite {
     buf.set(bx, byBot - bh, '#ffffff');
   }
 
-  // Linhas de status de sprint no topo da tela
   drawIsoLine(buf, 26, 18, 12, 'right-up', '#38bdf8');
   drawIsoLine(buf, 26, 20, 8, 'right-up', '#94a3b8');
 
   buf.outline();
 
-  // Se rot === 1, espelha o gabinete primeiro e desenha o badge LIVE sem espelhar!
   const finalBuf = rot === 1 ? buf.flipped() : buf;
 
-  // Indicador LIVE piscando (sempre legível)
   const liveOn = frame % 2 === 0;
   const lx = rot === 1 ? 18 : 42;
   const ly = 11;
   finalBuf.rect(lx, ly, 9, 5, '#1e293b');
   finalBuf.set(lx + 1, ly + 2, liveOn ? '#ef4444' : '#7f1d1d');
   finalBuf.set(lx + 2, ly + 2, liveOn ? '#fca5a5' : '#991b1b');
-  // Mini-letras "LV"
   finalBuf.vline(lx + 4, ly + 1, ly + 3, '#ffffff');
   finalBuf.set(lx + 5, ly + 3, '#ffffff');
   finalBuf.vline(lx + 7, ly + 1, ly + 3, '#38bdf8');
@@ -833,7 +953,6 @@ function buildConfTable(rot: 0 | 1): PixFurniSprite {
     lt: '#92400e',
   };
 
-  // 2 Colunas de sustentação robustas com base dourada
   drawIsoPrism(buf, 22, 37, 6, 6, 12, darkMahogany);
   drawIsoPrism(buf, 38, 29, 6, 6, 12, darkMahogany);
   drawIsoLine(buf, 21, 36, 5, 'left-up', '#fbbf24');
@@ -841,7 +960,6 @@ function buildConfTable(rot: 0 | 1): PixFurniSprite {
   drawIsoLine(buf, 37, 28, 5, 'left-up', '#fbbf24');
   drawIsoLine(buf, 38, 28, 5, 'right-up', '#d97706');
 
-  // Tampo grande de mogno polido com veios de madeira (wx=14, wy=28, h=4)
   drawIsoPrism(
     buf,
     22,
@@ -861,7 +979,6 @@ function buildConfTable(rot: 0 | 1): PixFurniSprite {
     },
   );
 
-  // Faixa central executiva dourada/bordô ao longo da mesa
   for (let i = 4; i < 24; i++) {
     const rx = 16 + i;
     const ry = 21 - Math.floor(i / 2);
@@ -871,16 +988,12 @@ function buildConfTable(rot: 0 | 1): PixFurniSprite {
     buf.set(rx + 1, ry + 2, '#d97706');
   }
 
-  // Notebook aberto sobre a mesa
-  // Base do teclado
   buf.rect(21, 17, 5, 3, '#94a3b8');
   buf.hline(22, 25, 18, '#334155');
-  // Tela aberta iluminada
   buf.rect(20, 13, 5, 4, '#1e293b');
   buf.rect(21, 14, 3, 2, '#38bdf8');
   buf.set(21, 14, '#ffffff');
 
-  // Folhas de relatório pixeladas + gráfico impresso
   buf.rect(31, 12, 5, 3, '#f8fafc');
   buf.hline(32, 34, 13, '#64748b');
   buf.set(32, 14, '#ef4444');
@@ -915,23 +1028,19 @@ function buildArcadeCab(rot: 0 | 1, frame: number): PixFurniSprite {
     lt: '#c084fc',
   };
 
-  // Base inferior do gabinete arcade (wx=11, wy=11, h=18)
   drawIsoPrism(buf, 20, 48, 11, 11, 18, purpleCab);
 
-  // Faixa lateral neon rosa/ciano na face esquerda
   drawIsoLine(buf, 18, 37, 8, 'left-up', '#f472b6');
   drawIsoLine(buf, 18, 38, 8, 'left-up', '#38bdf8');
 
-  // Ficheiro iluminado embaixo (coin door)
   for (let dx = 3; dx <= 7; dx++) {
     const x = 20 + dx;
     const y = 43 - Math.floor(dx / 2);
     buf.vline(x, y - 5, y, '#0f172a');
   }
-  buf.set(24, 39, '#f97316'); // entrada de ficha laranja neon
+  buf.set(24, 39, '#f97316');
   buf.set(26, 38, '#f97316');
 
-  // Painel de controle saliente (control deck)
   drawIsoPrism(buf, 21, 31, 11, 12, 3, {
     top: '#1e1b4b',
     left: '#4c1d95',
@@ -939,43 +1048,34 @@ function buildArcadeCab(rot: 0 | 1, frame: number): PixFurniSprite {
     lt: '#f472b6',
   });
 
-  // Joystick com bolinha vermelha + botões arcade coloridos
-  buf.vline(21, 25, 27, '#cbd5e1'); // haste
-  buf.rect(20, 24, 2, 2, '#ef4444'); // bolinha vermelha
+  buf.vline(21, 25, 27, '#cbd5e1');
+  buf.rect(20, 24, 2, 2, '#ef4444');
   buf.set(20, 24, '#fca5a5');
-  // Botões
   buf.set(24, 26, '#facc15');
   buf.set(26, 25, '#22c55e');
   buf.set(25, 27, '#38bdf8');
 
-  // Corpo superior recuado com tela CRT inclinada
   drawIsoPrism(buf, 19, 27, 10, 10, 12, purpleCab);
 
-  // Tela CRT escura na face frontal-direita
   for (let dx = 1; dx <= 8; dx++) {
     const x = 19 + dx;
     const yTop = 17 - Math.floor(dx / 2);
     buf.vline(x, yTop, yTop + 7, '#090d16');
   }
 
-  // Nave / Alien pixelado que se move conforme frame % 4
   const f = frame % 4;
   const shipX = 21 + f;
   const shipY = 19 - Math.floor(f / 2);
-  // Alien rosa no topo da tela
   buf.rect(25 - (f % 2), 15, 2, 2, '#f472b6');
-  // Nave verde + tiro laser amarelo
   buf.rect(shipX, shipY, 2, 2, '#22c55e');
   buf.set(shipX + 1, shipY - 2, '#facc15');
 
-  // Marquee iluminado amarelo/rosa no topo
   drawIsoPrism(buf, 20, 15, 11, 10, 4, {
     top: '#f472b6',
     left: '#db2777',
     right: '#facc15',
     lt: '#fde047',
   });
-  // Detalhe luminoso no marquee
   drawIsoLine(buf, 21, 13, 8, 'right-up', frame % 2 === 0 ? '#ffffff' : '#f43f5e');
 
   buf.outline();
@@ -1004,9 +1104,7 @@ function buildPalmPlant(rot: 0 | 1): PixFurniSprite {
     lt: '#fb923c',
   };
 
-  // Vaso quadrado de terracota (base)
   drawIsoPrism(buf, 18, 42, 7, 7, 9, terra);
-  // Borda superior grossa do vaso
   drawIsoPrism(buf, 18, 33, 8, 8, 2, {
     top: '#f97316',
     left: '#ea580c',
@@ -1014,7 +1112,6 @@ function buildPalmPlant(rot: 0 | 1): PixFurniSprite {
     lt: '#fdba74',
   });
 
-  // Terra escura dentro do vaso
   drawIsoPrism(buf, 18, 31, 6, 6, 1, {
     top: '#451a03',
     left: '#451a03',
@@ -1022,7 +1119,6 @@ function buildPalmPlant(rot: 0 | 1): PixFurniSprite {
     lt: '#78350f',
   });
 
-  // Tronco anelado de palmeira imperial subindo do centro (x=17..19, y=17..30)
   for (let y = 17; y <= 30; y++) {
     const ring = y % 2 === 0;
     buf.set(17, y, ring ? '#b45309' : '#92400e');
@@ -1030,8 +1126,6 @@ function buildPalmPlant(rot: 0 | 1): PixFurniSprite {
     buf.set(19, y, ring ? '#78350f' : '#451a03');
   }
 
-  // Coroa exuberante de folhas de palmeira arqueadas em 4 tons de verde:
-  // #14532d (sombra profunda), #15803d (médio escuro), #22c55e (vivo), #86efac (brilho)
   const fronds: Array<{ dx: number; dy: number; len: number; droop: number; bright: boolean }> = [
     { dx: -1, dy: -0.5, len: 12, droop: 0.42, bright: false },
     { dx: 1, dy: -0.5, len: 12, droop: 0.42, bright: false },
@@ -1048,11 +1142,9 @@ function buildPalmPlant(rot: 0 | 1): PixFurniSprite {
       const px = Math.round(18 + f.dx * s);
       const py = Math.round(17 + f.dy * s + t * t * f.len * f.droop);
 
-      // Nervura central iluminada
       buf.set(px, py, f.bright ? '#86efac' : '#22c55e');
       buf.set(px, py - 1, f.bright ? '#22c55e' : '#15803d');
 
-      // Folíolos recortados pixel a pixel (alternados para efeito pinnate)
       if (s % 2 === 1 && s > 2) {
         buf.set(px, py + 1, '#15803d');
         buf.set(px, py + 2, '#14532d');
@@ -1062,7 +1154,6 @@ function buildPalmPlant(rot: 0 | 1): PixFurniSprite {
     }
   }
 
-  // Miolo da coroa
   buf.rect(17, 15, 3, 3, '#15803d');
   buf.set(18, 15, '#86efac');
 
@@ -1085,7 +1176,6 @@ function buildRugVip(rot: 0 | 1): PixFurniSprite {
   const rx = 30;
   const ry = 15;
 
-  // Sombra de contato rente ao chão sob as bordas do tapete
   for (let y = 0; y < buf.h; y++) {
     for (let x = 0; x < buf.w; x++) {
       const d = Math.abs(x - cx) / rx + Math.abs(y - cy) / ry;
@@ -1095,7 +1185,6 @@ function buildRugVip(rot: 0 | 1): PixFurniSprite {
     }
   }
 
-  // Tecido isométrico 2:1 com moldura geométrica real e medalhão central em dithering Bayer
   for (let y = 0; y < buf.h; y++) {
     for (let x = 0; x < buf.w; x++) {
       const dx = Math.abs(x - cx);
@@ -1103,7 +1192,6 @@ function buildRugVip(rot: 0 | 1): PixFurniSprite {
       const d = dx / rx + dy / ry;
 
       if (d > 1.0) {
-        // Franjas douradas (#fde68a) nas bordas externas do tapete
         if (d <= 1.08 && ((x + y) & 1) === 0) {
           buf.set(x, y, '#fde68a');
         }
@@ -1111,27 +1199,22 @@ function buildRugVip(rot: 0 | 1): PixFurniSprite {
       }
 
       const bayer = ((x & 1) + ((y & 1) << 1)) % 2 === 0;
-      let col = '#881337'; // bordô imperial profundo
+      let col = '#881337';
 
       if (d > 0.9) {
-        // Borda externa azul-marinho/ouro
         col = '#1e1b4b';
       } else if (d > 0.8) {
-        // Moldura geométrica dourada real
         col = ((x + y) % 3 === 0) ? '#fde68a' : '#d97706';
       } else if (d > 0.72) {
         col = '#4c0519';
       } else if (d > 0.38) {
-        // Campo principal bordô com padrão persa em dithering
         col = bayer ? '#9f1239' : '#881337';
         if ((dx + dy * 2) % 6 === 0) {
           col = '#be123c';
         }
       } else if (d > 0.24) {
-        // Anel do medalhão central em ouro
         col = bayer ? '#fbbf24' : '#d97706';
       } else {
-        // Coração do medalhão real
         col = bayer ? '#fde68a' : '#be123c';
       }
 
@@ -1139,7 +1222,6 @@ function buildRugVip(rot: 0 | 1): PixFurniSprite {
     }
   }
 
-  // Sem buf.outline() no tapete para que fique perfeitamente rente ao chão!
   const finalBuf = rot === 1 ? buf.flipped() : buf;
   return {
     canvas: bufToCanvas(finalBuf),
@@ -1155,7 +1237,6 @@ function buildRugVip(rot: 0 | 1): PixFurniSprite {
 const spriteCache = new Map<string, PixFurniSprite>();
 
 export function getPixFurniSprite(type: string, rot: 0 | 1, frame: number): PixFurniSprite {
-  // Normaliza o frame apenas para mobis animados (0..3) para maximizar reuso de cache
   const isAnimated =
     type === 'dev_desk' ||
     type === 'espresso_bar' ||

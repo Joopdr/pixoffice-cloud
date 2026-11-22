@@ -2748,7 +2748,10 @@ canvas[data-floor-style="sunset_lounge"] {
   user-select: none;
 }
 
-body.is-pixhotel-iso .xp-balloon-layer {
+body.is-pixhotel-iso .xp-balloon-layer,
+body.is-pixhotel-iso .xp-speech-balloon,
+body.is-pixhotel-iso #xp-auto-summon-banner,
+body.is-pixhotel-iso #xp-building-panel {
   display: none !important;
 }
 

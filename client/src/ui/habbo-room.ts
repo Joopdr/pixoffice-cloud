@@ -8,8 +8,10 @@ import type { OfficeStore } from '../net/store';
 import {
   getIsoCursorCanvas,
   getIsoFloorTileCanvas,
+  getIsoMezzanineFrontWallCanvas,
   getIsoStairCanvas,
   getIsoWallCanvas,
+  getIsoWallCornerPillarCanvas,
   type IsoFloorTileKind,
   type IsoWallDecor,
 } from './habbo-pix-surfaces';
@@ -221,7 +223,7 @@ const GRID_W = 14;
 const GRID_H = 14;
 const TILE_W = 64;
 const TILE_H = 32;
-const LEVEL_H = 24;
+const LEVEL_H = 26;
 
 function getCatalogMeta(type: FurniType): FurniCatalogMeta {
   return PIX_FURNI_CATALOG.find((c) => c.type === type) || PIX_FURNI_CATALOG[0];
@@ -1118,6 +1120,14 @@ export class HabboRoomController {
 
   private bindEvents(): void {
     window.addEventListener('resize', () => this.resize());
+    window.addEventListener('pixhotel:agent-speak', ((ev: CustomEvent<{ agentId?: string; text?: string }>) => {
+      if (!this.active || !ev.detail?.text) return;
+      const raw = (ev.detail.agentId || '').toLowerCase();
+      const matched = this.avatars.find(
+        (a) => !a.isFounder && (a.id.toLowerCase().includes(raw) || a.name.toLowerCase().includes(raw)),
+      );
+      this.pushBubble(matched ? matched.id : 'agent-01-dev', ev.detail.text, false);
+    }) as EventListener);
 
     this.canvas.addEventListener('pointerdown', (e) => {
       this.isDraggingCam = true;
@@ -1445,7 +1455,19 @@ export class HabboRoomController {
   }
 
   private drawCutawayWalls(ctx: CanvasRenderingContext2D, S: number, animFrame: number): void {
-    // 1. Parede Traseira Direita (gy = 0, gx = 0..GRID_W - 1)
+    const pillar = getIsoWallCornerPillarCanvas(56);
+
+    // 1. Pilar de quina traseiro em (gx = 0, gy = 0, gz = 1)
+    const backCorner = this.isoToScreen(0, 0, 1);
+    ctx.drawImage(
+      pillar,
+      Math.round(backCorner.x - 8 * S),
+      Math.round(backCorner.y - 62 * S),
+      Math.round(pillar.width * S),
+      Math.round(pillar.height * S),
+    );
+
+    // 2. Parede Traseira Direita (gy = 0, gx = 0..GRID_W - 1) — 100% contínua (16px exatos)
     for (let gx = 0; gx < GRID_W; gx++) {
       const gz = this.getTileLevel(gx, 0);
       const bLeft = this.isoToScreen(gx, 0, gz);
@@ -1457,17 +1479,26 @@ export class HabboRoomController {
       const spr = getIsoWallCanvas('back', decor, gx, animFrame);
       ctx.drawImage(
         spr,
-        Math.round(bLeft.x - 1 * S),
+        Math.round(bLeft.x),
         Math.round(bLeft.y - 61 * S),
         Math.round(spr.width * S),
         Math.round(spr.height * S),
       );
     }
 
-    // 2. Parede Esquerda (gx = 0, gy = 0..GRID_H - 1)
+    // Pilar de extremidade direita em (GRID_W, 0, 1)
+    const rightEnd = this.isoToScreen(GRID_W, 0, 1);
+    ctx.drawImage(
+      pillar,
+      Math.round(rightEnd.x - 8 * S),
+      Math.round(rightEnd.y - 62 * S),
+      Math.round(pillar.width * S),
+      Math.round(pillar.height * S),
+    );
+
+    // 3. Parede Esquerda (gx = 0, gy = 0..GRID_H - 1) — 100% contínua incluindo gy = 4!
     for (let gy = 0; gy < GRID_H; gy++) {
-      if (gy === 4) continue;
-      const gz = this.getTileLevel(0, gy);
+      const gz = gy <= 3 ? 1 : 0;
       const bTop = this.isoToScreen(0, gy, gz);
       const bBot = this.isoToScreen(0, gy + 1, gz);
       let decor: IsoWallDecor = 'plain';
@@ -1479,29 +1510,75 @@ export class HabboRoomController {
       const spr = getIsoWallCanvas('left', decor, gy, animFrame);
       ctx.drawImage(
         spr,
-        Math.round(bBot.x - 1 * S),
+        Math.round(bBot.x),
         Math.round(bTop.y - 61 * S),
         Math.round(spr.width * S),
         Math.round(spr.height * S),
       );
+
+      // Pilar de transição do desnível na parede esquerda entre gy = 3 e gy = 4
+      if (gy === 3) {
+        const dropCorner = this.isoToScreen(0, 4, 1);
+        ctx.drawImage(
+          pillar,
+          Math.round(dropCorner.x - 8 * S),
+          Math.round(dropCorner.y - 62 * S),
+          Math.round(pillar.width * S),
+          Math.round(pillar.height * S),
+        );
+      }
     }
+
+    // Pilar de extremidade esquerda em (0, GRID_H, 0)
+    const leftEnd = this.isoToScreen(0, GRID_H, 0);
+    ctx.drawImage(
+      pillar,
+      Math.round(leftEnd.x - 8 * S),
+      Math.round(leftEnd.y - 62 * S),
+      Math.round(pillar.width * S),
+      Math.round(pillar.height * S),
+    );
   }
 
   private drawIsometricFloor(ctx: CanvasRenderingContext2D, S: number): void {
     for (let gy = 0; gy < GRID_H; gy++) {
       for (let gx = 0; gx < GRID_W; gx++) {
-        // Mureta divisória do Mezanino VIP em gy=4 (exceto escada gx 4..6)
+        // Mureta Frontal do Mezanino + Balaustrada VIP sobre o piso inferior em gy=4 (zero buraco preto!)
         if (gy === 4 && (gx < 4 || gx > 6)) {
-          const topTile = getIsoFloorTileCanvas('vip', gx + gy);
-          const pTop = this.isoToScreen(gx, 3, 1);
-          // O ladrilho de gy=3 já desenha a laje de mogno com friso dourado
-          void topTile;
-          void pTop;
+          const floorSpr = getIsoFloorTileCanvas('oak', gx * 3 + 4);
+          const floorTop = this.isoToScreen(gx, 4, 0);
+          ctx.drawImage(
+            floorSpr,
+            Math.round(floorTop.x - 17 * S),
+            Math.round(floorTop.y - 1 * S),
+            Math.round(floorSpr.width * S),
+            Math.round(floorSpr.height * S),
+          );
+
+          const mezzWall = getIsoMezzanineFrontWallCanvas(gx);
+          const pLeft = this.isoToScreen(gx, 4, 1);
+          ctx.drawImage(
+            mezzWall,
+            Math.round(pLeft.x - 1 * S),
+            Math.round(pLeft.y - 8 * S),
+            Math.round(mezzWall.width * S),
+            Math.round(mezzWall.height * S),
+          );
           continue;
         }
 
         // Escadinha isométrica 2:1 em PixelBuf (gy=4, gx=4..6)
         if (gy === 4 && gx >= 4 && gx <= 6) {
+          const floorSpr = getIsoFloorTileCanvas('oak', gx * 3 + 4);
+          const floorTop = this.isoToScreen(gx, 4, 0);
+          ctx.drawImage(
+            floorSpr,
+            Math.round(floorTop.x - 17 * S),
+            Math.round(floorTop.y - 1 * S),
+            Math.round(floorSpr.width * S),
+            Math.round(floorSpr.height * S),
+          );
+
           const stairSpr = getIsoStairCanvas();
           const top = this.isoToScreen(gx, gy, 0.72);
           ctx.drawImage(

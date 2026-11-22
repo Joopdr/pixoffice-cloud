@@ -1037,6 +1037,9 @@ export class AgentVoiceAndChat {
   /** Exibe um balão de conversa paralela simultânea (sem disputar o canal de voz; clique em 🎧 Ouvir para sintonizar!). */
   public showParallelBalloon(agentId: string, text: string, badgeLabel = '💬 papo', tuneTurns?: DialogueTurn[]) {
     const profile = this.resolveProfile(agentId);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('pixhotel:agent-speak', { detail: { agentId: profile.key || profile.agentId || agentId, text } }));
+    }
     const key = profile.agentId || agentId;
     const oldTimer = this.balloonTimers.get(key);
     if (oldTimer) clearTimeout(oldTimer);
