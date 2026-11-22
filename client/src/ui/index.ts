@@ -10,6 +10,7 @@ import '@fontsource/pixelify-sans/700.css';
 import './styles.css';
 import './xp-luna-theme.css';
 import { AgentVoiceAndChat } from './xp-voice';
+import { HabboRoomController } from './habbo-room';
 
 import type { OfficeStore } from '../net/store';
 import type { Selection, WorldApi } from '../world/api';
@@ -315,6 +316,7 @@ export function createUI(root: HTMLElement, store: OfficeStore, world: WorldApi,
   if (scene) components.push(scene);
   root.append(worldSocial.el);
   components.push(worldSocial);
+  new HabboRoomController(root, store);
 
   // ---------------------------------------------------------------- renderização agrupada por quadro
   let rafId = 0;
