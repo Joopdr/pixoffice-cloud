@@ -6,9 +6,30 @@
 // e Balões de Chat em Cascata no teto integrados à IA real (/api/phone/message) e Voz Neural.
 
 import type { OfficeStore } from '../net/store';
-import { AgentVoiceAndChat } from './xp-voice';
-import { openMeetingModal } from './meeting-modal';
-import { openPhoneModal } from './phone-modal';
+
+function triggerMeetingModal(): void {
+  const btn = document.getElementById('xp-top-btn-meeting') as HTMLButtonElement | null;
+  if (btn) btn.click();
+}
+
+function triggerPhoneModal(): void {
+  const btn = document.getElementById('xp-top-btn-phone') as HTMLButtonElement | null;
+  if (btn) btn.click();
+}
+
+function speakNeuralLine(agentId: string, text: string): void {
+  const female = /user|art|ux/i.test(agentId);
+  const voice = female ? 'pt-BR-FranciscaNeural' : 'pt-BR-AntonioNeural';
+  const audio = new Audio(`/api/tts?voice=${encodeURIComponent(voice)}&text=${encodeURIComponent(text.slice(0, 220))}`);
+  audio.volume = 0.85;
+  audio.play().catch(() => {
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(text.slice(0, 220));
+      u.lang = 'pt-BR';
+      window.speechSynthesis.speak(u);
+    }
+  });
+}
 
 export type FurniType =
   | 'club_sofa'
@@ -795,11 +816,11 @@ export class HabboRoomController {
     });
 
     dock.querySelector('#pixhotel-btn-3d')?.addEventListener('click', () => {
-      openMeetingModal(this.store);
+      triggerMeetingModal();
     });
 
     dock.querySelector('#pixhotel-btn-phone')?.addEventListener('click', () => {
-      openPhoneModal();
+      triggerPhoneModal();
     });
 
     // Presets de movimentação da equipe no quarto
@@ -840,7 +861,7 @@ export class HabboRoomController {
         if (data?.replyMessage?.text) {
           const replyAuthorId = data.replyMessage.authorId || targetAv.id;
           this.pushBubble(replyAuthorId, data.replyMessage.text, true);
-          AgentVoiceAndChat.speakText(replyAuthorId, data.replyMessage.text);
+          speakNeuralLine(replyAuthorId, data.replyMessage.text);
         }
       } catch {
         this.pushBubble(targetAv.id, 'Recebido! Estou processando sua solicitação aqui na bancada.', false);
@@ -1016,7 +1037,7 @@ export class HabboRoomController {
         this.cornerCardEl.querySelector('#pixhotel-act-use')?.addEventListener('click', () => {
           f.state = f.state ? 0 : 1;
           this.saveFurni();
-          if (f.type === 'holo_screen') openMeetingModal(this.store);
+          if (f.type === 'holo_screen') triggerMeetingModal();
         });
         this.cornerCardEl.querySelector('#pixhotel-act-del')?.addEventListener('click', () => {
           this.furni = this.furni.filter((item) => item.id !== f.id);
@@ -1045,7 +1066,7 @@ export class HabboRoomController {
       this.chatInputEl?.focus();
     });
     this.cornerCardEl.querySelector('#pixhotel-act-call')?.addEventListener('click', () => {
-      openPhoneModal();
+      triggerPhoneModal();
     });
   }
 
@@ -1169,7 +1190,7 @@ export class HabboRoomController {
       const meta = getCatalogMeta(clickedFurni.type);
       if (!meta.canSit && !meta.isWalkable) {
         if (clickedFurni.type === 'holo_screen') {
-          openMeetingModal(this.store);
+          triggerMeetingModal();
         }
         return;
       }
