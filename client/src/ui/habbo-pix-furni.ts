@@ -4,6 +4,7 @@
 
 import { mix, ramp, shade } from '../art/core/color';
 import { PixelBuf } from '../art/core/pixbuf';
+import { PIX_PALETTE } from './habbo-pix-palette';
 
 export interface PixFurniSprite {
   canvas: HTMLCanvasElement;
@@ -1231,6 +1232,197 @@ function buildRugVip(rot: 0 | 1): PixFurniSprite {
 }
 
 // ============================================================================
+// 12. FLOOR_LAMP — Luminária de Pé Retrô Dourada (1x1 tile, 30x54 px)
+// ============================================================================
+function buildFloorLamp(rot: 0 | 1, frame: number): PixFurniSprite {
+  const buf = new PixelBuf(30, 54);
+  const cx = 15;
+  const ay = 47;
+
+  // Sombra 2:1 no piso
+  buf.shadow(cx, ay - 2, 8, 4, PIX_PALETTE.outline.indigo, 0.3);
+
+  // Base circular de latão em elipse 2:1
+  buf.ellipse(cx, ay - 3, 6, 3, PIX_PALETTE.gold.dk);
+  buf.ellipse(cx, ay - 4, 5, 2.5, PIX_PALETTE.gold.mid);
+  buf.hline(cx - 3, cx + 1, ay - 5, PIX_PALETTE.gold.hi);
+
+  // Haste fina de latão com brilho na face esquerda (luz topo-esquerda)
+  buf.vline(cx - 1, 18, ay - 5, PIX_PALETTE.gold.lt);
+  buf.vline(cx, 18, ay - 5, PIX_PALETTE.gold.mid);
+  buf.vline(cx + 1, 18, ay - 5, PIX_PALETTE.gold.dk);
+  // Anel ornamental no meio da haste
+  buf.hline(cx - 2, cx + 2, 31, PIX_PALETTE.gold.lt);
+  buf.hline(cx - 1, cx + 1, 32, PIX_PALETTE.gold.dk);
+
+  // Cúpula plissada cônica creme/âmbar emitindo luz quente
+  const shimmer = frame % 2 === 0 ? PIX_PALETTE.warmLight.core : PIX_PALETTE.warmLight.mid;
+  for (let row = 0; row < 12; row++) {
+    const y = 7 + row;
+    const hw = Math.round(4 + row * 0.45);
+    for (let x = cx - hw; x <= cx + hw; x++) {
+      const isPleat = (x - cx) % 3 === 0;
+      const isLeftLit = x < cx;
+      let col: string = isLeftLit ? PIX_PALETTE.warmLight.core : PIX_PALETTE.warmLight.mid;
+      if (isPleat) col = isLeftLit ? PIX_PALETTE.warmLight.mid : PIX_PALETTE.gold.dk;
+      if (row === 0 || row === 11) col = PIX_PALETTE.gold.mid;
+      buf.set(x, y, col);
+    }
+  }
+  // Brilho interno sob a cúpula (lâmpada acesa)
+  buf.ellipse(cx, 19, 6, 2.2, shimmer);
+  buf.hline(cx - 3, cx + 3, 19, '#ffffff');
+  // Remate dourado no topo da cúpula
+  buf.rect(cx - 1, 5, 3, 2, PIX_PALETTE.gold.lt);
+  buf.set(cx, 4, PIX_PALETTE.gold.hi);
+
+  buf.outline();
+  const finalBuf = rot === 1 ? buf.flipped() : buf;
+  return {
+    canvas: bufToCanvas(finalBuf),
+    anchorX: cx,
+    anchorY: ay,
+  };
+}
+
+// ============================================================================
+// 13. BOOKSHELF_PRO — Estante Mogno com Livros & Troféu Pixel (1x1 tile, 44x58 px)
+// ============================================================================
+function buildBookshelfPro(rot: 0 | 1): PixFurniSprite {
+  const buf = new PixelBuf(44, 58);
+  const ax = 22;
+  const ay = 52;
+
+  buf.shadow(22, 46, 15, 7, PIX_PALETTE.outline.indigo, 0.3);
+
+  const wood = {
+    top: PIX_PALETTE.mahogany.lt,
+    left: PIX_PALETTE.mahogany.mid,
+    right: PIX_PALETTE.mahogany.dk,
+    lt: PIX_PALETTE.mahogany.hi,
+  };
+
+  // Corpo da estante isométrica (wx=13, wy=13, h=34)
+  drawIsoPrism(buf, 22, 48, 13, 13, 34, wood, { woodGrainTop: true, woodColor: PIX_PALETTE.mahogany.dk });
+
+  // Nichos internos sombreados na face direita (3 prateleiras)
+  const bookColors = [
+    PIX_PALETTE.vipCrimson.mid,
+    PIX_PALETTE.cyan.mid,
+    PIX_PALETTE.gold.mid,
+    PIX_PALETTE.foliage.mid,
+    PIX_PALETTE.neonPink.mid,
+    PIX_PALETTE.steel.lt,
+  ];
+  for (let shelf = 0; shelf < 3; shelf++) {
+    const baseY = 23 + shelf * 9;
+    // Fundo escuro da prateleira seguindo 2:1
+    for (let dx = 1; dx < 12; dx++) {
+      const x = 22 + dx;
+      const yb = baseY - Math.floor(dx / 2);
+      for (let h = 0; h < 6; h++) {
+        buf.set(x, yb - h, PIX_PALETTE.outline.espresso);
+      }
+      // Lombadas de livros coloridos variados
+      if (dx % 2 === 1 && dx < 11) {
+        const bCol = bookColors[(shelf * 5 + dx) % bookColors.length];
+        const bHi = shade(bCol, 0.14);
+        const bh = 4 + ((shelf + dx) % 2);
+        for (let h = 0; h < bh; h++) {
+          buf.set(x, yb - h, h === bh - 1 ? bHi : bCol);
+          buf.set(x + 1, yb - h, shade(bCol, -0.15));
+        }
+      }
+    }
+    // Borda dourada da prateleira
+    drawIsoLine(buf, 22, baseY + 1, 12, 'right-up', PIX_PALETTE.gold.dk);
+  }
+
+  // Troféu Pixel Dourado no topo da estante
+  buf.rect(18, 6, 4, 4, PIX_PALETTE.gold.lt);
+  buf.set(18, 6, PIX_PALETTE.gold.hi);
+  buf.set(17, 7, PIX_PALETTE.gold.mid);
+  buf.set(22, 7, PIX_PALETTE.gold.mid);
+  buf.rect(19, 10, 2, 2, PIX_PALETTE.gold.dk);
+  buf.rect(18, 12, 4, 2, PIX_PALETTE.mahogany.dd);
+
+  // Ramo pendente de planta no canto esquerdo do topo
+  buf.set(12, 14, PIX_PALETTE.foliage.lt);
+  buf.set(11, 15, PIX_PALETTE.foliage.mid);
+  buf.set(12, 16, PIX_PALETTE.foliage.dk);
+  buf.set(11, 17, PIX_PALETTE.foliage.hi);
+
+  buf.outline();
+  const finalBuf = rot === 1 ? buf.flipped() : buf;
+  return {
+    canvas: bufToCanvas(finalBuf),
+    anchorX: rot === 1 ? buf.w - ax : ax,
+    anchorY: ay,
+  };
+}
+
+// ============================================================================
+// 14. WATER_COOLER — Bebedouro Corporativo com Galão Borbulhando (34x52 px)
+// ============================================================================
+function buildWaterCooler(rot: 0 | 1, frame: number): PixFurniSprite {
+  const buf = new PixelBuf(34, 52);
+  const ax = 17;
+  const ay = 47;
+
+  buf.shadow(17, 43, 10, 5, PIX_PALETTE.outline.indigo, 0.28);
+
+  const whiteSteel = {
+    top: PIX_PALETTE.steel.hi,
+    left: PIX_PALETTE.steel.lt,
+    right: PIX_PALETTE.steel.mid,
+    lt: '#ffffff',
+  };
+
+  // Gabinete branco/aço (wx=9, wy=9, h=22)
+  drawIsoPrism(buf, 17, 44, 9, 9, 22, whiteSteel);
+
+  // Nicho escuro das torneiras (vermelha água quente + azul água fria)
+  for (let dx = 2; dx <= 6; dx++) {
+    const x = 17 + dx;
+    const yb = 31 - Math.floor(dx / 2);
+    for (let y = yb - 5; y <= yb; y++) {
+      buf.set(x, y, PIX_PALETTE.steel.deep);
+    }
+  }
+  buf.set(19, 26, PIX_PALETTE.vipCrimson.lt); // torneira quente
+  buf.set(22, 25, PIX_PALETTE.cyan.mid); // torneira gelada
+
+  // Suporte lateral de copinhos descartáveis
+  buf.rect(10, 26, 3, 7, PIX_PALETTE.steel.hi);
+  buf.vline(12, 26, 32, PIX_PALETTE.steel.dk);
+
+  // Galão translúcido de água mineral azul-ciano no topo (cilindro pixel art)
+  for (let y = 7; y <= 19; y++) {
+    for (let x = 13; x <= 21; x++) {
+      let col: string = x < 16 ? PIX_PALETTE.cyan.lt : x < 19 ? PIX_PALETTE.cyan.mid : PIX_PALETTE.cyan.dk;
+      if (y < 10) col = PIX_PALETTE.cyan.hi; // parte superior com ar/reflexo
+      if (x === 14 && y >= 9 && y <= 17) col = '#ffffff'; // reflexo especular vertical
+      buf.set(x, y, col);
+    }
+  }
+  // Anéis estruturais do galão
+  buf.hline(13, 21, 12, PIX_PALETTE.cyan.hi);
+  buf.hline(13, 21, 16, PIX_PALETTE.cyan.hi);
+  // Bolhinha de ar subindo animada por frame
+  const bubbleY = 18 - (frame % 4) * 3;
+  buf.set(17, bubbleY, '#ffffff');
+  buf.set(18, bubbleY - 1, PIX_PALETTE.cyan.hi);
+
+  buf.outline();
+  const finalBuf = rot === 1 ? buf.flipped() : buf;
+  return {
+    canvas: bufToCanvas(finalBuf),
+    anchorX: rot === 1 ? buf.w - ax : ax,
+    anchorY: ay,
+  };
+}
+
+// ============================================================================
 // CACHE & EXPORTAÇÃO PRINCIPAL
 // ============================================================================
 
@@ -1243,7 +1435,9 @@ export function getPixFurniSprite(type: string, rot: 0 | 1, frame: number): PixF
     type === 'vending_drinks' ||
     type === 'server_rack' ||
     type === 'holo_screen' ||
-    type === 'arcade_cab';
+    type === 'arcade_cab' ||
+    type === 'floor_lamp' ||
+    type === 'water_cooler';
   const normFrame = isAnimated ? ((Math.floor(frame) % 4) + 4) % 4 : 0;
   const key = `${type}|${rot}|${normFrame}`;
 
@@ -1284,6 +1478,15 @@ export function getPixFurniSprite(type: string, rot: 0 | 1, frame: number): PixF
       break;
     case 'rug_vip':
       sprite = buildRugVip(rot);
+      break;
+    case 'floor_lamp':
+      sprite = buildFloorLamp(rot, normFrame);
+      break;
+    case 'bookshelf_pro':
+      sprite = buildBookshelfPro(rot);
+      break;
+    case 'water_cooler':
+      sprite = buildWaterCooler(rot, normFrame);
       break;
     default:
       sprite = buildClubSofa(rot);

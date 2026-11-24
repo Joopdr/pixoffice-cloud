@@ -17,6 +17,13 @@ import {
 } from './habbo-pix-surfaces';
 import { getPixFurniSprite } from './habbo-pix-furni';
 import {
+  drawBaseboardAO,
+  drawPixelGlow,
+  drawWindowLightBeam,
+  getAsepriteOverride,
+  preloadAsepriteManifest,
+} from './habbo-pix-palette';
+import {
   getHabboAvatarPortrait,
   getHabboAvatarSprite,
   type HabboAccessory,
@@ -60,7 +67,10 @@ export type FurniType =
   | 'palm_plant'
   | 'arcade_cab'
   | 'conf_table'
-  | 'rug_vip';
+  | 'rug_vip'
+  | 'floor_lamp'
+  | 'bookshelf_pro'
+  | 'water_cooler';
 
 export interface FurniCatalogMeta {
   type: FurniType;
@@ -177,6 +187,33 @@ export const PIX_FURNI_CATALOG: FurniCatalogMeta[] = [
     sizeY: 2,
     isWalkable: true,
   },
+  {
+    type: 'floor_lamp',
+    name: 'Luminária de Pé Retrô Dourada',
+    desc: 'Haste de latão com cúpula plissada âmbar que projeta luz quente ao redor.',
+    category: 'Decoração',
+    priceCoins: 22,
+    sizeX: 1,
+    sizeY: 1,
+  },
+  {
+    type: 'bookshelf_pro',
+    name: 'Estante Mogno & Troféu Pixel',
+    desc: 'Estante entalhada repleta de livros coloridos, planta pendente e troféu dourado.',
+    category: 'Decoração',
+    priceCoins: 32,
+    sizeX: 1,
+    sizeY: 1,
+  },
+  {
+    type: 'water_cooler',
+    name: 'Bebedouro com Galão Borbulhando',
+    desc: 'Dispenser corporativo com torneiras quente/fria, copos e bolhas animadas.',
+    category: 'Café & Lounge',
+    priceCoins: 16,
+    sizeX: 1,
+    sizeY: 1,
+  },
 ];
 
 export interface PlacedFurni {
@@ -216,7 +253,7 @@ export interface CascadeBubble {
   isImportant?: boolean;
 }
 
-const STORAGE_KEY_FURNI = 'pixoffice-habbo-furni-v2';
+const STORAGE_KEY_FURNI = 'pixoffice-habbo-furni-v3';
 const STORAGE_KEY_MODE = 'pixoffice-habbo-mode-v1';
 
 const GRID_W = 14;
@@ -241,11 +278,14 @@ function defaultFurniLayout(): PlacedFurni[] {
   return [
     // Mezanino VIP (gy = 0..3)
     { id: 'f-screen-1', type: 'holo_screen', gx: 2, gy: 0, rot: 0, state: 1 },
+    { id: 'f-lamp-vip1', type: 'floor_lamp', gx: 1, gy: 0, rot: 0, state: 1 },
     { id: 'f-sofa-vip1', type: 'club_sofa', gx: 2, gy: 1, rot: 0 },
     { id: 'f-sofa-vip2', type: 'club_sofa', gx: 5, gy: 1, rot: 0 },
     { id: 'f-table-vip', type: 'conf_table', gx: 3, gy: 2, rot: 0 },
+    { id: 'f-books-vip', type: 'bookshelf_pro', gx: 8, gy: 0, rot: 0 },
     { id: 'f-rack-1', type: 'server_rack', gx: 9, gy: 0, rot: 0, state: 1 },
     { id: 'f-rack-2', type: 'server_rack', gx: 10, gy: 0, rot: 0, state: 1 },
+    { id: 'f-lamp-vip2', type: 'floor_lamp', gx: 11, gy: 1, rot: 0, state: 1 },
     { id: 'f-plant-vip1', type: 'palm_plant', gx: 0, gy: 0, rot: 0 },
     { id: 'f-plant-vip2', type: 'palm_plant', gx: 12, gy: 0, rot: 0 },
 
@@ -266,10 +306,13 @@ function defaultFurniLayout(): PlacedFurni[] {
 
     // Tapete Persa Central + Lounge & Café (gx = 8..13, gy = 5..12)
     { id: 'f-rug-1', type: 'rug_vip', gx: 8, gy: 8, rot: 0 },
+    { id: 'f-water-1', type: 'water_cooler', gx: 9, gy: 5, rot: 1, state: 1 },
     { id: 'f-espresso', type: 'espresso_bar', gx: 11, gy: 5, rot: 1, state: 1 },
     { id: 'f-vending', type: 'vending_drinks', gx: 12, gy: 5, rot: 1, state: 1 },
     { id: 'f-arcade', type: 'arcade_cab', gx: 12, gy: 7, rot: 1, state: 1 },
+    { id: 'f-lamp-lounge', type: 'floor_lamp', gx: 9, gy: 10, rot: 0, state: 1 },
     { id: 'f-sofa-lounge', type: 'club_sofa', gx: 10, gy: 10, rot: 0 },
+    { id: 'f-books-dev', type: 'bookshelf_pro', gx: 0, gy: 12, rot: 1 },
     { id: 'f-plant-lounge1', type: 'palm_plant', gx: 12, gy: 12, rot: 0 },
     { id: 'f-plant-door', type: 'palm_plant', gx: 0, gy: 6, rot: 0 },
   ];
@@ -322,6 +365,7 @@ export class HabboRoomController {
 
     this.furni = this.loadFurni();
     this.initAvatars();
+    preloadAsepriteManifest();
 
     this.hostEl = document.createElement('div');
     this.hostEl.id = 'pixhotel-iso-stage';
@@ -694,13 +738,22 @@ export class HabboRoomController {
     const av = this.avatars.find((a) => a.id === speakerId) || this.avatars[0];
     av.talkUntil = Date.now() + Math.min(7000, Math.max(2200, clean.length * 60));
 
-    for (const b of this.bubbles) {
-      b.currentY -= 40;
-    }
-
     const pos = this.isoToScreen(av.gx + 0.5, av.gy + 0.5, this.getTileLevel(Math.round(av.gx), Math.round(av.gy)));
     const w = this.canvas.clientWidth || window.innerWidth;
-    const clampedX = Math.max(180, Math.min(w - 180, pos.x));
+    const clampedX = Math.max(190, Math.min(w - 190, pos.x));
+    const startY = Math.max(82, Math.min(240, pos.y - 84 * this.zoom));
+
+    // Garante cascata estrita sem sobreposição horizontal: empurra balões existentes para cima com passo mínimo de 36px
+    for (const b of this.bubbles) {
+      b.currentY -= 38;
+    }
+    this.bubbles.sort((a, b) => a.currentY - b.currentY);
+    for (let i = this.bubbles.length - 1; i >= 0; i--) {
+      const targetMaxY = i === this.bubbles.length - 1 ? startY - 36 : this.bubbles[i + 1].currentY - 36;
+      if (this.bubbles[i].currentY > targetMaxY) {
+        this.bubbles[i].currentY = targetMaxY;
+      }
+    }
 
     this.bubbles.push({
       id: `bub-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -710,12 +763,12 @@ export class HabboRoomController {
       portrait: getHabboAvatarPortrait(av),
       text: clean.slice(0, 175),
       anchorScreenX: clampedX,
-      currentY: Math.max(76, pos.y - 84 * this.zoom),
+      currentY: startY,
       createdAt: Date.now(),
       isImportant,
     });
 
-    if (this.bubbles.length > 9) {
+    if (this.bubbles.length > 7) {
       this.bubbles.shift();
     }
   }
@@ -1401,6 +1454,9 @@ export class HabboRoomController {
     // 3. Piso Isométrico 2:1 em PixelBuf (Carvalho, Carpete Imperial VIP, Mármore Xadrez, Escada)
     this.drawIsometricFloor(ctx, S);
 
+    // 3B. Oclusão de Ambiente (AO) nos rodapés das paredes + Feixes de Luar das janelas noturnas
+    this.drawArchitecturalLighting(ctx, S);
+
     // 4. Cursor de Ladrilho do Habbo Hotel (34x18 px em PixelBuf)
     if (this.hoverTile && this.isTileValid(this.hoverTile.gx, this.hoverTile.gy)) {
       const gz = this.getTileLevel(this.hoverTile.gx, this.hoverTile.gy);
@@ -1422,7 +1478,7 @@ export class HabboRoomController {
 
     for (const av of this.avatars) {
       const gz = this.getTileLevel(Math.round(av.gx), Math.round(av.gy));
-      const depth = av.gx + av.gy + 0.45 + gz * 0.5;
+      const depth = av.gx + av.gy + 0.55 + gz * 0.5;
       drawList.push({
         depth,
         draw: () => this.drawIsoAvatar(ctx, av, gz, S, now),
@@ -1434,8 +1490,57 @@ export class HabboRoomController {
       item.draw();
     }
 
+    // 5B. Iluminação ambiente pixelada (glows de luminárias, telas, fliperama e racks)
+    this.drawAmbientFurniGlows(ctx, S, now);
+
     // 6. Balões de Chat em Cascata com Retrato Pixel Art 24x24
     this.drawCascadingBubbles(ctx);
+  }
+
+  private drawArchitecturalLighting(ctx: CanvasRenderingContext2D, S: number): void {
+    // Oclusão de ambiente fria de 2px ao longo do rodapé da parede traseira (gy=0) e esquerda (gx=0)
+    const backStart = this.isoToScreen(0, 0, 1);
+    const backEnd = this.isoToScreen(GRID_W, 0, 1);
+    drawBaseboardAO(ctx, backStart.x, backStart.y + 1 * S, backEnd.x, backEnd.y + 1 * S, 2 * S);
+
+    const leftTopEnd = this.isoToScreen(0, 4, 1);
+    drawBaseboardAO(ctx, backStart.x, backStart.y + 1 * S, leftTopEnd.x, leftTopEnd.y + 1 * S, 2 * S);
+
+    const leftLowStart = this.isoToScreen(0, 4, 0);
+    const leftLowEnd = this.isoToScreen(0, GRID_H, 0);
+    drawBaseboardAO(ctx, leftLowStart.x, leftLowStart.y + 1 * S, leftLowEnd.x, leftLowEnd.y + 1 * S, 2 * S);
+
+    // Feixe de luar azul-ciano entrando pelas janelas panorâmicas do Mezanino (gx=6..7, gy=0)
+    const winA = this.isoToScreen(6, 0, 1);
+    const winB = this.isoToScreen(8, 0, 1);
+    drawWindowLightBeam(ctx, winA.x, winA.y, winB.x, winB.y, -28 * S, 14 * S, '56, 189, 248', 0.08);
+
+    // Feixe de luar pela janela da parede esquerda (gx=0, gy=11)
+    const winL1 = this.isoToScreen(0, 11, 0);
+    const winL2 = this.isoToScreen(0, 12, 0);
+    drawWindowLightBeam(ctx, winL1.x, winL1.y, winL2.x, winL2.y, 26 * S, 13 * S, '56, 189, 248', 0.075);
+  }
+
+  private drawAmbientFurniGlows(ctx: CanvasRenderingContext2D, S: number, now: number): void {
+    const pulse = 0.88 + Math.sin(now * 0.004) * 0.12;
+    for (const f of this.furni) {
+      const gz = this.getTileLevel(f.gx, f.gy);
+      const c = this.isoToScreen(f.gx + 0.5, f.gy + 0.5, gz);
+      if (f.type === 'floor_lamp') {
+        drawPixelGlow(ctx, c.x, c.y - 22 * S, 28 * S, 15 * S, '255, 213, 65', 0.24 * pulse);
+        drawPixelGlow(ctx, c.x, c.y + 2 * S, 24 * S, 12 * S, '249, 163, 27', 0.14 * pulse);
+      } else if (f.type === 'dev_desk') {
+        drawPixelGlow(ctx, c.x, c.y - 16 * S, 15 * S, 9 * S, '32, 214, 199', 0.11 * pulse);
+      } else if (f.type === 'holo_screen') {
+        drawPixelGlow(ctx, c.x + 12 * S, c.y - 24 * S, 30 * S, 16 * S, '36, 159, 222', 0.16 * pulse);
+      } else if (f.type === 'arcade_cab') {
+        drawPixelGlow(ctx, c.x, c.y - 22 * S, 18 * S, 12 * S, '255, 0, 110', 0.17 * pulse);
+      } else if (f.type === 'vending_drinks') {
+        drawPixelGlow(ctx, c.x, c.y - 18 * S, 16 * S, 11 * S, '56, 189, 248', 0.14 * pulse);
+      } else if (f.type === 'server_rack') {
+        drawPixelGlow(ctx, c.x, c.y - 18 * S, 14 * S, 10 * S, '34, 197, 94', 0.10 * pulse);
+      }
+    }
   }
 
   private drawStarfield(ctx: CanvasRenderingContext2D, w: number, h: number, now: number): void {
@@ -1639,6 +1744,7 @@ export class HabboRoomController {
       this.drawTileCursor(ctx, f.gx, f.gy, gz, S);
     }
 
+    const override = getAsepriteOverride(`${f.type}_${f.rot}`) || getAsepriteOverride(f.type);
     const spr = getPixFurniSprite(f.type, f.rot, animFrame);
     let anchorPos: { x: number; y: number };
 
@@ -1652,6 +1758,17 @@ export class HabboRoomController {
       }
     } else {
       anchorPos = this.isoToScreen(f.gx + 0.72, f.gy + 0.72, gz);
+    }
+
+    if (override) {
+      ctx.drawImage(
+        override.image,
+        Math.round(anchorPos.x - override.anchorX * S),
+        Math.round(anchorPos.y - override.anchorY * S),
+        Math.round(override.image.width * S),
+        Math.round(override.image.height * S),
+      );
+      return;
     }
 
     ctx.drawImage(

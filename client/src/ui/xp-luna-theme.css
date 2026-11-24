@@ -2750,8 +2750,10 @@ canvas[data-floor-style="sunset_lounge"] {
 
 body.is-pixhotel-iso .xp-balloon-layer,
 body.is-pixhotel-iso .xp-speech-balloon,
-body.is-pixhotel-iso #xp-auto-summon-banner,
-body.is-pixhotel-iso #xp-building-panel {
+body.is-pixhotel-iso #xp-summon-banner,
+body.is-pixhotel-iso .xp-summon-banner,
+body.is-pixhotel-iso #xp-elevator-panel,
+body.is-pixhotel-iso .xp-elevator-panel {
   display: none !important;
 }
 
@@ -2765,7 +2767,7 @@ body.is-pixhotel-iso #xp-building-panel {
 .pixhotel-mode-toggle-btn {
   position: fixed;
   top: 6px;
-  left: 240px;
+  left: 124px;
   z-index: 140;
   display: inline-flex;
   align-items: center;
