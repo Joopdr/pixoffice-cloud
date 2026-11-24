@@ -9,7 +9,7 @@ import { PixelBuf, type Palette } from '../art/core/pixbuf';
 
 export type HabboAccessory = 'crown' | 'glasses' | 'headset' | 'beret' | 'cap' | 'visor' | 'none';
 export type HabboDirection = 'SE' | 'SW' | 'NW' | 'NE';
-export type HabboAction = 'idle' | 'walk' | 'sit' | 'type' | 'coffee' | 'wave';
+export type HabboAction = 'idle' | 'walk' | 'sit' | 'type' | 'coffee' | 'wave' | 'dance';
 
 export interface HabboAvatarLook {
   id: string;
@@ -345,35 +345,27 @@ function drawLegsAndShoes(
     return;
   }
 
-  // Em pé ou caminhando:
-  // No ciclo 'walk' (4 frames), alterna avanço diagonal e elevação dos joelhos/pés
+  // Em pé, caminhando (8 frames Contact->Down->Pass->Up x 2) ou dançando (8 frames Club Groove):
   let backDx = 0;
   let backDy = 0;
   let frontDx = 0;
   let frontDy = 0;
 
   if (action === 'walk') {
-    if (f4 === 0) {
-      backDx = -2;
-      backDy = -1;
-      frontDx = 2;
-      frontDy = 0;
-    } else if (f4 === 1) {
-      backDx = 0;
-      backDy = 0;
-      frontDx = 1;
-      frontDy = -1;
-    } else if (f4 === 2) {
-      backDx = 2;
-      backDy = 0;
-      frontDx = -2;
-      frontDy = -1;
-    } else {
-      backDx = -1;
-      backDy = -1;
-      frontDx = 0;
-      frontDy = 0;
-    }
+    const WALK_BACK_DX = [-3, -2, 0, 1, 3, 2, 0, -1] as const;
+    const WALK_BACK_DY = [-1, 0, 0, -2, 0, 0, -2, -1] as const;
+    const WALK_FRONT_DX = [3, 2, 0, -1, -3, -2, 0, 1] as const;
+    const WALK_FRONT_DY = [0, 0, -2, -1, -1, 0, 0, -2] as const;
+    backDx = WALK_BACK_DX[f4 % 8];
+    backDy = WALK_BACK_DY[f4 % 8];
+    frontDx = WALK_FRONT_DX[f4 % 8];
+    frontDy = WALK_FRONT_DY[f4 % 8];
+  } else if (action === 'dance') {
+    const step = f4 % 8;
+    backDx = step < 4 ? -1 : 1;
+    frontDx = step < 4 ? 1 : -1;
+    backDy = step % 2 === 1 ? -1 : 0;
+    frontDy = step % 2 === 0 ? -1 : 0;
   }
 
   // Cinto escuro com fivela dourada/prateada deslocada +1px para a direita (perspectiva 3/4 SE)
@@ -520,26 +512,39 @@ function drawBackArm(
   buf: PixelBuf,
   pal: AvatarPalettes,
   action: HabboAction,
-  f4: number,
+  f8: number,
   yOff: number,
 ): void {
   const { shirt, skin } = pal;
-  // Ombro traseiro (esquerdo na tela quando em SE) fica 1px mais alto/recuado na perspectiva 3/4
   const sy = 21 + yOff;
 
   if (action === 'wave') {
-    // Braço levantado acima do ombro oscilando com frame % 2
-    const waveShift = f4 % 2 === 0 ? 0 : -1;
-    buf.rect(7, sy - 4 + waveShift, 3, 6, shirt.base);
-    buf.vline(7, sy - 4 + waveShift, sy + 1 + waveShift, shirt.lt);
-    buf.rect(6 + waveShift, sy - 8 + waveShift, 3, 5, shirt.lt);
-    drawHand3x3(buf, 5 + waveShift, sy - 11 + waveShift, skin);
+    const waveAngles = [0, -1, -2, -1, 0, 1, 0, -1] as const;
+    const wShift = waveAngles[f8 % 8];
+    buf.rect(7, sy - 4 + wShift, 3, 6, shirt.base);
+    buf.vline(7, sy - 4 + wShift, sy + 1 + wShift, shirt.lt);
+    buf.rect(6 + wShift, sy - 8 + wShift, 3, 5, shirt.lt);
+    drawHand3x3(buf, 5 + wShift, sy - 11 + wShift, skin);
+    return;
+  }
+
+  if (action === 'dance') {
+    // No Habbo Club Dance, o braço traseiro levanta nos frames 0..3 e desce no groove nos frames 4..7
+    const up = f8 % 8 < 4;
+    if (up) {
+      const lift = f8 % 2 === 0 ? -1 : -2;
+      buf.rect(7, sy - 4 + lift, 3, 6, shirt.base);
+      buf.rect(6, sy - 8 + lift, 3, 4, shirt.lt);
+      drawHand3x3(buf, 5, sy - 11 + lift, skin);
+    } else {
+      buf.rect(7, sy + 1, 3, 5, shirt.dk);
+      drawHand3x3(buf, 6, sy + 6, skin);
+    }
     return;
   }
 
   if (action === 'type') {
-    // Antebraço traseiro projetado para o teclado na diagonal SE, alternando 1px verticalmente
-    const dy = f4 % 2 === 0 ? 0 : 1;
+    const dy = f8 % 2 === 0 ? 0 : 1;
     buf.rect(8, sy, 3, 6, shirt.dk);
     buf.rect(10, sy + 5 + dy, 4, 3, shirt.base);
     drawHand3x3(buf, 13, sy + 6 + dy, skin);
@@ -547,7 +552,6 @@ function drawBackArm(
   }
 
   if (action === 'sit') {
-    // Sentado: antebraço apoiado no braço da poltrona/coxa
     buf.rect(8, sy, 3, 6, shirt.dk);
     buf.rect(9, sy + 5, 3, 3, shirt.base);
     drawHand3x3(buf, 10, sy + 7, skin);
@@ -555,63 +559,79 @@ function drawBackArm(
   }
 
   if (action === 'walk') {
-    const swing = f4 === 0 ? 2 : f4 === 2 ? -2 : 0;
+    const SWING_8 = [3, 2, 0, -2, -3, -2, 0, 2] as const;
+    const swing = SWING_8[f8 % 8];
     buf.rect(8, sy, 3, 4, shirt.dk);
     buf.rect(8 + Math.round(swing * 0.5), sy + 4, 3, 4, shirt.base);
     drawHand3x3(buf, 8 + swing, sy + 8, skin);
     return;
   }
 
-  // Idle / Coffee: braço traseiro em 3/4 parcialmente ocluído pelo tronco
+  // Idle / Coffee: braço traseiro com secondary lag de 1 frame na respiração (f8 === 4 || f8 === 5)
+  const handLag = f8 % 8 === 4 || f8 % 8 === 5 ? 1 : 0;
   buf.rect(8, sy, 3, 7, shirt.dk);
   buf.vline(8, sy, sy + 6, shirt.dd);
   buf.vline(10, sy, sy + 6, shirt.base);
-  drawHand3x3(buf, 8, sy + 7, skin);
+  drawHand3x3(buf, 8, sy + 7 + handLag, skin);
 }
 
-function drawCoffeeMug(buf: PixelBuf, x: number, y: number, f4: number): void {
-  // Caneca branca/vermelha detalhada (5x5 px) com café escuro e vapor subindo
+function drawCoffeeMug(buf: PixelBuf, x: number, y: number, f8: number): void {
   buf.rect(x, y, 5, 5, '#ffffff');
   buf.hline(x, x + 4, y + 2, '#ef4444');
   buf.hline(x, x + 4, y + 3, '#dc2626');
   buf.vline(x + 4, y, y + 4, '#cbd5e1');
   buf.hline(x + 1, x + 3, y, '#3e2723');
-  // Alça lateral
   buf.set(x + 5, y + 1, '#e2e8f0');
   buf.set(x + 5, y + 2, '#cbd5e1');
   buf.set(x + 5, y + 3, '#94a3b8');
 
-  // Vapor animado
-  const vShift = f4 % 2;
-  buf.set(x + 2 + vShift, y - 2, 'rgba(255, 255, 255, 0.85)');
-  buf.set(x + 3 - vShift, y - 4, 'rgba(255, 255, 255, 0.75)');
-  buf.set(x + 2, y - 6, 'rgba(255, 255, 255, 0.55)');
+  // Vapor em curva "S" de 8 frames
+  const phase = f8 % 8;
+  const s1 = phase % 2 === 0 ? 0 : 1;
+  const s2 = (phase + 1) % 2 === 0 ? 0 : -1;
+  buf.set(x + 2 + s1, y - 2, 'rgba(255, 255, 255, 0.88)');
+  buf.set(x + 2 + s2, y - 4, 'rgba(255, 255, 255, 0.72)');
+  buf.set(x + 3 - s1, y - 6 - (phase % 2), 'rgba(255, 255, 255, 0.50)');
 }
 
 function drawFrontArm(
   buf: PixelBuf,
   pal: AvatarPalettes,
   action: HabboAction,
-  f4: number,
+  f8: number,
   yOff: number,
 ): void {
   const { shirt, skin } = pal;
-  // Ombro frontal (direito na tela em SE) articulado com luz direta
   const sy = 22 + yOff;
 
   if (action === 'coffee') {
-    const sip = f4 % 2 === 1 ? -1 : 0;
+    // Leva a caneca até perto da boca nos frames 3, 4, 5 para beber um gole real!
+    const step = f8 % 8;
+    const sip = step >= 3 && step <= 5 ? -3 : step === 2 || step === 6 ? -1 : 0;
     buf.rect(20, sy, 3, 5, shirt.base);
     buf.vline(20, sy, sy + 4, shirt.lt);
     buf.rect(19, sy + 3 + sip, 4, 3, shirt.lt);
     drawHand3x3(buf, 21, sy + 3 + sip, skin);
-    drawCoffeeMug(buf, 23, sy + 1 + sip, f4);
+    drawCoffeeMug(buf, 23, sy + 1 + sip, f8);
+    return;
+  }
+
+  if (action === 'dance') {
+    const up = f8 % 8 >= 4;
+    if (up) {
+      const lift = f8 % 2 === 0 ? -1 : -2;
+      buf.rect(20, sy - 4 + lift, 3, 6, shirt.base);
+      buf.rect(21, sy - 8 + lift, 3, 4, shirt.lt);
+      drawHand3x3(buf, 22, sy - 11 + lift, skin);
+    } else {
+      buf.rect(20, sy + 1, 3, 5, shirt.base);
+      drawHand3x3(buf, 21, sy + 6, skin);
+    }
     return;
   }
 
   if (action === 'type') {
-    // Antebraço direito projetado para frente alternando em oposição ao esquerdo
-    const dy = f4 % 2 === 1 ? 0 : 1;
+    const dy = f8 % 2 === 1 ? 0 : 1;
     buf.rect(20, sy, 3, 5, shirt.base);
     buf.vline(20, sy, sy + 4, shirt.lt);
     buf.rect(19, sy + 4 + dy, 4, 3, shirt.lt);
@@ -620,7 +640,6 @@ function drawFrontArm(
   }
 
   if (action === 'sit') {
-    // Sentado: braço direito dobrado apoiando a mão sobre a coxa
     buf.rect(20, sy, 3, 5, shirt.base);
     buf.vline(20, sy, sy + 4, shirt.lt);
     buf.rect(19, sy + 4, 3, 3, shirt.lt);
@@ -629,7 +648,8 @@ function drawFrontArm(
   }
 
   if (action === 'walk') {
-    const swing = f4 === 0 ? -2 : f4 === 2 ? 2 : 0;
+    const SWING_8 = [-3, -2, 0, 2, 3, 2, 0, -2] as const;
+    const swing = SWING_8[f8 % 8];
     buf.rect(20, sy, 3, 4, shirt.base);
     buf.vline(20, sy, sy + 3, shirt.lt);
     buf.rect(20 + Math.round(swing * 0.5), sy + 4, 3, 4, shirt.lt);
@@ -637,15 +657,15 @@ function drawFrontArm(
     return;
   }
 
-  // Idle / Wave: braço frontal articulado com punho levemente adiantado em 3/4
+  const handLag = f8 % 8 === 4 || f8 % 8 === 5 ? 1 : 0;
   buf.rect(20, sy, 3, 7, shirt.base);
   buf.vline(20, sy, sy + 6, shirt.lt);
   buf.vline(22, sy, sy + 6, shirt.dk);
-  drawHand3x3(buf, 20, sy + 7, skin);
+  drawHand3x3(buf, 20, sy + 7 + handLag, skin);
 }
 
 // ============================================================================
-// CABEÇA E ROSTO EM PERSPECTIVA 3/4 REAL (OLHOS E BOCA DESLOCADOS +2PX PARA SE)
+// CABEÇA E ROSTO EM PERSPECTIVA 3/4 REAL (LIP-SYNC A/E/O + PISCAR + REFLEXO DE TELA)
 // ============================================================================
 
 function drawHeadAndFace(
@@ -654,11 +674,13 @@ function drawHeadAndFace(
   yOff: number,
   isFront: boolean,
   talking: boolean,
-  f4: number,
+  f8: number,
+  blinking = false,
+  action: HabboAction = 'idle',
 ): void {
   const { skin, hair } = pal;
   const hx = 9;
-  const hy = 6 + yOff; // Cabeça ocupa x = 9..23, y = 6..20 (15x15 px)
+  const hy = 6 + yOff;
 
   const headPal: Palette = {
     L: skin.lt,
@@ -672,38 +694,66 @@ function drawHeadAndFace(
   buf.stamp(isFront ? HEAD_3Q_SE : HEAD_3Q_NE, hx, hy, headPal);
 
   if (isFront) {
-    // Perspectiva 3/4 Real do Habbo Hotel:
-    // A orelha está em x = 9..10 (hx + 0..1) e a bochecha direita vai até x = 22 (hx + 13).
-    // Os dois olhos ficam deslocados +2px para a direita do centro da cabeça:
-    // - Olho esquerdo (próximo ao centro): x = 15..16 (hx + 6..7), y = hy + 6..7 (2x2 px)
-    // - Espaço de 2px entre os olhos: x = 17..18 (hx + 8..9), onde fica a ponte nasal e o pixel do nariz!
-    // - Olho direito (próximo à borda direita da face): x = 19..20 (hx + 10..11), y = hy + 6..7 (2x2 px)
-
-    // Sobrancelhas expressivas acompanhando o eixo 3/4
     const browCol = hair.dd;
-    buf.hline(15, 17, hy + 5, browCol);
-    buf.hline(19, 21, hy + 5, browCol);
+    const browLift = talking || action === 'dance' || action === 'wave' ? (f8 % 4 === 0 ? -1 : 0) : 0;
+    buf.hline(15, 17, hy + 5 + browLift, browCol);
+    buf.hline(19, 21, hy + 5 + browLift, browCol);
 
-    // Olho esquerdo (2x2 px com pupila #0f172a e brilho especular branco 1px no canto superior-esquerdo)
-    buf.rect(15, hy + 6, 2, 2, '#0f172a');
-    buf.set(15, hy + 6, '#ffffff');
-
-    // Olho direito (2x2 px com pupila #0f172a e brilho especular branco 1px)
-    buf.rect(19, hy + 6, 2, 2, '#0f172a');
-    buf.set(19, hy + 6, '#ffffff');
-
-    // Nariz sombreado de 1px posicionado entre/abaixo dos olhos no eixo 3/4 (x = 18, y = hy + 8)
-    buf.set(18, hy + 8, skin.dk);
-    buf.set(18, hy + 7, skin.lt); // brilho na ponta do nariz
-
-    // Boca alinhada com o eixo 3/4 dos olhos (centrada em x = 17..19)
-    if (talking && f4 % 2 === 0) {
-      // Boca aberta expressiva cantando/falando (#9f1239 com dente #ffffff e língua #fb7185)
-      buf.rect(16, hy + 10, 4, 3, '#9f1239');
-      buf.hline(17, 18, hy + 10, '#ffffff');
-      buf.hline(17, 18, hy + 12, '#fb7185');
+    // Olhos: piscando (blinking), rindo na dança (^ ^) ou abertos com brilho 1px
+    if (blinking) {
+      buf.hline(15, 16, hy + 7, '#0f172a');
+      buf.hline(19, 20, hy + 7, '#0f172a');
+    } else if (action === 'dance' && f8 % 4 < 2) {
+      // Olhos felizes em arco (^ ^)
+      buf.set(15, hy + 7, '#0f172a');
+      buf.set(16, hy + 6, '#0f172a');
+      buf.set(19, hy + 6, '#0f172a');
+      buf.set(20, hy + 7, '#0f172a');
     } else {
-      // Sorriso discreto em 3/4 com canto esquerdo levemente erguido
+      buf.rect(15, hy + 6, 2, 2, '#0f172a');
+      buf.set(15, hy + 6, '#ffffff');
+      buf.rect(19, hy + 6, 2, 2, '#0f172a');
+      buf.set(19, hy + 6, '#ffffff');
+    }
+
+    // Nariz sombreado no eixo 3/4
+    buf.set(18, hy + 8, skin.dk);
+    buf.set(18, hy + 7, skin.lt);
+
+    // Reflexo ciano/verde do monitor no queixo quando digitando ('type')
+    if (action === 'type') {
+      const glowCol = f8 % 2 === 0 ? 'rgba(56, 189, 248, 0.38)' : 'rgba(34, 197, 94, 0.35)';
+      buf.hline(15, 20, hy + 13, glowCol);
+    }
+
+    // Lip-Sync em 3 Formas de Boca (A / E / O) quando falando ou tomando gole de café
+    if (action === 'coffee' && f8 % 8 >= 3 && f8 % 8 <= 5) {
+      // Boca em 'O' sorvendo o espresso quente
+      buf.rect(17, hy + 10, 2, 2, '#7f1d1d');
+    } else if (talking) {
+      const mouthShape = f8 % 4;
+      if (mouthShape === 0) {
+        // Vogal 'A': boca aberta ampla com dente branco e língua
+        buf.rect(16, hy + 10, 4, 3, '#9f1239');
+        buf.hline(17, 18, hy + 10, '#ffffff');
+        buf.hline(17, 18, hy + 12, '#fb7185');
+      } else if (mouthShape === 1) {
+        // Vogal 'E': sorriso aberto médio com dentes aparentes
+        buf.rect(16, hy + 10, 4, 2, '#7f1d1d');
+        buf.hline(16, 19, hy + 10, '#ffffff');
+      } else if (mouthShape === 2) {
+        // Vogal 'O': óvalo arredondado expressivo 3x3
+        buf.rect(17, hy + 10, 3, 3, '#881337');
+        buf.set(18, hy + 11, '#fb7185');
+      } else {
+        // Sílabas labiais fechadas (M/B/P)
+        buf.hline(16, 19, hy + 11, shade(skin.dd, -0.25));
+      }
+    } else if (action === 'dance' || action === 'wave') {
+      // Sorriso aberto radiante
+      buf.rect(16, hy + 10, 4, 2, '#9f1239');
+      buf.hline(17, 18, hy + 10, '#ffffff');
+    } else {
       buf.hline(16, 19, hy + 11, shade(skin.dd, -0.2));
       buf.set(15, hy + 10, skin.dk);
     }
@@ -876,37 +926,53 @@ function renderHabboAvatarBuf(
   action: HabboAction,
   frame: number,
   talking: boolean,
+  blinking = false,
 ): PixelBuf {
-  const f4 = ((Math.floor(frame) % 4) + 4) % 4;
+  const f8 = ((Math.floor(frame) % 8) + 8) % 8;
   const isFront = dir === 'SE' || dir === 'SW';
   const shouldFlip = dir === 'SW' || dir === 'NW';
   const pal = buildPalettes(look);
 
-  // Em 'sit' e 'type', o tronco e a cabeça descem 3px enquanto os joelhos dobram em L para a frente;
-  // em 'walk', há um quique vivo de 1px nos frames ímpares.
+  // Curva de deslocamento vertical de 8 frames (Contact->Down->Pass->Up + Respiração Idle + Groove Dance):
   const seatDrop = action === 'sit' || action === 'type' ? 3 : 0;
-  const walkBounce = action === 'walk' && (f4 === 1 || f4 === 3) ? -1 : 0;
-  const yOff = seatDrop + walkBounce;
+  let bodyBob = 0;
+  let hairLag = 0;
+  if (action === 'walk') {
+    const WALK_BOB = [0, 1, 0, -1, 0, 1, 0, -1] as const;
+    const HAIR_LAG = [0, 0, 1, 0, -1, 0, 1, 0] as const;
+    bodyBob = WALK_BOB[f8];
+    hairLag = HAIR_LAG[f8];
+  } else if (action === 'dance') {
+    const DANCE_BOB = [0, 1, -1, 0, 0, 1, -1, 0] as const;
+    bodyBob = DANCE_BOB[f8];
+    hairLag = f8 % 2 === 1 ? -1 : 0;
+  } else if (action === 'idle' || action === 'coffee') {
+    // Respiração suave com pés plantados: tronco desce 1px nos frames 3 e 4, cabelo atrasa no frame 4
+    bodyBob = f8 === 3 || f8 === 4 ? 1 : 0;
+    hairLag = f8 === 4 ? 1 : 0;
+  }
+
+  const yOff = seatDrop + bodyBob;
 
   const work = new PixelBuf(SPRITE_W, SPRITE_H);
 
   // 1. Braço traseiro (atrás do tronco na perspectiva 3/4)
-  drawBackArm(work, pal, action, f4, yOff);
+  drawBackArm(work, pal, action, f8, yOff);
 
-  // 2. Pernas em 3/4 e tênis bicolor com sola clara #e2e8f0
-  drawLegsAndShoes(work, pal, look, action, f4, isFront);
+  // 2. Pernas em 3/4 e tênis bicolor com sola clara #e2e8f0 (plantados no chão durante respiração idle!)
+  drawLegsAndShoes(work, pal, look, action, f8, isFront);
 
   // 3. Tronco em 3/4 com jaqueta aberta / colete & gravata / moletom tech
   drawTorso(work, pal, look, yOff, isFront);
 
-  // 4. Cabeça 15x15 arredondada em 3/4 real com orelha unilateral e olhos deslocados +2px
-  drawHeadAndFace(work, pal, yOff, isFront, talking, f4);
+  // 4. Cabeça 15x15 arredondada em 3/4 real com Lip-Sync A/E/O, piscar assíncrono e reflexo de tela
+  drawHeadAndFace(work, pal, yOff, isFront, talking, f8, blinking, action);
 
-  // 5. Cabelo esculpido com volume 3D, franja diagonal e acessório exclusivo
-  drawHairAndAccessory(work, pal, look, yOff, isFront);
+  // 5. Cabelo esculpido com volume 3D, secondary motion lag e acessório exclusivo
+  drawHairAndAccessory(work, pal, look, yOff + hairLag, isFront);
 
-  // 6. Braço frontal (sobreposto ao tronco, segurando café ou digitando)
-  drawFrontArm(work, pal, action, f4, yOff);
+  // 6. Braço frontal (sobreposto ao tronco, segurando café, dançando ou digitando)
+  drawFrontArm(work, pal, action, f8, yOff);
 
   // 7. Se a direção for SW ou NW, espelha horizontalmente mantendo a perspectiva 3/4 consistente
   const out = shouldFlip ? work.flipped() : work;
@@ -924,15 +990,17 @@ export function getHabboAvatarSprite(
   action: HabboAction,
   frame: number,
   talking: boolean,
+  blinking = false,
 ): HabboAvatarFrame {
-  const f4 = ((Math.floor(frame) % 4) + 4) % 4;
-  const talkBit = talking && f4 % 2 === 0 ? 1 : 0;
-  const key = `${lookKey(look)}|${dir}|${action}|${f4}|${talkBit}`;
+  const f8 = ((Math.floor(frame) % 8) + 8) % 8;
+  const talkState = talking ? f8 % 4 : -1;
+  const blinkBit = blinking ? 1 : 0;
+  const key = `${lookKey(look)}|${dir}|${action}|${f8}|${talkState}|${blinkBit}`;
 
   let cached = spriteCache.get(key);
   if (!cached) {
-    if (spriteCache.size > 4000) spriteCache.clear();
-    const buf = renderHabboAvatarBuf(look, dir, action, f4, talking);
+    if (spriteCache.size > 6000) spriteCache.clear();
+    const buf = renderHabboAvatarBuf(look, dir, action, f8, talking, blinking);
     cached = {
       canvas: bufToCanvas(buf),
       anchorX: ANCHOR_X,
@@ -943,16 +1011,23 @@ export function getHabboAvatarSprite(
   return cached;
 }
 
-export function getHabboAvatarPortrait(look: HabboAvatarLook): HTMLCanvasElement {
-  const key = lookKey(look);
+export function getHabboAvatarPortrait(
+  look: HabboAvatarLook,
+  frame = 0,
+  talking = false,
+  blinking = false,
+): HTMLCanvasElement {
+  const f4 = talking ? ((Math.floor(frame) % 4) + 4) % 4 : 0;
+  const blinkBit = blinking ? 1 : 0;
+  const key = `${lookKey(look)}|${talking ? f4 : 'idle'}|${blinkBit}`;
   let cached = portraitCache.get(key);
   if (!cached) {
-    if (portraitCache.size > 512) portraitCache.clear();
+    if (portraitCache.size > 1024) portraitCache.clear();
     const pal = buildPalettes(look);
     const work = new PixelBuf(SPRITE_W, SPRITE_H);
     drawBackArm(work, pal, 'idle', 0, 2);
     drawTorso(work, pal, look, 2, true);
-    drawHeadAndFace(work, pal, 2, true, false, 0);
+    drawHeadAndFace(work, pal, 2, true, talking, f4, blinking, 'idle');
     drawHairAndAccessory(work, pal, look, 2, true);
     drawFrontArm(work, pal, 'idle', 0, 2);
     work.outline();

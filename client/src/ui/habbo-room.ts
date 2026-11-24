@@ -236,9 +236,38 @@ export interface IsoAvatar extends HabboAvatarLook {
   action: HabboAction;
   talkUntil: number;
   waveUntil: number;
+  danceUntil: number;
+  nextBlinkAt: number;
+  blinkUntil: number;
   statusText: string;
   nextRoamAt: number;
 }
+
+export interface IsoParticle {
+  kind: 'ripple' | 'dust' | 'glyph';
+  gx: number;
+  gy: number;
+  gz: number;
+  offsetX: number;
+  offsetY: number;
+  vy: number;
+  text?: string;
+  color: string;
+  createdAt: number;
+  durationMs: number;
+}
+
+const PIX_SVG = {
+  hotel: `<svg width="15" height="15" viewBox="0 0 16 16" shape-rendering="crispEdges" style="vertical-align:-2px"><rect x="3" y="2" width="10" height="13" fill="#d97706"/><rect x="4" y="3" width="8" height="11" fill="#fbbf24"/><rect x="5" y="5" width="2" height="2" fill="#0f172a"/><rect x="9" y="5" width="2" height="2" fill="#0f172a"/><rect x="5" y="8" width="2" height="2" fill="#0f172a"/><rect x="9" y="8" width="2" height="2" fill="#0f172a"/><rect x="7" y="11" width="2" height="4" fill="#78350f"/></svg>`,
+  wave: `<svg width="14" height="14" viewBox="0 0 16 16" shape-rendering="crispEdges" style="vertical-align:-2px"><rect x="6" y="3" width="4" height="7" fill="#fcd34d"/><rect x="4" y="6" width="2" height="4" fill="#fcd34d"/><rect x="10" y="5" width="2" height="5" fill="#fcd34d"/><rect x="5" y="10" width="6" height="3" fill="#f59e0b"/></svg>`,
+  dance: `<svg width="14" height="14" viewBox="0 0 16 16" shape-rendering="crispEdges" style="vertical-align:-2px"><rect x="6" y="2" width="4" height="3" fill="#fbbf24"/><rect x="5" y="5" width="6" height="5" fill="#ec4899"/><rect x="3" y="4" width="2" height="3" fill="#fcd34d"/><rect x="11" y="4" width="2" height="3" fill="#fcd34d"/><rect x="5" y="10" width="2" height="4" fill="#38bdf8"/><rect x="9" y="10" width="2" height="4" fill="#38bdf8"/></svg>`,
+  coffee: `<svg width="14" height="14" viewBox="0 0 16 16" shape-rendering="crispEdges" style="vertical-align:-2px"><rect x="6" y="2" width="1" height="2" fill="#e2e8f0"/><rect x="9" y="1" width="1" height="3" fill="#e2e8f0"/><rect x="4" y="5" width="7" height="8" fill="#ffffff"/><rect x="4" y="8" width="7" height="3" fill="#ef4444"/><rect x="11" y="6" width="2" height="5" fill="#cbd5e1"/></svg>`,
+  focus: `<svg width="14" height="14" viewBox="0 0 16 16" shape-rendering="crispEdges" style="vertical-align:-2px"><rect x="7" y="1" width="2" height="3" fill="#38bdf8"/><rect x="7" y="12" width="2" height="3" fill="#38bdf8"/><rect x="1" y="7" width="3" height="2" fill="#38bdf8"/><rect x="12" y="7" width="3" height="2" fill="#38bdf8"/><rect x="6" y="6" width="4" height="4" fill="#fbbf24"/></svg>`,
+  catalog: `<svg width="14" height="14" viewBox="0 0 16 16" shape-rendering="crispEdges" style="vertical-align:-2px"><rect x="2" y="3" width="2" height="2" fill="#fde68a"/><rect x="4" y="5" width="9" height="6" fill="#fbbf24"/><rect x="5" y="12" width="2" height="2" fill="#e2e8f0"/><rect x="10" y="12" width="2" height="2" fill="#e2e8f0"/></svg>`,
+  move: `<svg width="14" height="14" viewBox="0 0 16 16" shape-rendering="crispEdges" style="vertical-align:-2px"><rect x="7" y="2" width="2" height="12" fill="#fbbf24"/><rect x="2" y="7" width="12" height="2" fill="#fbbf24"/><rect x="6" y="6" width="4" height="4" fill="#ffffff"/></svg>`,
+  screen3d: `<svg width="14" height="14" viewBox="0 0 16 16" shape-rendering="crispEdges" style="vertical-align:-2px"><rect x="2" y="3" width="12" height="8" fill="#0f172a"/><rect x="3" y="4" width="10" height="6" fill="#38bdf8"/><rect x="6" y="11" width="4" height="3" fill="#94a3b8"/></svg>`,
+  phone: `<svg width="14" height="14" viewBox="0 0 16 16" shape-rendering="crispEdges" style="vertical-align:-2px"><rect x="4" y="1" width="8" height="14" fill="#1e293b"/><rect x="5" y="3" width="6" height="9" fill="#38bdf8"/><rect x="7" y="13" width="2" height="1" fill="#fbbf24"/></svg>`,
+} as const;
 
 export interface CascadeBubble {
   id: string;
@@ -253,7 +282,7 @@ export interface CascadeBubble {
   isImportant?: boolean;
 }
 
-const STORAGE_KEY_FURNI = 'pixoffice-habbo-furni-v3';
+const STORAGE_KEY_FURNI = 'pixoffice-habbo-furni-v4';
 const STORAGE_KEY_MODE = 'pixoffice-habbo-mode-v1';
 
 const GRID_W = 14;
@@ -310,7 +339,7 @@ function defaultFurniLayout(): PlacedFurni[] {
     { id: 'f-espresso', type: 'espresso_bar', gx: 11, gy: 5, rot: 1, state: 1 },
     { id: 'f-vending', type: 'vending_drinks', gx: 12, gy: 5, rot: 1, state: 1 },
     { id: 'f-arcade', type: 'arcade_cab', gx: 12, gy: 7, rot: 1, state: 1 },
-    { id: 'f-lamp-lounge', type: 'floor_lamp', gx: 9, gy: 10, rot: 0, state: 1 },
+    { id: 'f-lamp-lounge', type: 'floor_lamp', gx: 12, gy: 9, rot: 0, state: 1 },
     { id: 'f-sofa-lounge', type: 'club_sofa', gx: 10, gy: 10, rot: 0 },
     { id: 'f-books-dev', type: 'bookshelf_pro', gx: 0, gy: 12, rot: 1 },
     { id: 'f-plant-lounge1', type: 'palm_plant', gx: 12, gy: 12, rot: 0 },
@@ -325,10 +354,13 @@ export class HabboRoomController {
   private active = true;
   private rafId = 0;
 
-  // Câmera pan & zoom
+  // Câmera pan & zoom com interpolação suave (lerp)
   private camX = 0;
   private camY = -28;
   private zoom = 1.05;
+  private targetCamX = 0;
+  private targetCamY = -28;
+  private targetZoom = 1.05;
   private isDraggingCam = false;
   private dragStartX = 0;
   private dragStartY = 0;
@@ -336,10 +368,12 @@ export class HabboRoomController {
   private camStartY = 0;
   private pointerDownDist = 0;
 
-  // Estado do quarto
+  // Estado do quarto & partículas VFX
   private furni: PlacedFurni[] = [];
   private avatars: IsoAvatar[] = [];
   private bubbles: CascadeBubble[] = [];
+  private particles: IsoParticle[] = [];
+  private lastVfxEmitAt = 0;
   private hoverTile: { gx: number; gy: number } | null = null;
   private selectedFurniId: string | null = null;
   private selectedAvatarId: string | null = 'agent-01-dev';
@@ -609,13 +643,25 @@ export class HabboRoomController {
       },
     ];
 
-    this.avatars = defs.map((d) => ({
+    this.avatars = defs.map((d, idx) => ({
       ...d,
       path: [],
       talkUntil: 0,
       waveUntil: d.isFounder ? Date.now() + 2500 : 0,
+      danceUntil: 0,
+      nextBlinkAt: Date.now() + 1200 + idx * 430,
+      blinkUntil: 0,
       nextRoamAt: d.roamDelay === Infinity ? Infinity : Date.now() + d.roamDelay,
     }));
+  }
+
+  private focusCameraOnTile(gx: number, gy: number): void {
+    const gz = this.getTileLevel(Math.round(gx), Math.round(gy));
+    const ix = (gx - gy) * (TILE_W * 0.5) * this.targetZoom;
+    const iy = ((gx + gy) * (TILE_H * 0.5) - gz * LEVEL_H) * this.targetZoom;
+    const h = this.canvas.clientHeight || window.innerHeight;
+    this.targetCamX = -ix;
+    this.targetCamY = h * 0.25 - iy;
   }
 
   private getTileLevel(gx: number, gy: number): number {
@@ -779,8 +825,8 @@ export class HabboRoomController {
     toggleBtn.className = 'pixhotel-mode-toggle-btn';
     const syncToggleText = () => {
       toggleBtn.innerHTML = this.active
-        ? `<span class="pixhotel-badge-dot"></span> 🏨 Quarto Habbo (Ativo) · Ver Planta 2D`
-        : `🏨 Entrar no Quarto Habbo Isométrico`;
+        ? `<span class="pixhotel-badge-dot"></span> ${PIX_SVG.hotel} Quarto Habbo (Ativo) · Ver Planta 2D`
+        : `${PIX_SVG.hotel} Entrar no Quarto Habbo Isométrico`;
     };
     syncToggleText();
     toggleBtn.addEventListener('click', () => {
@@ -800,15 +846,15 @@ export class HabboRoomController {
     const roomInfo = document.createElement('div');
     roomInfo.className = 'pixhotel-room-badge';
     roomInfo.innerHTML = `
-      <div class="pixhotel-room-badge__icon">🏨</div>
+      <div class="pixhotel-room-badge__icon">${PIX_SVG.hotel}</div>
       <div class="pixhotel-room-badge__body">
         <div class="pixhotel-room-badge__title">PixOffice HQ · Salão & Mezanino VIP (Pixel Art 2:1)</div>
-        <div class="pixhotel-room-badge__sub">Dono: <b>Você (Founder)</b> · <span id="pixhotel-pop-count">9/16 no quarto</span> · ⭐ 998</div>
+        <div class="pixhotel-room-badge__sub">Dono: <b>Você (Founder)</b> · <span id="pixhotel-pop-count">9/16 no quarto</span> · Rating 998</div>
       </div>
       <div class="pixhotel-room-badge__actions">
-        <button type="button" class="pixhotel-mini-btn" id="pixhotel-preset-work" title="Equipe nas bancadas">💻 Bancadas</button>
-        <button type="button" class="pixhotel-mini-btn" id="pixhotel-preset-vip" title="Chamar todos para o Mezanino VIP">🛋️ Reunião VIP</button>
-        <button type="button" class="pixhotel-mini-btn" id="pixhotel-preset-cafe" title="Hora do café">☕ Hora do Café</button>
+        <button type="button" class="pixhotel-mini-btn" id="pixhotel-preset-work" title="Equipe nas bancadas">${PIX_SVG.screen3d} Bancadas</button>
+        <button type="button" class="pixhotel-mini-btn" id="pixhotel-preset-vip" title="Chamar todos para o Mezanino VIP">${PIX_SVG.hotel} Reunião VIP</button>
+        <button type="button" class="pixhotel-mini-btn" id="pixhotel-preset-cafe" title="Hora do café">${PIX_SVG.coffee} Hora do Café</button>
       </div>
     `;
     this.hostEl.appendChild(roomInfo);
@@ -829,17 +875,26 @@ export class HabboRoomController {
     dock.innerHTML = `
       <div class="pixhotel-dock-left">
         <button type="button" class="pixhotel-dock-btn pixhotel-dock-btn--me" id="pixhotel-btn-wave" title="Acenar no quarto (o/)">
-          👋 <span>Acenar</span>
+          ${PIX_SVG.wave} <span>Acenar</span>
+        </button>
+        <button type="button" class="pixhotel-dock-btn pixhotel-dock-btn--me" id="pixhotel-btn-dance" title="Dançar Habbo Club Groove!">
+          ${PIX_SVG.dance} <span>Dançar</span>
+        </button>
+        <button type="button" class="pixhotel-dock-btn pixhotel-dock-btn--me" id="pixhotel-btn-coffee" title="Ir tomar espresso na cafeteria">
+          ${PIX_SVG.coffee} <span>Café</span>
+        </button>
+        <button type="button" class="pixhotel-dock-btn pixhotel-dock-btn--me" id="pixhotel-btn-focus" title="Centralizar câmera suavemente">
+          ${PIX_SVG.focus} <span>Focar</span>
         </button>
         <select class="pixhotel-target-select" id="pixhotel-chat-target" title="Escolher com quem falar">
-          <option value="agent-00-researcher">🗣️ 00 Vicente (Pesquisador)</option>
-          <option value="agent-01-dev" selected>🗣️ 01 Dev (Full-Stack)</option>
-          <option value="agent-02-fx-audio">🗣️ 02 FX & Áudio</option>
-          <option value="agent-03-qa">🗣️ 03 QA Auditor</option>
-          <option value="agent-04-user">🗣️ 04 User</option>
-          <option value="agent-05-art">🗣️ 05 Art XP</option>
-          <option value="agent-06-ux-ui">🗣️ 06 UX/UI</option>
-          <option value="agent-07-release">🗣️ 07 Release (Cloud)</option>
+          <option value="agent-00-researcher">00 Vicente (Pesquisador)</option>
+          <option value="agent-01-dev" selected>01 Dev (Full-Stack)</option>
+          <option value="agent-02-fx-audio">02 FX & Áudio</option>
+          <option value="agent-03-qa">03 QA Auditor</option>
+          <option value="agent-04-user">04 User</option>
+          <option value="agent-05-art">05 Art XP</option>
+          <option value="agent-06-ux-ui">06 UX/UI</option>
+          <option value="agent-07-release">07 Release (Cloud)</option>
         </select>
       </div>
       <form class="pixhotel-chat-form" id="pixhotel-chat-form">
@@ -854,16 +909,16 @@ export class HabboRoomController {
       </form>
       <div class="pixhotel-dock-right">
         <button type="button" class="pixhotel-dock-btn pixhotel-dock-btn--catalog" id="pixhotel-btn-catalog">
-          🛒 <span>Catálogo Mobis</span>
+          ${PIX_SVG.catalog} <span>Catálogo Mobis</span>
         </button>
         <button type="button" class="pixhotel-dock-btn" id="pixhotel-btn-move">
-          ✋ <span>Mover Mobis</span>
+          ${PIX_SVG.move} <span>Mover Mobis</span>
         </button>
         <button type="button" class="pixhotel-dock-btn pixhotel-dock-btn--3d" id="pixhotel-btn-3d">
-          📽️ <span>Telão 3D</span>
+          ${PIX_SVG.screen3d} <span>Telão 3D</span>
         </button>
         <button type="button" class="pixhotel-dock-btn pixhotel-dock-btn--console" id="pixhotel-btn-phone">
-          📱 <span>Console PixPhone</span>
+          ${PIX_SVG.phone} <span>Console PixPhone</span>
         </button>
       </div>
     `;
@@ -876,9 +931,35 @@ export class HabboRoomController {
     dock.querySelector('#pixhotel-btn-wave')?.addEventListener('click', () => {
       const me = this.avatars.find((a) => a.isFounder);
       if (me) {
-        me.waveUntil = Date.now() + 3000;
+        me.waveUntil = Date.now() + 3400;
+        me.danceUntil = 0;
         this.pushBubble(me.id, 'o/ Olá equipe!', false);
       }
+    });
+
+    dock.querySelector('#pixhotel-btn-dance')?.addEventListener('click', () => {
+      const me = this.avatars.find((a) => a.isFounder);
+      if (me) {
+        const isDancing = Date.now() < me.danceUntil;
+        me.danceUntil = isDancing ? 0 : Date.now() + 14000;
+        if (!isDancing) {
+          this.pushBubble(me.id, '♪ Solta o som no quarto! Habbo Club Groove ativado!', false);
+        }
+      }
+    });
+
+    dock.querySelector('#pixhotel-btn-coffee')?.addEventListener('click', () => {
+      const me = this.avatars.find((a) => a.isFounder);
+      if (me) {
+        const p = this.findPath(me.gx, me.gy, 10, 5, me.id);
+        if (p.length > 0) me.path = p;
+        this.pushBubble(me.id, 'Indo buscar um espresso fresquinho no lounge!', false);
+      }
+    });
+
+    dock.querySelector('#pixhotel-btn-focus')?.addEventListener('click', () => {
+      const target = this.avatars.find((a) => a.id === this.selectedAvatarId) || this.avatars[0];
+      this.focusCameraOnTile(target.gx, target.gy);
     });
 
     dock.querySelector('#pixhotel-btn-catalog')?.addEventListener('click', () => {
@@ -1149,15 +1230,16 @@ export class HabboRoomController {
     this.cornerCardEl.innerHTML = `
       <div class="pixhotel-card__tag">HABITANTE DO QUARTO · ${av.role.toUpperCase()}</div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
-        <img src="${portraitUrl}" alt="${av.name}" style="image-rendering:pixelated;width:48px;height:48px;background:#0b0e17;border:1.5px solid ${av.shirtColor};border-radius:6px;" />
+        <img id="pixhotel-inspector-portrait" src="${portraitUrl}" alt="${av.name}" style="image-rendering:pixelated;width:48px;height:48px;background:#0b0e17;border:1.5px solid ${av.shirtColor};border-radius:6px;" />
         <div>
           <div class="pixhotel-card__title">${av.name}</div>
           <div class="pixhotel-card__desc">${av.statusText}</div>
         </div>
       </div>
       <div class="pixhotel-card__actions">
-        <button type="button" class="pixhotel-card__btn" id="pixhotel-act-talk">💬 Falar com ${av.name.split(' ').pop()}</button>
-        <button type="button" class="pixhotel-card__btn" id="pixhotel-act-call">📞 Call de Voz</button>
+        <button type="button" class="pixhotel-card__btn" id="pixhotel-act-talk">Falar com ${av.name.split(' ').pop()}</button>
+        <button type="button" class="pixhotel-card__btn" id="pixhotel-act-focus">${PIX_SVG.focus} Focar</button>
+        <button type="button" class="pixhotel-card__btn" id="pixhotel-act-call">${PIX_SVG.phone} Call</button>
       </div>
     `;
     this.cornerCardEl.querySelector('#pixhotel-act-talk')?.addEventListener('click', () => {
@@ -1165,6 +1247,9 @@ export class HabboRoomController {
         this.targetSelectEl.value = av.id;
       }
       this.chatInputEl?.focus();
+    });
+    this.cornerCardEl.querySelector('#pixhotel-act-focus')?.addEventListener('click', () => {
+      this.focusCameraOnTile(av.gx, av.gy);
     });
     this.cornerCardEl.querySelector('#pixhotel-act-call')?.addEventListener('click', () => {
       triggerPhoneModal();
@@ -1186,8 +1271,8 @@ export class HabboRoomController {
       this.isDraggingCam = true;
       this.dragStartX = e.clientX;
       this.dragStartY = e.clientY;
-      this.camStartX = this.camX;
-      this.camStartY = this.camY;
+      this.camStartX = this.targetCamX;
+      this.camStartY = this.targetCamY;
       this.pointerDownDist = 0;
     });
 
@@ -1202,8 +1287,10 @@ export class HabboRoomController {
         const dy = e.clientY - this.dragStartY;
         this.pointerDownDist = Math.hypot(dx, dy);
         if (this.pointerDownDist > 5) {
-          this.camX = this.camStartX + dx;
-          this.camY = this.camStartY + dy;
+          this.targetCamX = this.camStartX + dx;
+          this.targetCamY = this.camStartY + dy;
+          this.camX = this.targetCamX;
+          this.camY = this.targetCamY;
         }
       }
 
@@ -1226,8 +1313,8 @@ export class HabboRoomController {
       (e) => {
         if (!this.active) return;
         e.preventDefault();
-        const factor = e.deltaY < 0 ? 1.1 : 0.91;
-        this.zoom = Math.max(0.65, Math.min(1.85, this.zoom * factor));
+        const factor = e.deltaY < 0 ? 1.12 : 0.89;
+        this.targetZoom = Math.max(0.65, Math.min(1.9, this.targetZoom * factor));
       },
       { passive: false },
     );
@@ -1235,6 +1322,21 @@ export class HabboRoomController {
 
   private handleCanvasClick(mx: number, my: number): void {
     const tile = this.screenToIso(mx, my);
+    if (tile) {
+      // Spawna onda isométrica 2:1 de clique no ladrilho!
+      this.particles.push({
+        kind: 'ripple',
+        gx: tile.gx,
+        gy: tile.gy,
+        gz: this.getTileLevel(tile.gx, tile.gy),
+        offsetX: 0,
+        offsetY: 0,
+        vy: 0,
+        color: '#fbbf24',
+        createdAt: Date.now(),
+        durationMs: 420,
+      });
+    }
 
     if (this.placingType && tile) {
       this.furni.push({
@@ -1341,6 +1443,13 @@ export class HabboRoomController {
   private updateSimulation(dt: number): void {
     const wallNow = Date.now();
 
+    // Interpolação suave (lerp) de câmera e zoom a 60fps
+    const camLerp = Math.min(1, 10 * dt);
+    const zoomLerp = Math.min(1, 12 * dt);
+    this.camX += (this.targetCamX - this.camX) * camLerp;
+    this.camY += (this.targetCamY - this.camY) * camLerp;
+    this.zoom += (this.targetZoom - this.zoom) * zoomLerp;
+
     const snapAgents = this.store.snapshot?.agents || [];
     for (const sa of snapAgents) {
       const match = this.avatars.find((av) => av.id === sa.id || av.name.toLowerCase().includes(sa.name.toLowerCase()));
@@ -1349,7 +1458,16 @@ export class HabboRoomController {
       }
     }
 
+    const emitVfxNow = wallNow - this.lastVfxEmitAt >= 680;
+    if (emitVfxNow) this.lastVfxEmitAt = wallNow;
+
     for (const av of this.avatars) {
+      // Relógio de piscar assíncrono por personagem (desacoplado da respiração!)
+      if (wallNow >= av.nextBlinkAt) {
+        av.blinkUntil = wallNow + 145;
+        av.nextBlinkAt = wallNow + 2700 + Math.random() * 2400;
+      }
+
       if (av.path.length > 0) {
         av.action = 'walk';
         const next = av.path[0];
@@ -1362,6 +1480,21 @@ export class HabboRoomController {
           av.dir = dx > 0 ? 'SE' : 'NW';
         } else {
           av.dir = dy > 0 ? 'SW' : 'NE';
+        }
+
+        if (emitVfxNow && Math.random() < 0.65) {
+          this.particles.push({
+            kind: 'dust',
+            gx: av.gx + 0.5,
+            gy: av.gy + 0.5,
+            gz: this.getTileLevel(Math.round(av.gx), Math.round(av.gy)),
+            offsetX: (Math.random() - 0.5) * 8,
+            offsetY: 0,
+            vy: -12,
+            color: '#e2e8f0',
+            createdAt: wallNow,
+            durationMs: 420,
+          });
         }
 
         if (dist <= speed) {
@@ -1378,7 +1511,10 @@ export class HabboRoomController {
         av.gx = rx;
         av.gy = ry;
 
-        if (wallNow < av.waveUntil) {
+        if (wallNow < av.danceUntil) {
+          av.action = 'dance';
+          av.dir = 'SE';
+        } else if (wallNow < av.waveUntil) {
           av.action = 'wave';
         } else {
           const seat = this.isSeatTile(rx, ry);
@@ -1390,11 +1526,61 @@ export class HabboRoomController {
               av.action = 'sit';
               av.dir = seat.rot === 0 ? 'SE' : 'SW';
             }
-          } else if (rx >= 10 && ry >= 5 && ry <= 8) {
+          } else if (rx >= 9 && ry >= 5 && ry <= 8) {
             av.action = 'coffee';
             av.dir = 'SW';
           } else {
             av.action = 'idle';
+          }
+        }
+
+        // Emite micro-partículas pixeladas conforme a atividade do agente
+        if (emitVfxNow) {
+          const gz = this.getTileLevel(rx, ry);
+          if (av.action === 'type' && Math.random() < 0.42) {
+            const tokens = ['{ }', '<>', '01', 'fn', 'OK', 'TS'];
+            this.particles.push({
+              kind: 'glyph',
+              gx: rx + 0.5,
+              gy: ry + 0.2,
+              gz,
+              offsetX: (Math.random() - 0.5) * 18,
+              offsetY: -54,
+              vy: -18,
+              text: tokens[Math.floor(Math.random() * tokens.length)],
+              color: Math.random() < 0.5 ? '#22c55e' : '#38bdf8',
+              createdAt: wallNow,
+              durationMs: 1150,
+            });
+          } else if (av.action === 'dance' && Math.random() < 0.85) {
+            const notes = ['♪', '♫', '★'];
+            this.particles.push({
+              kind: 'glyph',
+              gx: rx + 0.5,
+              gy: ry + 0.5,
+              gz,
+              offsetX: (Math.random() - 0.5) * 22,
+              offsetY: -58,
+              vy: -22,
+              text: notes[Math.floor(Math.random() * notes.length)],
+              color: Math.random() < 0.5 ? '#fbbf24' : '#f472b6',
+              createdAt: wallNow,
+              durationMs: 1200,
+            });
+          } else if (av.action === 'coffee' && Math.random() < 0.45) {
+            this.particles.push({
+              kind: 'glyph',
+              gx: rx + 0.5,
+              gy: ry + 0.5,
+              gz,
+              offsetX: 10 + (Math.random() - 0.5) * 6,
+              offsetY: -44,
+              vy: -15,
+              text: '~',
+              color: '#fde68a',
+              createdAt: wallNow,
+              durationMs: 950,
+            });
           }
         }
 
@@ -1419,6 +1605,15 @@ export class HabboRoomController {
             if (p.length > 0) av.path = p;
           }
         }
+      }
+    }
+
+    // Atualiza partículas VFX
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const pt = this.particles[i];
+      pt.offsetY += pt.vy * dt;
+      if (wallNow - pt.createdAt >= pt.durationMs) {
+        this.particles.splice(i, 1);
       }
     }
 
@@ -1490,11 +1685,12 @@ export class HabboRoomController {
       item.draw();
     }
 
-    // 5B. Iluminação ambiente pixelada (glows de luminárias, telas, fliperama e racks)
+    // 5B. Iluminação ambiente pixelada (glows de luminárias, telas, fliperama e racks) + Partículas VFX
     this.drawAmbientFurniGlows(ctx, S, now);
+    this.drawParticles(ctx, S);
 
-    // 6. Balões de Chat em Cascata com Retrato Pixel Art 24x24
-    this.drawCascadingBubbles(ctx);
+    // 6. Balões de Chat em Cascata com Retrato Pixel Art 24x24 Animado e Pop-In Elástico
+    this.drawCascadingBubbles(ctx, now);
   }
 
   private drawArchitecturalLighting(ctx: CanvasRenderingContext2D, S: number): void {
@@ -1787,20 +1983,24 @@ export class HabboRoomController {
     S: number,
     now: number,
   ): void {
+    const wallNow = Date.now();
     const isSel = this.selectedAvatarId === av.id;
-    const isTalking = Date.now() < av.talkUntil;
+    const isTalking = wallNow < av.talkUntil;
+    const isBlinking = wallNow < av.blinkUntil;
     const frameIdx =
       av.action === 'walk'
-        ? Math.floor(now / 130) % 4
-        : av.action === 'type'
-          ? Math.floor(now / 120) % 4
-          : Math.floor(now / 220) % 4;
+        ? Math.floor(now / 110) % 8
+        : av.action === 'dance'
+          ? Math.floor(now / 135) % 8
+          : av.action === 'type'
+            ? Math.floor(now / 100) % 8
+            : Math.floor(now / 210) % 8;
 
     if (isSel) {
       this.drawTileCursor(ctx, Math.round(av.gx), Math.round(av.gy), gz, S);
     }
 
-    const spr = getHabboAvatarSprite(av, av.dir, av.action, frameIdx, isTalking);
+    const spr = getHabboAvatarSprite(av, av.dir, av.action, frameIdx, isTalking, isBlinking);
     const feetPos = this.isoToScreen(av.gx + 0.5, av.gy + 0.5, gz);
 
     ctx.drawImage(
@@ -1814,7 +2014,17 @@ export class HabboRoomController {
     // Crachá flutuante acima da cabeça do avatar
     ctx.save();
     ctx.font = `bold ${Math.max(10, Math.round(10.5 * this.zoom))}px Tahoma, sans-serif`;
-    const label = av.name;
+    const actPrefix =
+      isTalking
+        ? '♪ '
+        : av.action === 'dance'
+          ? '★ '
+          : av.action === 'type'
+            ? '</> '
+            : av.action === 'coffee'
+              ? '~ '
+              : '';
+    const label = `${actPrefix}${av.name}`;
     const tw = ctx.measureText(label).width;
     const tagX = Math.round(feetPos.x - tw / 2 - 6);
     const tagY = Math.round(feetPos.y - 46 * S - 16);
@@ -1834,9 +2044,56 @@ export class HabboRoomController {
     ctx.restore();
   }
 
-  private drawCascadingBubbles(ctx: CanvasRenderingContext2D): void {
+  private drawParticles(ctx: CanvasRenderingContext2D, S: number): void {
+    const wallNow = Date.now();
     ctx.save();
     ctx.imageSmoothingEnabled = false;
+
+    for (const pt of this.particles) {
+      const progress = Math.max(0, Math.min(1, (wallNow - pt.createdAt) / pt.durationMs));
+      const alpha = 1 - progress;
+      const base = this.isoToScreen(pt.gx + 0.5, pt.gy + 0.5, pt.gz);
+
+      if (pt.kind === 'ripple') {
+        const rx = (8 + progress * 20) * this.zoom;
+        const ry = rx * 0.5;
+        ctx.strokeStyle = `rgba(251, 191, 36, ${alpha.toFixed(2)})`;
+        ctx.lineWidth = Math.max(1.5, 2 * this.zoom);
+        ctx.beginPath();
+        ctx.moveTo(base.x, base.y - ry);
+        ctx.lineTo(base.x + rx, base.y);
+        ctx.lineTo(base.x, base.y + ry);
+        ctx.lineTo(base.x - rx, base.y);
+        ctx.closePath();
+        ctx.stroke();
+      } else if (pt.kind === 'dust') {
+        ctx.fillStyle = `rgba(226, 232, 240, ${(alpha * 0.65).toFixed(2)})`;
+        const px = Math.round(base.x + pt.offsetX * this.zoom);
+        const py = Math.round(base.y + pt.offsetY * this.zoom);
+        const sz = Math.max(2, Math.round(2 * S));
+        ctx.fillRect(px, py, sz, sz);
+      } else if (pt.kind === 'glyph' && pt.text) {
+        ctx.globalAlpha = alpha;
+        ctx.font = `bold ${Math.max(10, Math.round(10 * this.zoom))}px Tahoma, monospace`;
+        ctx.textAlign = 'center';
+        const px = Math.round(base.x + pt.offsetX * this.zoom);
+        const py = Math.round(base.y + pt.offsetY * this.zoom);
+        ctx.fillStyle = '#090d16';
+        ctx.fillText(pt.text, px + 1, py + 1);
+        ctx.fillStyle = pt.color;
+        ctx.fillText(pt.text, px, py);
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    ctx.restore();
+  }
+
+  private drawCascadingBubbles(ctx: CanvasRenderingContext2D, now: number): void {
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    const wallNow = Date.now();
+    const lipFrame = Math.floor(now / 115) % 4;
 
     for (const b of this.bubbles) {
       const prefix = `${b.speakerName}: `;
@@ -1850,6 +2107,23 @@ export class HabboRoomController {
       const w = this.canvas.clientWidth || window.innerWidth;
       const boxX = Math.round(Math.max(14, Math.min(w - totalW - 14, b.anchorScreenX - totalW * 0.5)));
       const boxY = Math.round(b.currentY);
+
+      const age = wallNow - b.createdAt;
+      let popScale = 1;
+      if (age < 110) {
+        popScale = 0.58 + (age / 110) * 0.47;
+      } else if (age < 185) {
+        popScale = 1.05 - ((age - 110) / 75) * 0.05;
+      }
+
+      ctx.save();
+      if (popScale !== 1) {
+        const cx = boxX + totalW * 0.5;
+        const cy = boxY + boxH * 0.5;
+        ctx.translate(cx, cy);
+        ctx.scale(popScale, popScale);
+        ctx.translate(-cx, -cy);
+      }
 
       // Sombra pixelada dura do balão Habbo
       ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
@@ -1870,10 +2144,17 @@ export class HabboRoomController {
       ctx.fillRect(boxX + 1, boxY + boxH - 2, 1, 1);
       ctx.fillRect(boxX + totalW - 2, boxY + boxH - 2, 1, 1);
 
-      // Cápsula lateral colorida com o Retrato Pixel Art 24x24 real do agente
+      // Cápsula lateral colorida com o Retrato Pixel Art 24x24 Animado do agente (com Lip-Sync ao falar!)
+      const speakerAv = this.avatars.find((a) => a.id === b.speakerId);
+      const isSpeakerTalking = speakerAv ? wallNow < speakerAv.talkUntil : false;
+      const isSpeakerBlinking = speakerAv ? wallNow < speakerAv.blinkUntil : false;
+      const livePortrait = speakerAv
+        ? getHabboAvatarPortrait(speakerAv, lipFrame, isSpeakerTalking, isSpeakerBlinking)
+        : b.portrait;
+
       ctx.fillStyle = b.shirtColor;
       ctx.fillRect(boxX + 3, boxY + 3, 24, boxH - 6);
-      ctx.drawImage(b.portrait, boxX + 3, boxY + 3, 24, 24);
+      ctx.drawImage(livePortrait, boxX + 3, boxY + 3, 24, 24);
 
       // Linha divisória vertical após o retrato
       ctx.fillStyle = '#cbd5e1';
@@ -1891,6 +2172,7 @@ export class HabboRoomController {
       const maxMsgChars = Math.floor((totalW - 42 - prefixW) / 6.6);
       const clippedMsg = b.text.length > maxMsgChars ? b.text.slice(0, Math.max(12, maxMsgChars - 1)) + '…' : b.text;
       ctx.fillText(clippedMsg, boxX + 34 + prefixW, boxY + boxH / 2);
+      ctx.restore();
     }
 
     ctx.restore();

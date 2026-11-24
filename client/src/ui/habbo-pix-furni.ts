@@ -1438,7 +1438,7 @@ export function getPixFurniSprite(type: string, rot: 0 | 1, frame: number): PixF
     type === 'arcade_cab' ||
     type === 'floor_lamp' ||
     type === 'water_cooler';
-  const normFrame = isAnimated ? ((Math.floor(frame) % 4) + 4) % 4 : 0;
+  const normFrame = isAnimated ? ((Math.floor(frame) % 8) + 8) % 8 : 0;
   const key = `${type}|${rot}|${normFrame}`;
 
   const cached = spriteCache.get(key);

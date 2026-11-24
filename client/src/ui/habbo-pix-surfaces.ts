@@ -450,6 +450,12 @@ export function getIsoWallCanvas(
                   col = (ix + wy) % 3 === 0 ? '#38bdf8' : '#fbbf24';
                 }
               }
+            } else if (wy === 19 && (ix === 3 + f || ix === 2 + f)) {
+              // Luz de hover-car / monorail atravessando o céu noturno em 8 frames
+              col = ix === 3 + f ? '#fef08a' : '#f43f5e';
+            } else if (ix === 8 && wy === 21) {
+              // Farol de topo de arranha-céu piscando
+              col = f % 2 === 0 ? '#ef4444' : '#7f1d1d';
             } else if ((ix === 4 && wy === 12) || (ix === 11 && wy === 14)) {
               col = f % 2 === 0 ? '#f8fafc' : '#7dd3fc';
             }
