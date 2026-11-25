@@ -43,9 +43,22 @@ function triggerPhoneModal(): void {
 }
 
 function speakNeuralLine(agentId: string, text: string): void {
-  const female = /user|art|ux/i.test(agentId);
-  const voice = female ? 'pt-BR-FranciscaNeural' : 'pt-BR-AntonioNeural';
-  const audio = new Audio(`/api/tts?voice=${encodeURIComponent(voice)}&text=${encodeURIComponent(text.slice(0, 220))}`);
+  const agentKey = /user/i.test(agentId)
+    ? 'user'
+    : /art/i.test(agentId)
+      ? 'art'
+      : /ux/i.test(agentId)
+        ? 'ux'
+        : /qa/i.test(agentId)
+          ? 'qa'
+          : /fx/i.test(agentId)
+            ? 'fx'
+            : /release/i.test(agentId)
+              ? 'release'
+              : /dev/i.test(agentId)
+                ? 'dev'
+                : 'vicente';
+  const audio = new Audio(`/api/tts/play?agent=${encodeURIComponent(agentKey)}&text=${encodeURIComponent(text.slice(0, 220))}`);
   audio.volume = 0.85;
   audio.play().catch(() => {
     if ('speechSynthesis' in window) {
@@ -241,6 +254,9 @@ export interface IsoAvatar extends HabboAvatarLook {
   blinkUntil: number;
   statusText: string;
   nextRoamAt: number;
+  walkDist: number;
+  animSeedMs: number;
+  tempoMul: number;
 }
 
 export interface IsoParticle {
@@ -282,7 +298,7 @@ export interface CascadeBubble {
   isImportant?: boolean;
 }
 
-const STORAGE_KEY_FURNI = 'pixoffice-habbo-furni-v4';
+const STORAGE_KEY_FURNI = 'pixoffice-habbo-furni-v5';
 const STORAGE_KEY_MODE = 'pixoffice-habbo-mode-v1';
 
 const GRID_W = 14;
@@ -318,20 +334,20 @@ function defaultFurniLayout(): PlacedFurni[] {
     { id: 'f-plant-vip1', type: 'palm_plant', gx: 0, gy: 0, rot: 0 },
     { id: 'f-plant-vip2', type: 'palm_plant', gx: 12, gy: 0, rot: 0 },
 
-    // Salão Principal Dev (gy = 5..12, gx = 1..8)
+    // Salão Principal Dev (gy = 5..12, gx = 1..8) — Poltronas rot=1 (abertas para NE em direção às bancadas em gy-1!)
     { id: 'f-desk-1', type: 'dev_desk', gx: 2, gy: 6, rot: 0, state: 1 },
-    { id: 'f-chair-1', type: 'exec_chair', gx: 2, gy: 7, rot: 0 },
+    { id: 'f-chair-1', type: 'exec_chair', gx: 2, gy: 7, rot: 1 },
     { id: 'f-desk-2', type: 'dev_desk', gx: 4, gy: 6, rot: 0, state: 1 },
-    { id: 'f-chair-2', type: 'exec_chair', gx: 4, gy: 7, rot: 0 },
+    { id: 'f-chair-2', type: 'exec_chair', gx: 4, gy: 7, rot: 1 },
     { id: 'f-desk-3', type: 'dev_desk', gx: 6, gy: 6, rot: 0, state: 1 },
-    { id: 'f-chair-3', type: 'exec_chair', gx: 6, gy: 7, rot: 0 },
+    { id: 'f-chair-3', type: 'exec_chair', gx: 6, gy: 7, rot: 1 },
 
     { id: 'f-desk-4', type: 'dev_desk', gx: 2, gy: 10, rot: 0, state: 1 },
-    { id: 'f-chair-4', type: 'exec_chair', gx: 2, gy: 11, rot: 0 },
+    { id: 'f-chair-4', type: 'exec_chair', gx: 2, gy: 11, rot: 1 },
     { id: 'f-desk-5', type: 'dev_desk', gx: 4, gy: 10, rot: 0, state: 1 },
-    { id: 'f-chair-5', type: 'exec_chair', gx: 4, gy: 11, rot: 0 },
+    { id: 'f-chair-5', type: 'exec_chair', gx: 4, gy: 11, rot: 1 },
     { id: 'f-desk-6', type: 'dev_desk', gx: 6, gy: 10, rot: 0, state: 1 },
-    { id: 'f-chair-6', type: 'exec_chair', gx: 6, gy: 11, rot: 0 },
+    { id: 'f-chair-6', type: 'exec_chair', gx: 6, gy: 11, rot: 1 },
 
     // Tapete Persa Central + Lounge & Café (gx = 8..13, gy = 5..12)
     { id: 'f-rug-1', type: 'rug_vip', gx: 8, gy: 8, rot: 0 },
@@ -521,7 +537,7 @@ export class HabboRoomController {
         role: 'Engenheiro Full-Stack',
         gx: 2,
         gy: 7,
-        dir: 'NW',
+        dir: 'SE',
         shirtColor: '#10b981',
         shirtDark: '#047857',
         hairColor: '#0f172a',
@@ -539,7 +555,7 @@ export class HabboRoomController {
         role: 'Especialista DSP & Shaders',
         gx: 4,
         gy: 7,
-        dir: 'NW',
+        dir: 'SE',
         shirtColor: '#8b5cf6',
         shirtDark: '#6d28d9',
         hairColor: '#312e81',
@@ -557,7 +573,7 @@ export class HabboRoomController {
         role: 'Gatekeeper de Qualidade',
         gx: 6,
         gy: 7,
-        dir: 'NW',
+        dir: 'SE',
         shirtColor: '#ef4444',
         shirtDark: '#b91c1c',
         hairColor: '#1f2937',
@@ -593,7 +609,7 @@ export class HabboRoomController {
         role: 'Diretor de Pixel Art',
         gx: 2,
         gy: 11,
-        dir: 'NW',
+        dir: 'SE',
         shirtColor: '#ec4899',
         shirtDark: '#be185d',
         hairColor: '#581c87',
@@ -611,7 +627,7 @@ export class HabboRoomController {
         role: 'Arquiteto de Interfaces',
         gx: 4,
         gy: 11,
-        dir: 'NW',
+        dir: 'SE',
         shirtColor: '#14b8a6',
         shirtDark: '#0f766e',
         hairColor: '#1e293b',
@@ -629,7 +645,7 @@ export class HabboRoomController {
         role: 'Engenheiro Cloud & Deploy',
         gx: 6,
         gy: 11,
-        dir: 'NW',
+        dir: 'SE',
         shirtColor: '#f97316',
         shirtDark: '#c2410c',
         hairColor: '#27272a',
@@ -652,6 +668,9 @@ export class HabboRoomController {
       nextBlinkAt: Date.now() + 1200 + idx * 430,
       blinkUntil: 0,
       nextRoamAt: d.roamDelay === Infinity ? Infinity : Date.now() + d.roamDelay,
+      walkDist: 0,
+      animSeedMs: idx * 719 + (idx % 3) * 310,
+      tempoMul: 0.88 + (idx % 5) * 0.06,
     }));
   }
 
@@ -727,10 +746,15 @@ export class HabboRoomController {
     const queue: Array<{ gx: number; gy: number; path: Array<{ gx: number; gy: number }> }> = [{ gx: sx, gy: sy, path: [] }];
     const visited = new Set<string>([`${sx},${sy}`]);
     const dirs = [
+      // Ortogonais prioritárias + Diagonais reais para trajetórias humanas sem zigue-zague robótico
       { dx: 1, dy: 0 },
       { dx: -1, dy: 0 },
       { dx: 0, dy: 1 },
       { dx: 0, dy: -1 },
+      { dx: 1, dy: 1 },
+      { dx: -1, dy: -1 },
+      { dx: 1, dy: -1 },
+      { dx: -1, dy: 1 },
     ];
 
     while (queue.length > 0) {
@@ -741,6 +765,15 @@ export class HabboRoomController {
         const key = `${nx},${ny}`;
         if (visited.has(key)) continue;
         if (this.isTileBlockedForWalk(nx, ny, avatarId)) continue;
+        // Evita cortar quinas de mobis sólidos em passos diagonais
+        if (d.dx !== 0 && d.dy !== 0) {
+          if (
+            this.isTileBlockedForWalk(cur.gx + d.dx, cur.gy, avatarId) ||
+            this.isTileBlockedForWalk(cur.gx, cur.gy + d.dy, avatarId)
+          ) {
+            continue;
+          }
+        }
         const nextPath = [...cur.path, { gx: nx, gy: ny }];
         if (nx === goalGx && ny === goalGy) return nextPath;
         visited.add(key);
@@ -1474,15 +1507,19 @@ export class HabboRoomController {
         const dx = next.gx - av.gx;
         const dy = next.gy - av.gy;
         const dist = Math.hypot(dx, dy);
-        const speed = 3.2 * dt;
+        // Velocidade orgânica: desacelera suavemente nos últimos 0.35 ladrilhos do destino final
+        const isLastLeg = av.path.length === 1;
+        const arrivalEase = isLastLeg && dist < 0.35 ? Math.max(0.58, dist / 0.35) : 1.0;
+        const baseTilesPerSec = 2.35 * av.tempoMul * arrivalEase;
+        const stepDist = baseTilesPerSec * dt;
 
-        if (Math.abs(dx) > Math.abs(dy)) {
+        if (Math.abs(dx) >= Math.abs(dy)) {
           av.dir = dx > 0 ? 'SE' : 'NW';
         } else {
           av.dir = dy > 0 ? 'SW' : 'NE';
         }
 
-        if (emitVfxNow && Math.random() < 0.65) {
+        if (emitVfxNow && Math.random() < 0.55) {
           this.particles.push({
             kind: 'dust',
             gx: av.gx + 0.5,
@@ -1497,13 +1534,15 @@ export class HabboRoomController {
           });
         }
 
-        if (dist <= speed) {
+        if (dist <= stepDist) {
+          av.walkDist += dist;
           av.gx = next.gx;
           av.gy = next.gy;
           av.path.shift();
         } else {
-          av.gx += (dx / dist) * speed;
-          av.gy += (dy / dist) * speed;
+          av.walkDist += stepDist;
+          av.gx += (dx / dist) * stepDist;
+          av.gy += (dy / dist) * stepDist;
         }
       } else {
         const rx = Math.round(av.gx);
@@ -1521,7 +1560,7 @@ export class HabboRoomController {
           if (seat) {
             if (this.hasDeskInFront(rx, ry)) {
               av.action = 'type';
-              av.dir = 'NW';
+              av.dir = 'SE';
             } else {
               av.action = 'sit';
               av.dir = seat.rot === 0 ? 'SE' : 'SW';
@@ -1673,6 +1712,9 @@ export class HabboRoomController {
 
     for (const av of this.avatars) {
       const gz = this.getTileLevel(Math.round(av.gx), Math.round(av.gy));
+      // Quando sentado na poltrona executiva (depth = gx + gy + 0.2), o avatar (depth = gx + gy + 0.55)
+      // é desenhado NA FRENTE do encosto da cadeira para que o encosto azul fique atrás de suas costas,
+      // deixando o rosto 3/4, mãos no teclado e gestos de mão no queixo 100% visíveis!
       const depth = av.gx + av.gy + 0.55 + gz * 0.5;
       drawList.push({
         depth,
@@ -1987,14 +2029,16 @@ export class HabboRoomController {
     const isSel = this.selectedAvatarId === av.id;
     const isTalking = wallNow < av.talkUntil;
     const isBlinking = wallNow < av.blinkUntil;
+    // Relógio individual dessincronizado por agente + passada de caminhada atrelada à distância física percorrida (zero foot-sliding!)
+    const localClock = (now + av.animSeedMs) * av.tempoMul;
     const frameIdx =
       av.action === 'walk'
-        ? Math.floor(now / 110) % 8
+        ? Math.floor(av.walkDist * 8.2) % 16
         : av.action === 'dance'
-          ? Math.floor(now / 135) % 8
+          ? Math.floor(localClock / 145) % 16
           : av.action === 'type'
-            ? Math.floor(now / 100) % 8
-            : Math.floor(now / 210) % 8;
+            ? Math.floor(localClock / 120) % 16
+            : Math.floor(localClock / 235) % 16;
 
     if (isSel) {
       this.drawTileCursor(ctx, Math.round(av.gx), Math.round(av.gy), gz, S);

@@ -40647,7 +40647,7 @@ function handleTtsRoute(req, res, path, url) {
         res.end(mp3);
       } catch (err) {
         log.warn(`[tts/play] Falha: ${err?.message ?? err}`);
-        if (!res.headersSent) sendJson2(res, 502, { error: "falha na s\xEDntese neural" });
+        if (!res.headersSent) sendJson2(res, 200, { fallback: true });
       }
     })();
     return true;
@@ -40674,7 +40674,7 @@ function handleTtsRoute(req, res, path, url) {
       const pitch = safePitch(body2?.pitch, computed.pitch);
       const mp3 = await synthesizeEdgeMp3(text2, voice, rate, pitch);
       if (!mp3.length) {
-        sendJson2(res, 502, { error: "s\xEDntese retornou \xE1udio vazio" });
+        sendJson2(res, 200, { fallback: true });
         return;
       }
       res.writeHead(200, {
@@ -40689,9 +40689,9 @@ function handleTtsRoute(req, res, path, url) {
         sendJson2(res, err.status, { error: err.message });
         return;
       }
-      log.warn(`[tts] Falha na s\xEDntese neural: ${err?.message ?? err}`);
+      log.warn(`[tts] Fallback local de voz: ${err?.message ?? err}`);
       if (!res.headersSent) {
-        sendJson2(res, 502, { error: "falha na s\xEDntese neural" });
+        sendJson2(res, 200, { fallback: true });
       }
     }
   })();

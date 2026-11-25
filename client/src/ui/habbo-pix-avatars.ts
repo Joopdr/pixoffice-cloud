@@ -1,8 +1,10 @@
 // Motor de Avatares Isométricos em Pixel Art (Proporção Clássica Habbo Hotel 2006 / Chibi Isométrico 3-Cabeças)
 // Resolução nativa 1x: 32x52 px com âncora nos pés (16, 47).
-// Rodada 2 de Polimento Crítico: Anatomia 3/4 Isométrica Real (rosto virado na diagonal 2:1 com orelha de um só lado,
-// olhos deslocados +2px para a face frontal, cabelos orgânicos com volume 3D e franja em 3/4, tronco em 3/4 com
-// jaqueta aberta / colete & gravata / moletom tech, tênis bicolor com sola #e2e8f0 e postura sentada natural em L).
+// Rodada 3 de Humanização & Cinemática de Estúdio:
+// - Articulação orgânica com coxa + joelho dobrando + canela + rotação do pé (calcanhar -> planta -> ponta)
+// - Braços com ombro + cotovelo articulado + antebraço + punho (zero blocos retangulares rígidos)
+// - Micro-gestos humanos em 16 fases (0..15): olhar curioso para o lado, inclinar cabeça, coçar/ajustar queixo ou óculos,
+//   pausa para pensar durante a digitação, virar página/ler monitor, e balanço natural de quadril na dança.
 
 import { mix, ramp, shade, type Ramp } from '../art/core/color';
 import { PixelBuf, type Palette } from '../art/core/pixbuf';
@@ -88,13 +90,6 @@ function lookKey(look: HabboAvatarLook): string {
 // TEMPLATES ASCII ESCULPIDOS EM 3/4 ISOMÉTRICO REAL (CABEÇA 15x15 E CABELOS 3D)
 // ============================================================================
 
-// Cabeça arredondada isométrica 3/4 olhando para SE (diagonal inferior-direita):
-// - Orelha visível APENAS no lado esquerdo (colunas 0..1, x = 9..10 no canvas).
-// - Têmpora e maxilar esquerdos sombreados, face central/direita iluminada e bochecha direita (col 13, x = 22)
-//   curvada e saliente como no Habbo Hotel clássico!
-// Legenda:
-// L = pele iluminada (testa/maçã do rosto), s = pele base, S = sombra lateral/mandíbula,
-// D = sombra profunda (sob a franja e sob o queixo), r = concha da orelha, b = rubor das bochechas
 const HEAD_3Q_SE: readonly string[] = [
   '.....DDDDDD....',
   '...DDLLLLLsss..',
@@ -113,8 +108,6 @@ const HEAD_3Q_SE: readonly string[] = [
   '......DDDDD....',
 ];
 
-// Cabeça em 3/4 de costas olhando para NE (diagonal superior-direita):
-// - Nuca arredondada à esquerda/centro, orelha lateral e perfil direito do maxilar visível à direita.
 const HEAD_3Q_NE: readonly string[] = [
   '.....DDDDDD....',
   '...DDssssssSS..',
@@ -133,11 +126,6 @@ const HEAD_3Q_NE: readonly string[] = [
   '...............',
 ];
 
-// 4 Estilos de Cabelo Esculpidos com Volume 3D, Silhueta Orgânica Arredondada e Franja Diagonal 3/4
-// Grade de 16 colunas (aplicada em hx = 8, cobrindo x = 8..23):
-// o = base, h = meio-tom claro, H = cluster de brilho especular no topo-esquerdo, d = sombra, D = sombra profunda
-
-// Estilo 0: Habbo Classic Layered Swoop (franja diagonal caindo em 3/4 sobre a testa + costeleta antes da orelha)
 const HAIR_0_SE: readonly string[] = [
   '.....oooooo.....',
   '...oohhhhhhooo..',
@@ -166,7 +154,6 @@ const HAIR_0_NE: readonly string[] = [
   '...dddddddddd...',
 ];
 
-// Estilo 1: Spiky Anime / Tech Dev (mechas recortadas orgânicas em 3D com topete projetado para SE)
 const HAIR_1_SE: readonly string[] = [
   '....oo...oo.....',
   '..oohho.ohhoo...',
@@ -194,7 +181,6 @@ const HAIR_1_NE: readonly string[] = [
   '....ddddddddd...',
 ];
 
-// Estilo 2: Side-Part / Artista Volumoso com repartição profunda (D) e mecha longa emoldurando o rosto 3/4
 const HAIR_2_SE: readonly string[] = [
   '.....ooooooo....',
   '...ooDhhhhhhoo..',
@@ -223,7 +209,6 @@ const HAIR_2_NE: readonly string[] = [
   '...ddddddddddd..',
 ];
 
-// Estilo 3: Pompadour / Cacheado Esculpido (volume alto arredondado com textura de luz/sombra)
 const HAIR_3_SE: readonly string[] = [
   '....oohhhhhoo...',
   '..oohhHHHHhhhoo.',
@@ -278,8 +263,10 @@ function buildPalettes(look: HabboAvatarLook): AvatarPalettes {
 }
 
 // ============================================================================
-// SAPATOS BICOLOR & PERNAS EM 3/4 (CAMINHADA ISOMÉTRICA E POSTURA SENTADA EM "L")
+// SAPATOS COM INCLINAÇÃO HUMANA (FLAT / HEEL-STRIKE / TOE-OFF) & PERNAS ARTICULADAS
 // ============================================================================
+
+type FootTilt = 'flat' | 'heel' | 'toe';
 
 function drawSneaker(
   buf: PixelBuf,
@@ -288,22 +275,96 @@ function drawSneaker(
   shoes: Ramp,
   accentColor: string,
   isFrontFoot: boolean,
+  tilt: FootTilt = 'flat',
 ): void {
-  // Tênis / Sapato isométrico arredondado com bico projetado para a direita (SE),
-  // detalhe colorido no cabedal, brilho especular na ponta e sola clara de 1px (#e2e8f0)
   const w = isFrontFoot ? 6 : 5;
   const upperCol = isFrontFoot ? shoes.base : shoes.dk;
   const tongueCol = isFrontFoot ? shoes.lt : shoes.base;
+  const soleCol = isFrontFoot ? '#e2e8f0' : '#cbd5e1';
 
-  // Cano / língua do tênis
+  if (tilt === 'heel') {
+    // Pé aterrissando com calcanhar apoiado e bico apontando 1px para cima (humano caminhando!)
+    buf.hline(x + 1, x + w - 2, y, tongueCol);
+    buf.set(x + 2, y, accentColor);
+    buf.rect(x, y + 1, w - 1, 1, upperCol);
+    buf.set(x + w - 1, y, '#ffffff'); // bico levantado 1px
+    buf.hline(x, x + w - 2, y + 2, soleCol);
+    buf.set(x + w - 1, y + 1, soleCol);
+    buf.set(x, y + 2, '#94a3b8');
+    return;
+  }
+
+  if (tilt === 'toe') {
+    // Pé impulsionando o chão (calcanhar levantado 1px atrás, ponta apoiada)
+    buf.hline(x + 1, x + w - 2, y - 1, tongueCol);
+    buf.set(x + 2, y - 1, accentColor);
+    buf.rect(x, y, w - 1, 1, upperCol);
+    buf.rect(x + 2, y + 1, w - 2, 1, upperCol);
+    buf.set(x + w - 2, y + 1, '#ffffff');
+    buf.hline(x, x + 1, y + 1, soleCol);
+    buf.hline(x + 2, x + w - 1, y + 2, soleCol);
+    return;
+  }
+
+  // Pé plantado reto no chão ('flat')
   buf.hline(x + 1, x + w - 2, y, tongueCol);
-  buf.set(x + 2, y, accentColor); // detalhe da cor da camisa na lingueta
-  // Corpo arredondado do calçado
+  buf.set(x + 2, y, accentColor);
   buf.rect(x, y + 1, w, 1, upperCol);
-  buf.set(x + w - 2, y + 1, '#ffffff'); // biqueira / brilho de 1px na ponta
-  // Sola bicolor clara de 1px (#e2e8f0 / #cbd5e1) — assinatura clássica de leitura nítida no piso!
-  buf.hline(x, x + w - 1, y + 2, isFrontFoot ? '#e2e8f0' : '#cbd5e1');
-  buf.set(x, y + 2, '#94a3b8'); // calcanhar sombreado
+  buf.set(x + w - 2, y + 1, '#ffffff');
+  buf.hline(x, x + w - 1, y + 2, soleCol);
+  buf.set(x, y + 2, '#94a3b8');
+}
+
+function drawArticulatedLeg(
+  buf: PixelBuf,
+  hipX: number,
+  hipY: number,
+  kneeDx: number,
+  kneeDy: number,
+  footDx: number,
+  footDy: number,
+  pants: Ramp,
+  shoes: Ramp,
+  accentCol: string,
+  isFrontLeg: boolean,
+  tilt: FootTilt,
+): void {
+  // Coxa (y = hipY .. hipY + 3)
+  const kx = hipX + kneeDx;
+  const ky = hipY + 4 + kneeDy;
+  const fx = hipX + footDx;
+  const fy = hipY + 8 + footDy;
+
+  const mainCol = isFrontLeg ? pants.base : pants.dk;
+  const shadowCol = pants.dd;
+  const lightCol = isFrontLeg ? pants.lt : pants.base;
+
+  // Desenha a coxa conectando quadril ao joelho com espessura de 4px
+  for (let step = 0; step <= 4; step++) {
+    const t = step / 4;
+    const cx = Math.round(hipX + (kx - hipX) * t);
+    const cy = Math.round(hipY + (ky - hipY) * t);
+    buf.rect(cx, cy, 4, 1, mainCol);
+    buf.set(cx, cy, shadowCol);
+    buf.set(cx + 2, cy, lightCol);
+    if (isFrontLeg) buf.set(cx + 3, cy, pants.dk);
+  }
+
+  // Desenha a canela conectando joelho ao tornozelo com espessura de 4px
+  for (let step = 0; step <= 4; step++) {
+    const t = step / 4;
+    const cx = Math.round(kx + (fx - kx) * t);
+    const cy = Math.round(ky + (fy - ky) * t);
+    buf.rect(cx, cy, 4, 1, mainCol);
+    buf.set(cx, cy, shadowCol);
+    buf.set(cx + 2, cy, lightCol);
+    if (isFrontLeg && step === 0) {
+      // Brilho de dobra no joelho
+      buf.set(cx + 1, cy, pants.hi);
+    }
+  }
+
+  drawSneaker(buf, fx, fy, shoes, accentCol, isFrontLeg, tilt);
 }
 
 function drawLegsAndShoes(
@@ -311,16 +372,17 @@ function drawLegsAndShoes(
   pal: AvatarPalettes,
   look: HabboAvatarLook,
   action: HabboAction,
-  f4: number,
+  f16: number,
   isFront: boolean,
 ): void {
   const { pants, shoes, shirt } = pal;
+  const f8 = f16 % 8;
 
   // Postura Sentada ('sit' e 'type') Natural em "L" na diagonal isométrica 2:1:
-  // O quadril fica recuado no assento (x = 11..19, y = 36..39), as coxas avançam na diagonal SE (x + 3, y + 2),
-  // os joelhos dobram em x = 16..22 e as canelas descem até os tênis apoiados à frente (x = 16..24, y = 44..46)!
   if (action === 'sit' || action === 'type') {
-    // Cinto com fivela na cintura sentada (y = 35)
+    // Em 'sit', a perna dianteira dá uma leve balançada relaxada nos frames 11..14
+    const footTap = action === 'sit' && (f16 === 11 || f16 === 13) ? -1 : 0;
+
     buf.hline(11, 20, 35, '#0f172a');
     if (isFront) {
       buf.rect(17, 35, 2, 1, look.accessory === 'crown' ? '#fbbf24' : '#e2e8f0');
@@ -330,76 +392,142 @@ function drawLegsAndShoes(
     buf.rect(11, 36, 9, 3, pants.dk);
     buf.hline(11, 14, 38, pants.dd);
 
-    // Perna traseira (esquerda na tela) dobrada na diagonal SE
-    buf.rect(13, 38, 4, 3, pants.dk); // coxa avançando
-    buf.rect(15, 40, 4, 4, pants.dd); // joelho e canela descendo
-    drawSneaker(buf, 15, 43, shoes, shirt.base, false);
+    // Perna traseira dobrada na diagonal SE
+    buf.rect(13, 38, 4, 3, pants.dk);
+    buf.rect(15, 40, 4, 4, pants.dd);
+    drawSneaker(buf, 15, 43, shoes, shirt.base, false, 'flat');
 
-    // Perna dianteira (direita na tela) iluminada na coxa e joelho dobrado à frente
-    buf.rect(16, 37, 5, 3, pants.base); // coxa frontal
-    buf.hline(17, 20, 37, pants.lt); // luz superior na coxa sentada
-    buf.vline(16, 38, 43, pants.dd); // vinco escuro separando as duas pernas
-    buf.rect(18, 39, 4, 5, pants.base); // joelho e canela frontal
-    buf.vline(20, 39, 43, pants.lt); // brilho vertical na canela
-    drawSneaker(buf, 19, 44, shoes, shirt.lt, true);
+    // Perna dianteira iluminada na coxa e joelho dobrado à frente
+    buf.rect(16, 37, 5, 3, pants.base);
+    buf.hline(17, 20, 37, pants.lt);
+    buf.vline(16, 38, 43, pants.dd);
+    buf.rect(18, 39, 4, 5, pants.base);
+    buf.vline(20, 39, 43, pants.lt);
+    drawSneaker(buf, 19, 44 + footTap, shoes, shirt.lt, true, footTap < 0 ? 'heel' : 'flat');
     return;
   }
 
-  // Em pé, caminhando (8 frames Contact->Down->Pass->Up x 2) ou dançando (8 frames Club Groove):
-  let backDx = 0;
-  let backDy = 0;
-  let frontDx = 0;
-  let frontDy = 0;
+  // Cinemática Humana de Caminhada em 8 Fases com Articulação de Joelho & Calcanhar-Ponta:
+  // Fase 0 (Contact R): Perna frontal esticada à frente apoiando calcanhar ('heel'), perna traseira atrás impulsionando na ponta ('toe')
+  // Fase 1 (Down R): Perna frontal recebe o peso ('flat'), joelho traseiro começa a dobrar para avançar
+  // Fase 2 (Pass R): Perna frontal reta firme no chão, perna traseira passa levantada com joelho dobrado à frente ('toe')
+  // Fase 3 (High Point R): Perna traseira chuta à frente preparando contato, perna frontal começa a ficar para trás
+  // Fases 4..7: Simétrico invertido para a outra perna!
+  const WALK_POSE: ReadonlyArray<{
+    bKneeDx: number;
+    bKneeDy: number;
+    bFootDx: number;
+    bFootDy: number;
+    bTilt: FootTilt;
+    fKneeDx: number;
+    fKneeDy: number;
+    fFootDx: number;
+    fFootDy: number;
+    fTilt: FootTilt;
+    hipShiftX: number;
+  }> = [
+    // 0: Contact (Frente pousa calcanhar, Trás impulsiona ponta)
+    { bKneeDx: -1, bKneeDy: 0, bFootDx: -3, bFootDy: -1, bTilt: 'toe', fKneeDx: 2, fKneeDy: 0, fFootDx: 3, fFootDy: 0, fTilt: 'heel', hipShiftX: 0 },
+    // 1: Down (Peso absorvido na perna frontal, joelho traseiro dobra)
+    { bKneeDx: 0, bKneeDy: 0, bFootDx: -2, bFootDy: -2, bTilt: 'toe', fKneeDx: 2, fKneeDy: 1, fFootDx: 2, fFootDy: 0, fTilt: 'flat', hipShiftX: 1 },
+    // 2: Pass (Perna traseira passa dobrada no ar, frontal plantada)
+    { bKneeDx: 2, bKneeDy: -1, bFootDx: 0, bFootDy: -3, bTilt: 'toe', fKneeDx: 0, fKneeDy: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+    // 3: Up / Reach (Perna traseira estende à frente, frontal empurra o chão)
+    { bKneeDx: 2, bKneeDy: -1, bFootDx: 3, bFootDy: -1, bTilt: 'heel', fKneeDx: -1, fKneeDy: 0, fFootDx: -2, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
+    // 4: Contact Oposto (Traseira pousa à frente, Frontal fica atrás na ponta)
+    { bKneeDx: 2, bKneeDy: 0, bFootDx: 3, bFootDy: 0, bTilt: 'heel', fKneeDx: -1, fKneeDy: 0, fFootDx: -3, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
+    // 5: Down Oposto (Peso na perna esquerda, joelho frontal dobra atrás)
+    { bKneeDx: 2, bKneeDy: 1, bFootDx: 2, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fKneeDy: 0, fFootDx: -2, fFootDy: -2, fTilt: 'toe', hipShiftX: -1 },
+    // 6: Pass Oposto (Perna frontal passa com joelho alto no ar)
+    { bKneeDx: 0, bKneeDy: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 2, fKneeDy: -1, fFootDx: 0, fFootDy: -3, fTilt: 'toe', hipShiftX: 0 },
+    // 7: Up / Reach Oposto (Perna frontal chuta à frente preparando calcanhar)
+    { bKneeDx: -1, bKneeDy: 0, bFootDx: -2, bFootDy: -1, bTilt: 'toe', fKneeDx: 2, fKneeDy: -1, fFootDx: 3, fFootDy: -1, fTilt: 'heel', hipShiftX: 0 },
+  ];
+
+  let pose = {
+    bKneeDx: 0,
+    bKneeDy: 0,
+    bFootDx: 0,
+    bFootDy: 0,
+    bTilt: 'flat' as FootTilt,
+    fKneeDx: 0,
+    fKneeDy: 0,
+    fFootDx: 0,
+    fFootDy: 0,
+    fTilt: 'flat' as FootTilt,
+    hipShiftX: 0,
+  };
 
   if (action === 'walk') {
-    const WALK_BACK_DX = [-3, -2, 0, 1, 3, 2, 0, -1] as const;
-    const WALK_BACK_DY = [-1, 0, 0, -2, 0, 0, -2, -1] as const;
-    const WALK_FRONT_DX = [3, 2, 0, -1, -3, -2, 0, 1] as const;
-    const WALK_FRONT_DY = [0, 0, -2, -1, -1, 0, 0, -2] as const;
-    backDx = WALK_BACK_DX[f4 % 8];
-    backDy = WALK_BACK_DY[f4 % 8];
-    frontDx = WALK_FRONT_DX[f4 % 8];
-    frontDy = WALK_FRONT_DY[f4 % 8];
+    pose = WALK_POSE[f8];
   } else if (action === 'dance') {
-    const step = f4 % 8;
-    backDx = step < 4 ? -1 : 1;
-    frontDx = step < 4 ? 1 : -1;
-    backDy = step % 2 === 1 ? -1 : 0;
-    frontDy = step % 2 === 0 ? -1 : 0;
+    // Dança com suingue de quadril e batida de calcanhar/ponta humana
+    const DANCE_POSE: typeof WALK_POSE = [
+      { bKneeDx: -1, bKneeDy: 0, bFootDx: -1, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fKneeDy: 0, fFootDx: 2, fFootDy: -1, fTilt: 'heel', hipShiftX: -1 },
+      { bKneeDx: 0, bKneeDy: 1, bFootDx: -1, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fKneeDy: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: -1 },
+      { bKneeDx: 0, bKneeDy: 0, bFootDx: 0, bFootDy: -1, bTilt: 'toe', fKneeDx: 0, fKneeDy: 0, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+      { bKneeDx: 0, bKneeDy: 1, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fKneeDy: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+      { bKneeDx: -1, bKneeDy: 0, bFootDx: -2, bFootDy: -1, bTilt: 'heel', fKneeDx: 1, fKneeDy: 0, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 1 },
+      { bKneeDx: -1, bKneeDy: 1, bFootDx: -1, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fKneeDy: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 1 },
+      { bKneeDx: 0, bKneeDy: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fKneeDy: 0, fFootDx: 0, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
+      { bKneeDx: 0, bKneeDy: 1, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fKneeDy: 1, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+    ];
+    pose = DANCE_POSE[f8];
+  } else if (action === 'idle' && (f16 === 10 || f16 === 11)) {
+    // Em pé pensando: transfere sutilmente o peso do quadril e relaxa um joelho
+    pose = {
+      ...pose,
+      fKneeDx: 1,
+      hipShiftX: 0,
+    };
   }
 
   // Cinto escuro com fivela dourada/prateada deslocada +1px para a direita (perspectiva 3/4 SE)
-  buf.hline(11, 20, 33, '#0f172a');
+  const hx = pose.hipShiftX;
+  buf.hline(11 + hx, 20 + hx, 33, '#0f172a');
   if (isFront) {
     const buckleCol = look.accessory === 'crown' ? '#fbbf24' : '#e2e8f0';
-    buf.rect(17, 33, 2, 1, buckleCol);
+    buf.rect(17 + hx, 33, 2, 1, buckleCol);
   }
   // Quadril isométrico (y = 34..35)
-  buf.rect(11, 34, 10, 2, pants.base);
-  buf.rect(11, 34, 4, 2, pants.dk);
-  buf.set(15, 35, pants.dd);
+  buf.rect(11 + hx, 34, 10, 2, pants.base);
+  buf.rect(11 + hx, 34, 4, 2, pants.dk);
+  buf.set(15 + hx, 35, pants.dd);
 
-  // Perna traseira (esquerda em SE, sombreada)
-  const bx = 11 + backDx;
-  const by = 36 + backDy;
-  buf.rect(bx, by, 4, 8, pants.dk);
-  buf.vline(bx, by, by + 7, pants.dd);
-  buf.vline(bx + 2, by, by + 7, pants.base);
-  drawSneaker(buf, bx, by + 8, shoes, shirt.base, false);
+  // Ordem de desenho das pernas: na fase 2..4 da caminhada, a perna traseira cruza para a frente
+  drawArticulatedLeg(
+    buf,
+    11 + hx,
+    36,
+    pose.bKneeDx,
+    pose.bKneeDy,
+    pose.bFootDx,
+    pose.bFootDy,
+    pants,
+    shoes,
+    shirt.base,
+    false,
+    pose.bTilt,
+  );
 
-  // Perna dianteira (direita em SE, avança 1px mais abaixo na projeção isométrica e recebe luz na coxa)
-  const fx = 16 + frontDx;
-  const fy = 36 + frontDy;
-  buf.rect(fx, fy, 4, 8, pants.base);
-  buf.vline(fx, fy, fy + 7, pants.dd); // vinco profundo entre as pernas
-  buf.vline(fx + 1, fy, fy + 7, pants.lt); // luz na face frontal da coxa
-  buf.vline(fx + 2, fy, fy + 6, pants.hi); // vinco iluminado
-  buf.vline(fx + 3, fy, fy + 7, pants.dk); // curvatura lateral externa
-  drawSneaker(buf, fx, fy + 8, shoes, shirt.lt, true);
+  drawArticulatedLeg(
+    buf,
+    16 + hx,
+    36,
+    pose.fKneeDx,
+    pose.fKneeDy,
+    pose.fFootDx,
+    pose.fFootDy,
+    pants,
+    shoes,
+    shirt.lt,
+    true,
+    pose.fTilt,
+  );
 }
 
 // ============================================================================
-// TRONCO EM 3/4 COM ROUPAS DETALHADAS (JAQUETA ABERTA / COLETE & GRAVATA / MOLETOM TECH)
+// TRONCO EM 3/4 COM TORÇÃO DE OMBROS (CONTRAPPOSTO HUMANO NA CAMINHADA E DANÇA)
 // ============================================================================
 
 function drawTorso(
@@ -407,97 +535,86 @@ function drawTorso(
   pal: AvatarPalettes,
   look: HabboAvatarLook,
   yOff: number,
+  xShift: number,
   isFront: boolean,
+  chestTwist = 0,
 ): void {
   const { shirt, skin } = pal;
-  const ty = 21 + yOff; // Tronco ocupa y = 21..32 em pé (ou 25..36 sentado)
+  const ty = 21 + yOff;
+  const tx = xShift;
   const outfit = resolveOutfitStyle(look);
 
-  // Silhueta isométrica 3/4 arredondada:
-  // O lado esquerdo (x = 10..13) é a lateral traseira sombreada; o centro-direito (x = 14..21) é o peito frontal virado para SE!
-  buf.hline(11, 20, ty, shirt.lt);
+  buf.hline(11 + tx, 20 + tx, ty, shirt.lt);
   for (let r = 1; r <= 10; r++) {
     const y = ty + r;
-    buf.set(10, y, shirt.dd);
-    buf.hline(11, 13, y, shirt.dk);
-    buf.hline(14, 17, y, shirt.base);
-    buf.hline(18, 20, y, shirt.lt);
-    buf.set(21, y, shirt.dk);
+    buf.set(10 + tx, y, shirt.dd);
+    buf.hline(11 + tx, 13 + tx, y, shirt.dk);
+    buf.hline(14 + tx, 17 + tx, y, shirt.base);
+    buf.hline(18 + tx, 20 + tx, y, shirt.lt);
+    buf.set(21 + tx, y, shirt.dk);
   }
-  // Barra inferior da jaqueta/camisa (ty + 11)
-  buf.hline(11, 14, ty + 11, shirt.dd);
-  buf.hline(15, 20, ty + 11, shirt.dk);
+  buf.hline(11 + tx, 14 + tx, ty + 11, shirt.dd);
+  buf.hline(15 + tx, 20 + tx, ty + 11, shirt.dk);
 
-  // Pescoço cilíndrico sombreado conectando cabeça ao colarinho (x = 14..17)
-  buf.rect(14, ty - 1, 4, 2, skin.dk);
-  buf.set(16, ty - 1, skin.base);
-  buf.set(17, ty - 1, skin.lt);
+  // Pescoço cilíndrico sombreado conectando cabeça ao colarinho
+  buf.rect(14 + tx, ty - 1, 4, 2, skin.dk);
+  buf.set(16 + tx, ty - 1, skin.base);
+  buf.set(17 + tx, ty - 1, skin.lt);
+
+  // O eixo central do peito gira sutilmente (+/- 1px) com o contrapposto dos ombros ao andar ou dançar!
+  const cx = 17 + tx + chestTwist;
 
   if (isFront) {
-    // Eixo central do peito em 3/4 SE fica deslocado para x = 17!
     if (outfit === 'vest_tie') {
-      // Camisa branca social por baixo + Colete/Blazer executivo com lapela e gravata imperial
-      buf.set(14, ty, '#cbd5e1');
-      buf.set(15, ty + 1, '#e2e8f0');
-      buf.set(16, ty + 2, '#ffffff');
-      buf.set(19, ty, '#ffffff');
-      buf.set(18, ty + 1, '#ffffff');
-      buf.set(17, ty + 2, '#f1f5f9');
+      buf.set(cx - 3, ty, '#cbd5e1');
+      buf.set(cx - 2, ty + 1, '#e2e8f0');
+      buf.set(cx - 1, ty + 2, '#ffffff');
+      buf.set(cx + 2, ty, '#ffffff');
+      buf.set(cx + 1, ty + 1, '#ffffff');
+      buf.set(cx, ty + 2, '#f1f5f9');
 
-      // Lapelas sombreadas do blazer em V ao redor de x = 17
-      buf.vline(15, ty + 2, ty + 8, shirt.dd);
-      buf.vline(19, ty + 2, ty + 8, shirt.hi);
+      buf.vline(cx - 2, ty + 2, ty + 8, shirt.dd);
+      buf.vline(cx + 2, ty + 2, ty + 8, shirt.hi);
 
-      // Gravata vermelha/dourada no eixo 3/4 (x = 17)
       const tieCol = look.accessory === 'crown' ? '#dc2626' : '#f59e0b';
       const tieHi = look.accessory === 'crown' ? '#fbbf24' : '#fef08a';
-      buf.set(17, ty + 2, tieHi); // nó da gravata
-      buf.vline(17, ty + 3, ty + 9, tieCol);
-      buf.set(17, ty + 9, tieHi);
+      buf.set(cx, ty + 2, tieHi);
+      buf.vline(cx, ty + 3, ty + 9, tieCol);
+      buf.set(cx, ty + 9, tieHi);
 
-      // Lenço de bolso / crachá VIP no lado direito do peito (x = 19..20)
-      buf.set(19, ty + 4, '#ffffff');
-      buf.set(20, ty + 4, '#38bdf8');
+      buf.set(cx + 2, ty + 4, '#ffffff');
+      buf.set(cx + 3, ty + 4, '#38bdf8');
     } else if (outfit === 'hoodie') {
-      // Moletom Tech / Cyber Jacket com zíper deslocado em 3/4 (x = 17), gola estruturada e cordões claros
-      buf.hline(13, 19, ty, shirt.dd);
-      buf.hline(14, 18, ty + 1, '#1e293b');
-      // Trilho do zíper frontal em x = 17
-      buf.vline(17, ty + 2, ty + 11, '#0f172a');
-      buf.vline(16, ty + 2, ty + 10, shirt.hi);
-      // Cordões brancos/ciano do capuz descendo no peito
-      buf.vline(15, ty + 2, ty + 5, '#e2e8f0');
-      buf.vline(18, ty + 2, ty + 5, '#38bdf8');
-      // Bolso canguru sombreado na parte inferior
-      buf.hline(14, 19, ty + 8, shirt.dk);
-      buf.vline(14, ty + 8, ty + 10, shirt.dd);
-      buf.vline(19, ty + 8, ty + 10, shirt.dd);
+      buf.hline(13 + tx, 19 + tx, ty, shirt.dd);
+      buf.hline(14 + tx, 18 + tx, ty + 1, '#1e293b');
+      buf.vline(cx, ty + 2, ty + 11, '#0f172a');
+      buf.vline(cx - 1, ty + 2, ty + 10, shirt.hi);
+      buf.vline(cx - 2, ty + 2, ty + 5, '#e2e8f0');
+      buf.vline(cx + 1, ty + 2, ty + 5, '#38bdf8');
+      buf.hline(14 + tx, 19 + tx, ty + 8, shirt.dk);
+      buf.vline(14 + tx, ty + 8, ty + 10, shirt.dd);
+      buf.vline(19 + tx, ty + 8, ty + 10, shirt.dd);
     } else {
-      // Jaqueta Aberta moderna sobre camiseta clara interna (eixo 3/4 em x = 16..18)
-      buf.rect(16, ty + 1, 3, 10, '#f8fafc');
-      buf.vline(16, ty + 1, ty + 10, '#cbd5e1'); // sombra interna da jaqueta sobre a camiseta
-      // Estampa gráfica minimalista na camiseta interna
-      buf.hline(16, 18, ty + 4, shirt.dk);
-      buf.set(17, ty + 5, '#38bdf8');
-      // Bordas abertas da jaqueta com brilho na lapela
-      buf.vline(15, ty + 1, ty + 11, shirt.lt);
-      buf.vline(19, ty + 1, ty + 11, shirt.hi);
-      // Colarinho dobrado
-      buf.set(14, ty, shirt.hi);
-      buf.set(19, ty, shirt.hi);
+      buf.rect(cx - 1, ty + 1, 3, 10, '#f8fafc');
+      buf.vline(cx - 1, ty + 1, ty + 10, '#cbd5e1');
+      buf.hline(cx - 1, cx + 1, ty + 4, shirt.dk);
+      buf.set(cx, ty + 5, '#38bdf8');
+      buf.vline(cx - 2, ty + 1, ty + 11, shirt.lt);
+      buf.vline(cx + 2, ty + 1, ty + 11, shirt.hi);
+      buf.set(cx - 3, ty, shirt.hi);
+      buf.set(cx + 2, ty, shirt.hi);
     }
   } else {
-    // Vista 3/4 de costas (NE): capuz/gola estruturada nas costas e costura dorsal deslocada para x = 14
-    buf.hline(12, 19, ty, shirt.hi);
-    buf.hline(11, 20, ty + 1, shirt.lt);
-    buf.hline(12, 18, ty + 2, shirt.dk);
-    buf.vline(14, ty + 2, ty + 10, shirt.dd); // costura da coluna em 3/4 traseiro
-    buf.vline(15, ty + 2, ty + 10, shirt.base);
+    buf.hline(12 + tx, 19 + tx, ty, shirt.hi);
+    buf.hline(11 + tx, 20 + tx, ty + 1, shirt.lt);
+    buf.hline(12 + tx, 18 + tx, ty + 2, shirt.dk);
+    buf.vline(14 + tx + chestTwist, ty + 2, ty + 10, shirt.dd);
+    buf.vline(15 + tx + chestTwist, ty + 2, ty + 10, shirt.base);
   }
 }
 
 // ============================================================================
-// BRAÇOS ARTICULADOS EM 3/4, MÃOS 3x3 PX E CANECA DE CAFÉ FUMEGANTE
+// BRAÇOS ARTICULADOS COM COTOVELO REAL, MÃOS 3x3 PX E MICRO-GESTOS HUMANOS
 // ============================================================================
 
 function drawHand3x3(buf: PixelBuf, x: number, y: number, skin: Ramp): void {
@@ -508,74 +625,129 @@ function drawHand3x3(buf: PixelBuf, x: number, y: number, skin: Ramp): void {
   buf.set(x, y + 2, skin.dk);
 }
 
+function drawArticulatedArm(
+  buf: PixelBuf,
+  shoulderX: number,
+  shoulderY: number,
+  elbowX: number,
+  elbowY: number,
+  handX: number,
+  handY: number,
+  shirt: Ramp,
+  skin: Ramp,
+  isFrontArm: boolean,
+): void {
+  const upperCol = isFrontArm ? shirt.base : shirt.dk;
+  const foreCol = isFrontArm ? shirt.lt : shirt.base;
+  const edgeCol = isFrontArm ? shirt.lt : shirt.dd;
+
+  // Braço superior (ombro -> cotovelo)
+  for (let s = 0; s <= 4; s++) {
+    const t = s / 4;
+    const cx = Math.round(shoulderX + (elbowX - shoulderX) * t);
+    const cy = Math.round(shoulderY + (elbowY - shoulderY) * t);
+    buf.rect(cx, cy, 3, 2, upperCol);
+    buf.set(cx, cy, edgeCol);
+  }
+
+  // Antebraço articulado (cotovelo -> punho)
+  for (let s = 0; s <= 4; s++) {
+    const t = s / 4;
+    const cx = Math.round(elbowX + (handX - elbowX) * t);
+    const cy = Math.round(elbowY + (handY - elbowY) * t);
+    buf.rect(cx, cy, 3, 2, foreCol);
+    if (isFrontArm) buf.set(cx, cy, shirt.hi);
+  }
+
+  drawHand3x3(buf, handX, handY, skin);
+}
+
 function drawBackArm(
   buf: PixelBuf,
   pal: AvatarPalettes,
   action: HabboAction,
-  f8: number,
+  f16: number,
   yOff: number,
+  xShift: number,
 ): void {
   const { shirt, skin } = pal;
   const sy = 21 + yOff;
+  const sx = 8 + xShift;
+  const f8 = f16 % 8;
 
   if (action === 'wave') {
-    const waveAngles = [0, -1, -2, -1, 0, 1, 0, -1] as const;
-    const wShift = waveAngles[f8 % 8];
-    buf.rect(7, sy - 4 + wShift, 3, 6, shirt.base);
-    buf.vline(7, sy - 4 + wShift, sy + 1 + wShift, shirt.lt);
-    buf.rect(6 + wShift, sy - 8 + wShift, 3, 5, shirt.lt);
-    drawHand3x3(buf, 5 + wShift, sy - 11 + wShift, skin);
+    // Aceno orgânico com cotovelo aberto e mão abanando em arco
+    const WAVE_HAND_X = [5, 4, 3, 4, 6, 7, 6, 5] as const;
+    const WAVE_HAND_Y = [-10, -11, -11, -10, -9, -10, -11, -10] as const;
+    drawArticulatedArm(
+      buf,
+      sx,
+      sy,
+      sx - 2,
+      sy - 4,
+      WAVE_HAND_X[f8] + xShift,
+      sy + WAVE_HAND_Y[f8],
+      shirt,
+      skin,
+      false,
+    );
     return;
   }
 
   if (action === 'dance') {
-    // No Habbo Club Dance, o braço traseiro levanta nos frames 0..3 e desce no groove nos frames 4..7
-    const up = f8 % 8 < 4;
+    // Na dança, o cotovelo dobra no ritmo do groove
+    const up = f8 < 4;
     if (up) {
-      const lift = f8 % 2 === 0 ? -1 : -2;
-      buf.rect(7, sy - 4 + lift, 3, 6, shirt.base);
-      buf.rect(6, sy - 8 + lift, 3, 4, shirt.lt);
-      drawHand3x3(buf, 5, sy - 11 + lift, skin);
+      const sway = f8 % 2 === 0 ? -1 : 1;
+      drawArticulatedArm(buf, sx, sy, sx - 2, sy - 3, sx - 3 + sway, sy - 9, shirt, skin, false);
     } else {
-      buf.rect(7, sy + 1, 3, 5, shirt.dk);
-      drawHand3x3(buf, 6, sy + 6, skin);
+      const hipTap = f8 % 2 === 0 ? 0 : 1;
+      drawArticulatedArm(buf, sx, sy, sx - 2, sy + 3, sx - 1, sy + 6 + hipTap, shirt, skin, false);
     }
     return;
   }
 
   if (action === 'type') {
-    const dy = f8 % 2 === 0 ? 0 : 1;
-    buf.rect(8, sy, 3, 6, shirt.dk);
-    buf.rect(10, sy + 5 + dy, 4, 3, shirt.base);
-    drawHand3x3(buf, 13, sy + 6 + dy, skin);
+    // Digitando com pausas humanas (fases 6, 7 e 13..15 = lendo a tela, mão repousa; demais = dedos ágeis)
+    const isReadingPause = f16 === 6 || f16 === 7 || f16 >= 13;
+    const dy = isReadingPause ? 1 : f16 % 2 === 0 ? 0 : 1;
+    const dx = isReadingPause ? 0 : f16 % 3 === 0 ? 1 : 0;
+    drawArticulatedArm(buf, sx, sy, sx, sy + 4, sx + 4 + dx, sy + 6 + dy, shirt, skin, false);
     return;
   }
 
   if (action === 'sit') {
-    buf.rect(8, sy, 3, 6, shirt.dk);
-    buf.rect(9, sy + 5, 3, 3, shirt.base);
-    drawHand3x3(buf, 10, sy + 7, skin);
+    // Braço apoiado no braço da poltrona
+    drawArticulatedArm(buf, sx, sy, sx, sy + 4, sx + 2, sy + 7, shirt, skin, false);
     return;
   }
 
   if (action === 'walk') {
-    const SWING_8 = [3, 2, 0, -2, -3, -2, 0, 2] as const;
-    const swing = SWING_8[f8 % 8];
-    buf.rect(8, sy, 3, 4, shirt.dk);
-    buf.rect(8 + Math.round(swing * 0.5), sy + 4, 3, 4, shirt.base);
-    drawHand3x3(buf, 8 + swing, sy + 8, skin);
+    // Pêndulo natural humano com dobra do cotovelo quando o braço avança à frente
+    const ELBOW_DX = [1, 1, 0, -1, -2, -1, 0, 1] as const;
+    const HAND_DX = [3, 2, 0, -2, -3, -2, 0, 2] as const;
+    const HAND_DY = [7, 7, 8, 8, 7, 7, 8, 7] as const;
+    drawArticulatedArm(
+      buf,
+      sx,
+      sy,
+      sx + ELBOW_DX[f8],
+      sy + 4,
+      sx + HAND_DX[f8],
+      sy + HAND_DY[f8],
+      shirt,
+      skin,
+      false,
+    );
     return;
   }
 
-  // Idle / Coffee: braço traseiro com secondary lag de 1 frame na respiração (f8 === 4 || f8 === 5)
-  const handLag = f8 % 8 === 4 || f8 % 8 === 5 ? 1 : 0;
-  buf.rect(8, sy, 3, 7, shirt.dk);
-  buf.vline(8, sy, sy + 6, shirt.dd);
-  buf.vline(10, sy, sy + 6, shirt.base);
-  drawHand3x3(buf, 8, sy + 7 + handLag, skin);
+  // Idle / Coffee: braço relaxado com leve flexão natural do cotovelo
+  const breathLag = f8 === 4 || f8 === 5 ? 1 : 0;
+  drawArticulatedArm(buf, sx, sy, sx - 1, sy + 4, sx, sy + 7 + breathLag, shirt, skin, false);
 }
 
-function drawCoffeeMug(buf: PixelBuf, x: number, y: number, f8: number): void {
+function drawCoffeeMug(buf: PixelBuf, x: number, y: number, f16: number): void {
   buf.rect(x, y, 5, 5, '#ffffff');
   buf.hline(x, x + 4, y + 2, '#ef4444');
   buf.hline(x, x + 4, y + 3, '#dc2626');
@@ -585,8 +757,8 @@ function drawCoffeeMug(buf: PixelBuf, x: number, y: number, f8: number): void {
   buf.set(x + 5, y + 2, '#cbd5e1');
   buf.set(x + 5, y + 3, '#94a3b8');
 
-  // Vapor em curva "S" de 8 frames
-  const phase = f8 % 8;
+  // Vapor em curva "S" suave
+  const phase = f16 % 8;
   const s1 = phase % 2 === 0 ? 0 : 1;
   const s2 = (phase + 1) % 2 === 0 ? 0 : -1;
   buf.set(x + 2 + s1, y - 2, 'rgba(255, 255, 255, 0.88)');
@@ -598,89 +770,120 @@ function drawFrontArm(
   buf: PixelBuf,
   pal: AvatarPalettes,
   action: HabboAction,
-  f8: number,
+  f16: number,
   yOff: number,
+  xShift: number,
+  talking: boolean,
 ): void {
   const { shirt, skin } = pal;
   const sy = 22 + yOff;
+  const sx = 20 + xShift;
+  const f8 = f16 % 8;
 
   if (action === 'coffee') {
-    // Leva a caneca até perto da boca nos frames 3, 4, 5 para beber um gole real!
-    const step = f8 % 8;
-    const sip = step >= 3 && step <= 5 ? -3 : step === 2 || step === 6 ? -1 : 0;
-    buf.rect(20, sy, 3, 5, shirt.base);
-    buf.vline(20, sy, sy + 4, shirt.lt);
-    buf.rect(19, sy + 3 + sip, 4, 3, shirt.lt);
-    drawHand3x3(buf, 21, sy + 3 + sip, skin);
-    drawCoffeeMug(buf, 23, sy + 1 + sip, f8);
+    // Toma um gole real apenas nas fases 4..7 de cada ciclo de 16 frames; no resto segura a caneca relaxado
+    const sip = f16 >= 4 && f16 <= 7 ? -4 : f16 === 3 || f16 === 8 ? -2 : 0;
+    const elbowOut = sip < 0 ? 2 : 0;
+    drawArticulatedArm(buf, sx, sy, sx + elbowOut, sy + 3 + Math.round(sip * 0.5), sx + 1, sy + 4 + sip, shirt, skin, true);
+    drawCoffeeMug(buf, sx + 3, sy + 2 + sip, f16);
     return;
   }
 
   if (action === 'dance') {
-    const up = f8 % 8 >= 4;
+    const up = f8 >= 4;
     if (up) {
-      const lift = f8 % 2 === 0 ? -1 : -2;
-      buf.rect(20, sy - 4 + lift, 3, 6, shirt.base);
-      buf.rect(21, sy - 8 + lift, 3, 4, shirt.lt);
-      drawHand3x3(buf, 22, sy - 11 + lift, skin);
+      const sway = f8 % 2 === 0 ? 1 : -1;
+      drawArticulatedArm(buf, sx, sy, sx + 2, sy - 3, sx + 2 + sway, sy - 9, shirt, skin, true);
     } else {
-      buf.rect(20, sy + 1, 3, 5, shirt.base);
-      drawHand3x3(buf, 21, sy + 6, skin);
+      const groove = f8 % 2 === 0 ? 1 : 0;
+      drawArticulatedArm(buf, sx, sy, sx + 1, sy + 3, sx + 1, sy + 6 + groove, shirt, skin, true);
     }
     return;
   }
 
   if (action === 'type') {
-    const dy = f8 % 2 === 1 ? 0 : 1;
-    buf.rect(20, sy, 3, 5, shirt.base);
-    buf.vline(20, sy, sy + 4, shirt.lt);
-    buf.rect(19, sy + 4 + dy, 4, 3, shirt.lt);
-    drawHand3x3(buf, 21, sy + 5 + dy, skin);
+    // Nas fases 13..15, o desenvolvedor para de digitar com uma mão e leva a mão ao queixo pensando no código!
+    if (f16 >= 13 && !talking) {
+      drawArticulatedArm(buf, sx, sy, sx + 2, sy + 2, sx - 1, sy - 3, shirt, skin, true);
+      return;
+    }
+    const isPause = f16 === 6 || f16 === 7;
+    const dy = isPause ? 1 : f16 % 2 === 1 ? 0 : 1;
+    const dx = isPause ? 1 : f16 % 4 === 0 ? -1 : 0;
+    drawArticulatedArm(buf, sx, sy, sx + 1, sy + 3, sx + dx, sy + 5 + dy, shirt, skin, true);
     return;
   }
 
   if (action === 'sit') {
-    buf.rect(20, sy, 3, 5, shirt.base);
-    buf.vline(20, sy, sy + 4, shirt.lt);
-    buf.rect(19, sy + 4, 3, 3, shirt.lt);
-    drawHand3x3(buf, 19, sy + 6, skin);
+    // Sentado conversando ou pensando: nas fases 11..13 gesticula ou apoia a mão no queixo
+    if (talking && f8 % 2 === 0) {
+      drawArticulatedArm(buf, sx, sy, sx + 1, sy + 3, sx + 2, sy + 2, shirt, skin, true);
+      return;
+    }
+    if (f16 >= 11 && f16 <= 13) {
+      drawArticulatedArm(buf, sx, sy, sx + 2, sy + 2, sx - 1, sy - 3, shirt, skin, true);
+      return;
+    }
+    drawArticulatedArm(buf, sx, sy, sx + 1, sy + 3, sx - 1, sy + 6, shirt, skin, true);
     return;
   }
 
   if (action === 'walk') {
-    const SWING_8 = [-3, -2, 0, 2, 3, 2, 0, -2] as const;
-    const swing = SWING_8[f8 % 8];
-    buf.rect(20, sy, 3, 4, shirt.base);
-    buf.vline(20, sy, sy + 3, shirt.lt);
-    buf.rect(20 + Math.round(swing * 0.5), sy + 4, 3, 4, shirt.lt);
-    drawHand3x3(buf, 20 + swing, sy + 8, skin);
+    // Balanço oposto ao braço traseiro com cotovelo flexionando para a frente (SE) quando avança
+    const ELBOW_DX = [-1, -1, 0, 1, 2, 1, 0, -1] as const;
+    const HAND_DX = [-2, -1, 0, 2, 3, 2, 0, -1] as const;
+    const HAND_DY = [7, 8, 8, 6, 5, 6, 8, 7] as const;
+    drawArticulatedArm(
+      buf,
+      sx,
+      sy,
+      sx + ELBOW_DX[f8],
+      sy + 4,
+      sx + HAND_DX[f8],
+      sy + HAND_DY[f8],
+      shirt,
+      skin,
+      true,
+    );
     return;
   }
 
-  const handLag = f8 % 8 === 4 || f8 % 8 === 5 ? 1 : 0;
-  buf.rect(20, sy, 3, 7, shirt.base);
-  buf.vline(20, sy, sy + 6, shirt.lt);
-  buf.vline(22, sy, sy + 6, shirt.dk);
-  drawHand3x3(buf, 20, sy + 7 + handLag, skin);
+  // Quando falando em pé ('idle' + talking), faz gesto expressivo humano com a mão dianteira!
+  if (talking) {
+    const gestureLift = f8 % 3 === 0 ? -3 : f8 % 3 === 1 ? -2 : -1;
+    drawArticulatedArm(buf, sx, sy, sx + 1, sy + 3, sx + 2, sy + 5 + gestureLift, shirt, skin, true);
+    return;
+  }
+
+  // Micro-gesto humano em Idle (fases 11..13 de 16): leva a mão ao queixo/óculos como alguém pensando
+  if (action === 'idle' && f16 >= 11 && f16 <= 13) {
+    drawArticulatedArm(buf, sx, sy, sx + 2, sy + 2, sx - 1, sy - 4, shirt, skin, true);
+    return;
+  }
+
+  const breathLag = f8 === 4 || f8 === 5 ? 1 : 0;
+  drawArticulatedArm(buf, sx, sy, sx + 1, sy + 4, sx, sy + 7 + breathLag, shirt, skin, true);
 }
 
 // ============================================================================
-// CABEÇA E ROSTO EM PERSPECTIVA 3/4 REAL (LIP-SYNC A/E/O + PISCAR + REFLEXO DE TELA)
+// CABEÇA E ROSTO EM PERSPECTIVA 3/4 COM OLHAR VIVO (EYE SACCADES) E INCLINAÇÃO
 // ============================================================================
 
 function drawHeadAndFace(
   buf: PixelBuf,
   pal: AvatarPalettes,
   yOff: number,
+  headDx: number,
   isFront: boolean,
   talking: boolean,
-  f8: number,
+  f16: number,
   blinking = false,
   action: HabboAction = 'idle',
 ): void {
   const { skin, hair } = pal;
-  const hx = 9;
+  const hx = 9 + headDx;
   const hy = 6 + yOff;
+  const f8 = f16 % 8;
 
   const headPal: Palette = {
     L: skin.lt,
@@ -695,67 +898,81 @@ function drawHeadAndFace(
 
   if (isFront) {
     const browCol = hair.dd;
-    const browLift = talking || action === 'dance' || action === 'wave' ? (f8 % 4 === 0 ? -1 : 0) : 0;
-    buf.hline(15, 17, hy + 5 + browLift, browCol);
-    buf.hline(19, 21, hy + 5 + browLift, browCol);
+    const isThinkingPose =
+      !talking &&
+      ((action === 'idle' && f16 >= 11 && f16 <= 13) ||
+        (action === 'type' && f16 >= 13) ||
+        (action === 'sit' && f16 >= 11 && f16 <= 13));
 
-    // Olhos: piscando (blinking), rindo na dança (^ ^) ou abertos com brilho 1px
+    const browLiftL = talking || action === 'dance' || action === 'wave' ? (f8 % 4 === 0 ? -1 : 0) : 0;
+    // Quando pensando, arqueia uma sobrancelha (expressão humana curiosa!)
+    const browLiftR = isThinkingPose ? -1 : browLiftL;
+
+    buf.hline(15 + headDx, 17 + headDx, hy + 5 + browLiftL, browCol);
+    buf.hline(19 + headDx, 21 + headDx, hy + 5 + browLiftR, browCol);
+
+    // Movimento ocular humano (Eye Saccades):
+    // - Digitando: as pupilas varrem da esquerda para a direita lendo as linhas dos dois monitores!
+    // - Em pé / Sentado: olha curiosamente para o lado nas fases 9..12
+    let gazeDx = 0;
+    if (action === 'type') {
+      gazeDx = f8 < 4 ? 0 : 1;
+    } else if ((action === 'idle' || action === 'sit') && f16 >= 8 && f16 <= 11) {
+      gazeDx = 1;
+    }
+
     if (blinking) {
-      buf.hline(15, 16, hy + 7, '#0f172a');
-      buf.hline(19, 20, hy + 7, '#0f172a');
+      buf.hline(15 + headDx, 16 + headDx, hy + 7, '#0f172a');
+      buf.hline(19 + headDx, 20 + headDx, hy + 7, '#0f172a');
     } else if (action === 'dance' && f8 % 4 < 2) {
-      // Olhos felizes em arco (^ ^)
-      buf.set(15, hy + 7, '#0f172a');
-      buf.set(16, hy + 6, '#0f172a');
-      buf.set(19, hy + 6, '#0f172a');
-      buf.set(20, hy + 7, '#0f172a');
+      buf.set(15 + headDx, hy + 7, '#0f172a');
+      buf.set(16 + headDx, hy + 6, '#0f172a');
+      buf.set(19 + headDx, hy + 6, '#0f172a');
+      buf.set(20 + headDx, hy + 7, '#0f172a');
     } else {
-      buf.rect(15, hy + 6, 2, 2, '#0f172a');
-      buf.set(15, hy + 6, '#ffffff');
-      buf.rect(19, hy + 6, 2, 2, '#0f172a');
-      buf.set(19, hy + 6, '#ffffff');
+      buf.rect(15 + headDx, hy + 6, 2, 2, '#0f172a');
+      buf.set(15 + headDx + gazeDx, hy + 6, '#ffffff');
+      buf.rect(19 + headDx, hy + 6, 2, 2, '#0f172a');
+      buf.set(19 + headDx + gazeDx, hy + 6, '#ffffff');
     }
 
     // Nariz sombreado no eixo 3/4
-    buf.set(18, hy + 8, skin.dk);
-    buf.set(18, hy + 7, skin.lt);
+    buf.set(18 + headDx, hy + 8, skin.dk);
+    buf.set(18 + headDx, hy + 7, skin.lt);
 
     // Reflexo ciano/verde do monitor no queixo quando digitando ('type')
     if (action === 'type') {
       const glowCol = f8 % 2 === 0 ? 'rgba(56, 189, 248, 0.38)' : 'rgba(34, 197, 94, 0.35)';
-      buf.hline(15, 20, hy + 13, glowCol);
+      buf.hline(15 + headDx, 20 + headDx, hy + 13, glowCol);
     }
 
     // Lip-Sync em 3 Formas de Boca (A / E / O) quando falando ou tomando gole de café
-    if (action === 'coffee' && f8 % 8 >= 3 && f8 % 8 <= 5) {
-      // Boca em 'O' sorvendo o espresso quente
-      buf.rect(17, hy + 10, 2, 2, '#7f1d1d');
+    if (action === 'coffee' && f16 >= 4 && f16 <= 7) {
+      buf.rect(17 + headDx, hy + 10, 2, 2, '#7f1d1d');
     } else if (talking) {
       const mouthShape = f8 % 4;
       if (mouthShape === 0) {
-        // Vogal 'A': boca aberta ampla com dente branco e língua
-        buf.rect(16, hy + 10, 4, 3, '#9f1239');
-        buf.hline(17, 18, hy + 10, '#ffffff');
-        buf.hline(17, 18, hy + 12, '#fb7185');
+        buf.rect(16 + headDx, hy + 10, 4, 3, '#9f1239');
+        buf.hline(17 + headDx, 18 + headDx, hy + 10, '#ffffff');
+        buf.hline(17 + headDx, 18 + headDx, hy + 12, '#fb7185');
       } else if (mouthShape === 1) {
-        // Vogal 'E': sorriso aberto médio com dentes aparentes
-        buf.rect(16, hy + 10, 4, 2, '#7f1d1d');
-        buf.hline(16, 19, hy + 10, '#ffffff');
+        buf.rect(16 + headDx, hy + 10, 4, 2, '#7f1d1d');
+        buf.hline(16 + headDx, 19 + headDx, hy + 10, '#ffffff');
       } else if (mouthShape === 2) {
-        // Vogal 'O': óvalo arredondado expressivo 3x3
-        buf.rect(17, hy + 10, 3, 3, '#881337');
-        buf.set(18, hy + 11, '#fb7185');
+        buf.rect(17 + headDx, hy + 10, 3, 3, '#881337');
+        buf.set(18 + headDx, hy + 11, '#fb7185');
       } else {
-        // Sílabas labiais fechadas (M/B/P)
-        buf.hline(16, 19, hy + 11, shade(skin.dd, -0.25));
+        buf.hline(16 + headDx, 19 + headDx, hy + 11, shade(skin.dd, -0.25));
       }
     } else if (action === 'dance' || action === 'wave') {
-      // Sorriso aberto radiante
-      buf.rect(16, hy + 10, 4, 2, '#9f1239');
-      buf.hline(17, 18, hy + 10, '#ffffff');
+      buf.rect(16 + headDx, hy + 10, 4, 2, '#9f1239');
+      buf.hline(17 + headDx, 18 + headDx, hy + 10, '#ffffff');
+    } else if (isThinkingPose) {
+      // Boca pensativa de lado ("hmm")
+      buf.hline(17 + headDx, 19 + headDx, hy + 11, shade(skin.dd, -0.22));
     } else {
-      buf.hline(16, 19, hy + 11, shade(skin.dd, -0.2));
-      buf.set(15, hy + 10, skin.dk);
+      buf.hline(16 + headDx, 19 + headDx, hy + 11, shade(skin.dd, -0.2));
+      buf.set(15 + headDx, hy + 10, skin.dk);
     }
   }
 }
@@ -769,10 +986,11 @@ function drawHairAndAccessory(
   pal: AvatarPalettes,
   look: HabboAvatarLook,
   yOff: number,
+  headDx: number,
   isFront: boolean,
 ): void {
   const { hair } = pal;
-  const hx = 8;
+  const hx = 8 + headDx;
   const hy = 4 + yOff;
   const styleIdx = resolveHairStyle(look);
 
@@ -784,128 +1002,110 @@ function drawHairAndAccessory(
     D: hair.dd,
   };
 
-  // Estampa o cabelo esculpido com mechas recortadas e brilho especular no topo-esquerdo
   const tpl = isFront ? HAIR_STYLES_SE[styleIdx] : HAIR_STYLES_NE[styleIdx];
   buf.stamp(tpl, hx, hy, hairPal);
 
-  // Acessórios exclusivos ajustados para o eixo 3/4 real (olhos em x = 15..16 e 19..20)
   const acc = look.accessory;
   const ay = 6 + yOff;
+  const dx = headDx;
 
   switch (acc) {
     case 'crown': {
-      // Coroa imperial dourada com 3 pontas e joias vermelha/azul brilhantes
       const gold = ramp('#f59e0b', 0.1);
-      buf.hline(11, 21, ay - 1, gold.dk);
-      buf.hline(10, 22, ay - 2, gold.base);
-      buf.hline(10, 22, ay - 3, gold.lt);
-      // 3 Pontas imperiais em perspectiva 3/4
-      buf.rect(10, ay - 5, 2, 2, gold.lt);
-      buf.set(11, ay - 6, gold.hi);
-      buf.rect(16, ay - 6, 2, 3, gold.hi);
-      buf.set(17, ay - 7, '#ffffff');
-      buf.rect(21, ay - 5, 2, 2, gold.base);
-      buf.set(21, ay - 6, gold.lt);
-      // Joias incrustadas alinhadas ao eixo 3/4
-      buf.set(12, ay - 2, '#ef4444');
-      buf.set(16, ay - 2, '#38bdf8');
-      buf.set(17, ay - 2, '#e0f2fe');
-      buf.set(20, ay - 2, '#ef4444');
+      buf.hline(11 + dx, 21 + dx, ay - 1, gold.dk);
+      buf.hline(10 + dx, 22 + dx, ay - 2, gold.base);
+      buf.hline(10 + dx, 22 + dx, ay - 3, gold.lt);
+      buf.rect(10 + dx, ay - 5, 2, 2, gold.lt);
+      buf.set(11 + dx, ay - 6, gold.hi);
+      buf.rect(16 + dx, ay - 6, 2, 3, gold.hi);
+      buf.set(17 + dx, ay - 7, '#ffffff');
+      buf.rect(21 + dx, ay - 5, 2, 2, gold.base);
+      buf.set(21 + dx, ay - 6, gold.lt);
+      buf.set(12 + dx, ay - 2, '#ef4444');
+      buf.set(16 + dx, ay - 2, '#38bdf8');
+      buf.set(17 + dx, ay - 2, '#e0f2fe');
+      buf.set(20 + dx, ay - 2, '#ef4444');
       break;
     }
 
     case 'glasses': {
       if (isFront) {
-        // Óculos de aro estilizado perfeitamente alinhado aos olhos em 3/4 (x = 14..17 e 18..21)
         const frameCol = '#1e293b';
-        // Haste indo até a orelha esquerda (x = 10..13)
-        buf.hline(10, 13, ay + 6, frameCol);
-        // Aro esquerdo (ao redor do olho x = 15..16)
-        buf.hline(14, 17, ay + 5, frameCol);
-        buf.hline(14, 17, ay + 8, frameCol);
-        buf.vline(14, ay + 5, ay + 8, frameCol);
-        buf.vline(17, ay + 5, ay + 8, frameCol);
-        // Ponte nasal em x = 17..18
-        buf.set(18, ay + 6, frameCol);
-        // Aro direito (ao redor do olho x = 19..20)
-        buf.hline(18, 21, ay + 5, frameCol);
-        buf.hline(18, 21, ay + 8, frameCol);
-        buf.vline(18, ay + 5, ay + 8, frameCol);
-        buf.vline(21, ay + 5, ay + 8, frameCol);
-        // Lentes azuladas semi-reflexivas
-        buf.set(15, ay + 6, '#7dd3fc');
-        buf.set(16, ay + 7, 'rgba(56, 189, 248, 0.55)');
-        buf.set(19, ay + 6, '#7dd3fc');
-        buf.set(20, ay + 7, 'rgba(56, 189, 248, 0.55)');
+        buf.hline(10 + dx, 13 + dx, ay + 6, frameCol);
+        buf.hline(14 + dx, 17 + dx, ay + 5, frameCol);
+        buf.hline(14 + dx, 17 + dx, ay + 8, frameCol);
+        buf.vline(14 + dx, ay + 5, ay + 8, frameCol);
+        buf.vline(17 + dx, ay + 5, ay + 8, frameCol);
+        buf.set(18 + dx, ay + 6, frameCol);
+        buf.hline(18 + dx, 21 + dx, ay + 5, frameCol);
+        buf.hline(18 + dx, 21 + dx, ay + 8, frameCol);
+        buf.vline(18 + dx, ay + 5, ay + 8, frameCol);
+        buf.vline(21 + dx, ay + 5, ay + 8, frameCol);
+        buf.set(15 + dx, ay + 6, '#7dd3fc');
+        buf.set(16 + dx, ay + 7, 'rgba(56, 189, 248, 0.55)');
+        buf.set(19 + dx, ay + 6, '#7dd3fc');
+        buf.set(20 + dx, ay + 7, 'rgba(56, 189, 248, 0.55)');
       } else {
-        buf.hline(19, 22, ay + 6, '#1e293b');
+        buf.hline(19 + dx, 22 + dx, ay + 6, '#1e293b');
       }
       break;
     }
 
     case 'headset': {
-      // Arco sobre a cabeça + fones acolchoados com LED neon e microfone boom vindo da esquerda até a boca 3/4
-      buf.hline(11, 21, ay - 1, '#334155');
-      buf.hline(12, 20, ay - 2, '#64748b');
-      // Concha acústica principal sobre a orelha esquerda (x = 8..10)
-      buf.rect(8, ay + 4, 3, 5, '#1e293b');
-      buf.vline(9, ay + 5, ay + 7, '#22c55e');
-      // Borda da concha direita em escorço (x = 22..23)
-      buf.rect(22, ay + 4, 2, 5, '#0f172a');
-      buf.set(23, ay + 6, '#22c55e');
+      buf.hline(11 + dx, 21 + dx, ay - 1, '#334155');
+      buf.hline(12 + dx, 20 + dx, ay - 2, '#64748b');
+      buf.rect(8 + dx, ay + 4, 3, 5, '#1e293b');
+      buf.vline(9 + dx, ay + 5, ay + 7, '#22c55e');
+      buf.rect(22 + dx, ay + 4, 2, 5, '#0f172a');
+      buf.set(23 + dx, ay + 6, '#22c55e');
       if (isFront) {
-        // Microfone boom articulado indo até perto da boca 3/4 (x = 15)
-        buf.line(10, ay + 8, 14, ay + 11, '#475569');
-        buf.rect(14, ay + 11, 2, 2, '#0f172a');
-        buf.set(15, ay + 11, '#22c55e');
+        buf.line(10 + dx, ay + 8, 14 + dx, ay + 11, '#475569');
+        buf.rect(14 + dx, ay + 11, 2, 2, '#0f172a');
+        buf.set(15 + dx, ay + 11, '#22c55e');
       }
       break;
     }
 
     case 'beret': {
-      // Boina francesa inclinada de artista com volume arredondado e brilho especular no topo-esquerdo
       const beret = ramp(look.shirtColor || '#ec4899', 0.1);
-      buf.hline(11, 19, ay - 3, beret.lt);
-      buf.hline(9, 21, ay - 2, beret.base);
-      buf.hline(8, 22, ay - 1, beret.base);
-      buf.hline(9, 22, ay, beret.dk);
-      buf.hline(10, 21, ay + 1, '#1e293b');
-      buf.hline(12, 16, ay - 2, beret.hi);
-      buf.set(14, ay - 4, beret.dd);
+      buf.hline(11 + dx, 19 + dx, ay - 3, beret.lt);
+      buf.hline(9 + dx, 21 + dx, ay - 2, beret.base);
+      buf.hline(8 + dx, 22 + dx, ay - 1, beret.base);
+      buf.hline(9 + dx, 22 + dx, ay, beret.dk);
+      buf.hline(10 + dx, 21 + dx, ay + 1, '#1e293b');
+      buf.hline(12 + dx, 16 + dx, ay - 2, beret.hi);
+      buf.set(14 + dx, ay - 4, beret.dd);
       break;
     }
 
     case 'cap': {
-      // Boné urbano com copa arredondada e aba projetada na direção 3/4 do olhar (SE)
       const cap = ramp(look.shirtColor || '#06b6d4', 0.09);
-      buf.hline(12, 20, ay - 2, cap.lt);
-      buf.hline(10, 21, ay - 1, cap.base);
-      buf.hline(10, 22, ay, cap.base);
-      buf.hline(10, 22, ay + 1, cap.dk);
-      buf.set(15, ay - 3, '#ffffff');
-      buf.hline(12, 16, ay - 1, cap.hi);
+      buf.hline(12 + dx, 20 + dx, ay - 2, cap.lt);
+      buf.hline(10 + dx, 21 + dx, ay - 1, cap.base);
+      buf.hline(10 + dx, 22 + dx, ay, cap.base);
+      buf.hline(10 + dx, 22 + dx, ay + 1, cap.dk);
+      buf.set(15 + dx, ay - 3, '#ffffff');
+      buf.hline(12 + dx, 16 + dx, ay - 1, cap.hi);
       if (isFront) {
-        // Aba projetada para a direita/frente (x = 14..25)
-        buf.hline(14, 24, ay + 2, cap.dk);
-        buf.hline(16, 25, ay + 3, cap.dd);
+        buf.hline(14 + dx, 24 + dx, ay + 2, cap.dk);
+        buf.hline(16 + dx, 25 + dx, ay + 3, cap.dd);
       } else {
-        buf.hline(18, 24, ay + 2, cap.dd);
-        buf.rect(13, ay + 1, 4, 1, '#1e293b');
+        buf.hline(18 + dx, 24 + dx, ay + 2, cap.dd);
+        buf.rect(13 + dx, ay + 1, 4, 1, '#1e293b');
       }
       break;
     }
 
     case 'visor': {
-      // Visor tático futurista vermelho/ciano translúcido cobrindo os olhos em 3/4 (x = 13..22)
-      buf.hline(9, 22, ay + 4, '#334155');
+      buf.hline(9 + dx, 22 + dx, ay + 4, '#334155');
       if (isFront) {
-        buf.rect(13, ay + 5, 10, 3, '#e11d48');
-        buf.hline(14, 22, ay + 5, '#38bdf8');
-        buf.hline(15, 20, ay + 6, '#ffffff');
-        buf.hline(14, 22, ay + 7, '#9f1239');
+        buf.rect(13 + dx, ay + 5, 10, 3, '#e11d48');
+        buf.hline(14 + dx, 22 + dx, ay + 5, '#38bdf8');
+        buf.hline(15 + dx, 20 + dx, ay + 6, '#ffffff');
+        buf.hline(14 + dx, 22 + dx, ay + 7, '#9f1239');
       } else {
-        buf.hline(9, 22, ay + 5, '#1e293b');
-        buf.set(21, ay + 5, '#ef4444');
+        buf.hline(9 + dx, 22 + dx, ay + 5, '#1e293b');
+        buf.set(21 + dx, ay + 5, '#ef4444');
       }
       break;
     }
@@ -917,7 +1117,7 @@ function drawHairAndAccessory(
 }
 
 // ============================================================================
-// COMPOSIÇÃO COMPLETA DO SPRITE 32x52 E RETRATO 24x24
+// COMPOSIÇÃO COMPLETA DO SPRITE 32x52 EM 16 FASES ORGÂNICAS E RETRATO 24x24
 // ============================================================================
 
 function renderHabboAvatarBuf(
@@ -928,56 +1128,76 @@ function renderHabboAvatarBuf(
   talking: boolean,
   blinking = false,
 ): PixelBuf {
-  const f8 = ((Math.floor(frame) % 8) + 8) % 8;
+  const f16 = ((Math.floor(frame) % 16) + 16) % 16;
+  const f8 = f16 % 8;
   const isFront = dir === 'SE' || dir === 'SW';
   const shouldFlip = dir === 'SW' || dir === 'NW';
   const pal = buildPalettes(look);
 
-  // Curva de deslocamento vertical de 8 frames (Contact->Down->Pass->Up + Respiração Idle + Groove Dance):
+  // Cinemática Corporal de 16 Fases:
   const seatDrop = action === 'sit' || action === 'type' ? 3 : 0;
   let bodyBob = 0;
   let hairLag = 0;
+  let torsoShiftX = 0;
+  let chestTwist = 0;
+  let headDx = 0;
+
   if (action === 'walk') {
     const WALK_BOB = [0, 1, 0, -1, 0, 1, 0, -1] as const;
-    const HAIR_LAG = [0, 0, 1, 0, -1, 0, 1, 0] as const;
+    const HAIR_LAG = [0, 0, 1, 0, 0, 0, 1, 0] as const;
+    const CHEST_TWIST = [1, 1, 0, -1, -1, -1, 0, 1] as const;
     bodyBob = WALK_BOB[f8];
     hairLag = HAIR_LAG[f8];
+    chestTwist = CHEST_TWIST[f8];
+    // Leve inclinação humana à frente na caminhada
+    headDx = 1;
   } else if (action === 'dance') {
-    const DANCE_BOB = [0, 1, -1, 0, 0, 1, -1, 0] as const;
+    const DANCE_BOB = [0, 1, 0, 1, 0, 1, 0, 1] as const;
+    const DANCE_SWAY = [-1, -1, 0, 0, 1, 1, 0, 0] as const;
     bodyBob = DANCE_BOB[f8];
-    hairLag = f8 % 2 === 1 ? -1 : 0;
-  } else if (action === 'idle' || action === 'coffee') {
-    // Respiração suave com pés plantados: tronco desce 1px nos frames 3 e 4, cabelo atrasa no frame 4
-    bodyBob = f8 === 3 || f8 === 4 ? 1 : 0;
-    hairLag = f8 === 4 ? 1 : 0;
+    torsoShiftX = DANCE_SWAY[f8];
+    chestTwist = DANCE_SWAY[f8];
+    headDx = DANCE_SWAY[f8];
+    hairLag = f8 % 2 === 1 ? 1 : 0;
+  } else if (action === 'type') {
+    // Digitando concentrado: inclina a cabeça 1px para os monitores; nas fases 13..15 recua 1px pensando
+    const isThinking = f16 >= 13;
+    bodyBob = isThinking ? 0 : f8 === 3 || f8 === 4 ? 1 : 0;
+    headDx = isThinking ? 0 : 1;
+  } else if (action === 'idle' || action === 'coffee' || action === 'sit') {
+    // Respiração suave e pausada (apenas 2 fases por ciclo longo) + olhar curioso nas fases 9..12
+    bodyBob = f16 === 4 || f16 === 5 || f16 === 12 ? 1 : 0;
+    hairLag = f16 === 5 ? 1 : 0;
+    if (action !== 'coffee' && f16 >= 9 && f16 <= 12) {
+      headDx = 1;
+    }
   }
 
   const yOff = seatDrop + bodyBob;
-
   const work = new PixelBuf(SPRITE_W, SPRITE_H);
 
-  // 1. Braço traseiro (atrás do tronco na perspectiva 3/4)
-  drawBackArm(work, pal, action, f8, yOff);
+  // 1. Braço traseiro articulado
+  drawBackArm(work, pal, action, f16, yOff, torsoShiftX);
 
-  // 2. Pernas em 3/4 e tênis bicolor com sola clara #e2e8f0 (plantados no chão durante respiração idle!)
-  drawLegsAndShoes(work, pal, look, action, f8, isFront);
+  // 2. Pernas articuladas (coxa + joelho + canela) e tênis com inclinação calcanhar-ponta
+  drawLegsAndShoes(work, pal, look, action, f16, isFront);
 
-  // 3. Tronco em 3/4 com jaqueta aberta / colete & gravata / moletom tech
-  drawTorso(work, pal, look, yOff, isFront);
+  // 3. Tronco em 3/4 com contrapposto de ombros
+  drawTorso(work, pal, look, yOff, torsoShiftX, isFront, chestTwist);
 
-  // 4. Cabeça 15x15 arredondada em 3/4 real com Lip-Sync A/E/O, piscar assíncrono e reflexo de tela
-  drawHeadAndFace(work, pal, yOff, isFront, talking, f8, blinking, action);
+  // 4. Cabeça 15x15 em 3/4 com saccades oculares, expressão pensativa e Lip-Sync
+  drawHeadAndFace(work, pal, yOff, torsoShiftX + headDx, isFront, talking, f16, blinking, action);
 
-  // 5. Cabelo esculpido com volume 3D, secondary motion lag e acessório exclusivo
-  drawHairAndAccessory(work, pal, look, yOff + hairLag, isFront);
+  // 5. Cabelo esculpido com volume 3D, secondary lag e acessório
+  drawHairAndAccessory(work, pal, look, yOff + hairLag, torsoShiftX + headDx, isFront);
 
-  // 6. Braço frontal (sobreposto ao tronco, segurando café, dançando ou digitando)
-  drawFrontArm(work, pal, action, f8, yOff);
+  // 6. Braço frontal articulado (com micro-gesto de mão no queixo, gole de café ou gesticulação de fala)
+  drawFrontArm(work, pal, action, f16, yOff, torsoShiftX, talking);
 
-  // 7. Se a direção for SW ou NW, espelha horizontalmente mantendo a perspectiva 3/4 consistente
+  // 7. Espelhamento horizontal para SW e NW
   const out = shouldFlip ? work.flipped() : work;
 
-  // 8. Contorno seletivo escuro de 1px na silhueta externa + sombra elíptica 2:1 nos pés
+  // 8. Contorno seletivo escuro de 1px + sombra elíptica 2:1 nos pés
   out.outline();
   out.shadow(16, 47, 9, 4, '#090d16', 0.35);
 
@@ -992,15 +1212,15 @@ export function getHabboAvatarSprite(
   talking: boolean,
   blinking = false,
 ): HabboAvatarFrame {
-  const f8 = ((Math.floor(frame) % 8) + 8) % 8;
-  const talkState = talking ? f8 % 4 : -1;
+  const f16 = ((Math.floor(frame) % 16) + 16) % 16;
+  const talkState = talking ? f16 % 4 : -1;
   const blinkBit = blinking ? 1 : 0;
-  const key = `${lookKey(look)}|${dir}|${action}|${f8}|${talkState}|${blinkBit}`;
+  const key = `${lookKey(look)}|${dir}|${action}|${f16}|${talkState}|${blinkBit}`;
 
   let cached = spriteCache.get(key);
   if (!cached) {
-    if (spriteCache.size > 6000) spriteCache.clear();
-    const buf = renderHabboAvatarBuf(look, dir, action, f8, talking, blinking);
+    if (spriteCache.size > 8000) spriteCache.clear();
+    const buf = renderHabboAvatarBuf(look, dir, action, f16, talking, blinking);
     cached = {
       canvas: bufToCanvas(buf),
       anchorX: ANCHOR_X,
@@ -1025,14 +1245,13 @@ export function getHabboAvatarPortrait(
     if (portraitCache.size > 1024) portraitCache.clear();
     const pal = buildPalettes(look);
     const work = new PixelBuf(SPRITE_W, SPRITE_H);
-    drawBackArm(work, pal, 'idle', 0, 2);
-    drawTorso(work, pal, look, 2, true);
-    drawHeadAndFace(work, pal, 2, true, talking, f4, blinking, 'idle');
-    drawHairAndAccessory(work, pal, look, 2, true);
-    drawFrontArm(work, pal, 'idle', 0, 2);
+    drawBackArm(work, pal, 'idle', 0, 2, 0);
+    drawTorso(work, pal, look, 2, 0, true, 0);
+    drawHeadAndFace(work, pal, 2, 0, true, talking, f4, blinking, 'idle');
+    drawHairAndAccessory(work, pal, look, 2, 0, true);
+    drawFrontArm(work, pal, 'idle', 0, 2, 0, talking);
     work.outline();
 
-    // Recorta 24x24 centrado no busto 3/4 (cabeça + ombros + acessório)
     const bust = work.crop(4, 2, PORTRAIT_SIZE, PORTRAIT_SIZE);
     cached = bufToCanvas(bust);
     portraitCache.set(key, cached);
