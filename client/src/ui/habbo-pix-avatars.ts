@@ -320,7 +320,6 @@ function drawArticulatedLeg(
   hipX: number,
   hipY: number,
   kneeDx: number,
-  kneeDy: number,
   footDx: number,
   footDy: number,
   pants: Ramp,
@@ -329,42 +328,44 @@ function drawArticulatedLeg(
   isFrontLeg: boolean,
   tilt: FootTilt,
 ): void {
-  // Coxa (y = hipY .. hipY + 3)
-  const kx = hipX + kneeDx;
-  const ky = hipY + 4 + kneeDy;
-  const fx = hipX + footDx;
-  const fy = hipY + 8 + footDy;
-
+  // Anatomia humana limpa em escala 32x52:
+  // - Coxa (y = hipY .. hipY + 3): sai do quadril e acompanha metade do avanço do joelho (joelho NUNCA dobra para trás!)
+  // - Canela (y = hipY + 4 .. hipY + 7): desce do joelho até o tornozelo com silhueta firme de 4px (sem degraus tortos)
   const mainCol = isFrontLeg ? pants.base : pants.dk;
   const shadowCol = pants.dd;
   const lightCol = isFrontLeg ? pants.lt : pants.base;
 
-  // Desenha a coxa conectando quadril ao joelho com espessura de 4px
-  for (let step = 0; step <= 4; step++) {
-    const t = step / 4;
-    const cx = Math.round(hipX + (kx - hipX) * t);
-    const cy = Math.round(hipY + (ky - hipY) * t);
-    buf.rect(cx, cy, 4, 1, mainCol);
-    buf.set(cx, cy, shadowCol);
-    buf.set(cx + 2, cy, lightCol);
-    if (isFrontLeg) buf.set(cx + 3, cy, pants.dk);
+  const thighX = hipX + Math.round(kneeDx * 0.5);
+  const shinX = hipX + footDx;
+  const kneeY = hipY + 4;
+  const ankleY = hipY + 8 + footDy;
+
+  // Coxa (4 linhas sólidas)
+  for (let y = hipY; y < kneeY; y++) {
+    const t = (y - hipY) / 4;
+    const cx = Math.round(hipX + (thighX - hipX) * t);
+    buf.rect(cx, y, 4, 1, mainCol);
+    buf.set(cx, y, shadowCol);
+    buf.set(cx + 2, y, lightCol);
+    if (isFrontLeg) buf.set(cx + 3, y, pants.dk);
   }
 
-  // Desenha a canela conectando joelho ao tornozelo com espessura de 4px
-  for (let step = 0; step <= 4; step++) {
-    const t = step / 4;
-    const cx = Math.round(kx + (fx - kx) * t);
-    const cy = Math.round(ky + (fy - ky) * t);
-    buf.rect(cx, cy, 4, 1, mainCol);
-    buf.set(cx, cy, shadowCol);
-    buf.set(cx + 2, cy, lightCol);
-    if (isFrontLeg && step === 0) {
-      // Brilho de dobra no joelho
-      buf.set(cx + 1, cy, pants.hi);
+  // Canela (conecta o joelho ao tornozelo sem quebrar a silhueta)
+  const shinTopX = Math.round(hipX + kneeDx);
+  const shinRows = Math.max(2, ankleY - kneeY);
+  for (let i = 0; i < shinRows; i++) {
+    const y = kneeY + i;
+    const t = shinRows <= 1 ? 1 : i / (shinRows - 1);
+    const cx = Math.round(shinTopX + (shinX - shinTopX) * t);
+    buf.rect(cx, y, 4, 1, mainCol);
+    buf.set(cx, y, shadowCol);
+    buf.set(cx + 2, y, lightCol);
+    if (isFrontLeg && i === 0) {
+      buf.set(cx + 1, y, pants.hi);
     }
   }
 
-  drawSneaker(buf, fx, fy, shoes, accentCol, isFrontLeg, tilt);
+  drawSneaker(buf, shinX, ankleY, shoes, accentCol, isFrontLeg, tilt);
 }
 
 function drawLegsAndShoes(
@@ -407,51 +408,47 @@ function drawLegsAndShoes(
     return;
   }
 
-  // Cinemática Humana de Caminhada em 8 Fases com Articulação de Joelho & Calcanhar-Ponta:
-  // Fase 0 (Contact R): Perna frontal esticada à frente apoiando calcanhar ('heel'), perna traseira atrás impulsionando na ponta ('toe')
-  // Fase 1 (Down R): Perna frontal recebe o peso ('flat'), joelho traseiro começa a dobrar para avançar
-  // Fase 2 (Pass R): Perna frontal reta firme no chão, perna traseira passa levantada com joelho dobrado à frente ('toe')
-  // Fase 3 (High Point R): Perna traseira chuta à frente preparando contato, perna frontal começa a ficar para trás
-  // Fases 4..7: Simétrico invertido para a outra perna!
+  // Cinemática Humana de Caminhada Isométrica 2:1 em 8 Fases:
+  // Regras anatômicas estritas (perspectiva SE, olhando para +X direita):
+  // 1. O joelho SEMPRE dobra para frente (kneeDx >= footDx), nunca para trás!
+  // 2. Na projeção isométrica 2:1, passo à frente (+X) desce levemente (+1px Y no chão),
+  //    enquanto o pé de impulsão atrás (-X) sobe levemente (-1px Y), mantendo as duas pernas alinhadas ao piso.
+  // 3. Amplitude natural (-2..+2px por perna) sem cruzar ou torcer os quadris.
   const WALK_POSE: ReadonlyArray<{
     bKneeDx: number;
-    bKneeDy: number;
     bFootDx: number;
     bFootDy: number;
     bTilt: FootTilt;
     fKneeDx: number;
-    fKneeDy: number;
     fFootDx: number;
     fFootDy: number;
     fTilt: FootTilt;
     hipShiftX: number;
   }> = [
-    // 0: Contact (Frente pousa calcanhar, Trás impulsiona ponta)
-    { bKneeDx: -1, bKneeDy: 0, bFootDx: -3, bFootDy: -1, bTilt: 'toe', fKneeDx: 2, fKneeDy: 0, fFootDx: 3, fFootDy: 0, fTilt: 'heel', hipShiftX: 0 },
-    // 1: Down (Peso absorvido na perna frontal, joelho traseiro dobra)
-    { bKneeDx: 0, bKneeDy: 0, bFootDx: -2, bFootDy: -2, bTilt: 'toe', fKneeDx: 2, fKneeDy: 1, fFootDx: 2, fFootDy: 0, fTilt: 'flat', hipShiftX: 1 },
-    // 2: Pass (Perna traseira passa dobrada no ar, frontal plantada)
-    { bKneeDx: 2, bKneeDy: -1, bFootDx: 0, bFootDy: -3, bTilt: 'toe', fKneeDx: 0, fKneeDy: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-    // 3: Up / Reach (Perna traseira estende à frente, frontal empurra o chão)
-    { bKneeDx: 2, bKneeDy: -1, bFootDx: 3, bFootDy: -1, bTilt: 'heel', fKneeDx: -1, fKneeDy: 0, fFootDx: -2, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
-    // 4: Contact Oposto (Traseira pousa à frente, Frontal fica atrás na ponta)
-    { bKneeDx: 2, bKneeDy: 0, bFootDx: 3, bFootDy: 0, bTilt: 'heel', fKneeDx: -1, fKneeDy: 0, fFootDx: -3, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
-    // 5: Down Oposto (Peso na perna esquerda, joelho frontal dobra atrás)
-    { bKneeDx: 2, bKneeDy: 1, bFootDx: 2, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fKneeDy: 0, fFootDx: -2, fFootDy: -2, fTilt: 'toe', hipShiftX: -1 },
-    // 6: Pass Oposto (Perna frontal passa com joelho alto no ar)
-    { bKneeDx: 0, bKneeDy: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 2, fKneeDy: -1, fFootDx: 0, fFootDy: -3, fTilt: 'toe', hipShiftX: 0 },
-    // 7: Up / Reach Oposto (Perna frontal chuta à frente preparando calcanhar)
-    { bKneeDx: -1, bKneeDy: 0, bFootDx: -2, bFootDy: -1, bTilt: 'toe', fKneeDx: 2, fKneeDy: -1, fFootDx: 3, fFootDy: -1, fTilt: 'heel', hipShiftX: 0 },
+    // 0: Contact D (Frente pisa à frente no calcanhar, Traseira atrás na ponta)
+    { bKneeDx: -1, bFootDx: -2, bFootDy: -1, bTilt: 'toe', fKneeDx: 2, fFootDx: 2, fFootDy: 1, fTilt: 'heel', hipShiftX: 0 },
+    // 1: Down D (Frente planta firme no piso, Traseira dobra joelho para frente puxando o pé)
+    { bKneeDx: 0, bFootDx: -1, bFootDy: -2, bTilt: 'toe', fKneeDx: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+    // 2: Pass D (Frente firme no centro, Traseira passa levantada com joelho à frente)
+    { bKneeDx: 1, bFootDx: 0, bFootDy: -2, bTilt: 'toe', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+    // 3: Reach D (Traseira estende à frente preparando calcanhar, Frente fica atrás)
+    { bKneeDx: 2, bFootDx: 2, bFootDy: 0, bTilt: 'heel', fKneeDx: 0, fFootDx: -1, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
+    // 4: Contact E (Traseira pisa à frente, Frente atrás na ponta)
+    { bKneeDx: 2, bFootDx: 2, bFootDy: 0, bTilt: 'heel', fKneeDx: -1, fFootDx: -2, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
+    // 5: Down E (Traseira planta firme, Frente dobra joelho para frente puxando o pé)
+    { bKneeDx: 1, bFootDx: 1, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fFootDx: -1, fFootDy: -2, fTilt: 'toe', hipShiftX: 0 },
+    // 6: Pass E (Traseira firme no centro, Frente passa levantada com joelho à frente)
+    { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fFootDx: 0, fFootDy: -2, fTilt: 'toe', hipShiftX: 0 },
+    // 7: Reach E (Frente estende à frente preparando calcanhar, Traseira fica atrás)
+    { bKneeDx: 0, bFootDx: -1, bFootDy: -1, bTilt: 'toe', fKneeDx: 2, fFootDx: 2, fFootDy: 1, fTilt: 'heel', hipShiftX: 0 },
   ];
 
   let pose = {
     bKneeDx: 0,
-    bKneeDy: 0,
     bFootDx: 0,
     bFootDy: 0,
     bTilt: 'flat' as FootTilt,
     fKneeDx: 0,
-    fKneeDy: 0,
     fFootDx: 0,
     fFootDy: 0,
     fTilt: 'flat' as FootTilt,
@@ -461,25 +458,19 @@ function drawLegsAndShoes(
   if (action === 'walk') {
     pose = WALK_POSE[f8];
   } else if (action === 'dance') {
-    // Dança com suingue de quadril e batida de calcanhar/ponta humana
+    // Dança com batida rítmica natural (joelhos dobram apenas para frente, nunca para trás!)
     const DANCE_POSE: typeof WALK_POSE = [
-      { bKneeDx: -1, bKneeDy: 0, bFootDx: -1, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fKneeDy: 0, fFootDx: 2, fFootDy: -1, fTilt: 'heel', hipShiftX: -1 },
-      { bKneeDx: 0, bKneeDy: 1, bFootDx: -1, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fKneeDy: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: -1 },
-      { bKneeDx: 0, bKneeDy: 0, bFootDx: 0, bFootDy: -1, bTilt: 'toe', fKneeDx: 0, fKneeDy: 0, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-      { bKneeDx: 0, bKneeDy: 1, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fKneeDy: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-      { bKneeDx: -1, bKneeDy: 0, bFootDx: -2, bFootDy: -1, bTilt: 'heel', fKneeDx: 1, fKneeDy: 0, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 1 },
-      { bKneeDx: -1, bKneeDy: 1, bFootDx: -1, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fKneeDy: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 1 },
-      { bKneeDx: 0, bKneeDy: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fKneeDy: 0, fFootDx: 0, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
-      { bKneeDx: 0, bKneeDy: 1, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fKneeDy: 1, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+      { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fFootDx: 1, fFootDy: 0, fTilt: 'heel', hipShiftX: 0 },
+      { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+      { bKneeDx: 1, bFootDx: 0, bFootDy: -1, bTilt: 'toe', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+      { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+      { bKneeDx: 1, bFootDx: 1, bFootDy: 0, bTilt: 'heel', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+      { bKneeDx: 1, bFootDx: 1, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
+      { bKneeDx: 0, bKneeDy2: 0 } as any,
+      { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
     ];
+    DANCE_POSE[6] = { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fFootDx: 0, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 };
     pose = DANCE_POSE[f8];
-  } else if (action === 'idle' && (f16 === 10 || f16 === 11)) {
-    // Em pé pensando: transfere sutilmente o peso do quadril e relaxa um joelho
-    pose = {
-      ...pose,
-      fKneeDx: 1,
-      hipShiftX: 0,
-    };
   }
 
   // Cinto escuro com fivela dourada/prateada deslocada +1px para a direita (perspectiva 3/4 SE)
@@ -494,13 +485,11 @@ function drawLegsAndShoes(
   buf.rect(11 + hx, 34, 4, 2, pants.dk);
   buf.set(15 + hx, 35, pants.dd);
 
-  // Ordem de desenho das pernas: na fase 2..4 da caminhada, a perna traseira cruza para a frente
   drawArticulatedLeg(
     buf,
     11 + hx,
     36,
     pose.bKneeDx,
-    pose.bKneeDy,
     pose.bFootDx,
     pose.bFootDy,
     pants,
@@ -515,7 +504,6 @@ function drawLegsAndShoes(
     16 + hx,
     36,
     pose.fKneeDx,
-    pose.fKneeDy,
     pose.fFootDx,
     pose.fFootDy,
     pants,
