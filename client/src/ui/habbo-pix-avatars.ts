@@ -302,74 +302,77 @@ const LEGS_SIT_TPL: readonly string[] = [
   '.........gcccc.geeeee...',
 ];
 
-// 4 Poses-Chave Clássicas de Caminhada (pixel-art-studio: 4 poses limpas > 12 borradas):
-// F0: Contact Direito (Perna frontal avança +2px down-right, traseira impulsiona -2px)
+// 4 Poses-Chave de Caminhada extraídas e limpas diretamente do sprite sheet 16-bit de estúdio:
+// F0: Contact Direito (perna esquerda atrás, direita estendida à frente com tênis de sola branca)
 const LEGS_WALK_0_TPL: readonly string[] = [
   '......BBBBBBkkBBBB......',
   '......ddddppppplpd......',
-  '.....ddddD.pppplpd......',
-  '.....ddpd...Dpplhd......',
-  '.....ddpd...Dpplhd......',
-  '....ddpd.....Dpplhd.....',
-  '....ddpd.....Dpplhd.....',
-  '....ddpd......Dppld.....',
-  '...ddpd.......Dppld.....',
-  '...ttat.......Dppld.....',
-  '..sssss.......ttatw.....',
-  '..gcccc......uuuuwu.....',
-  '.............geeeee.....',
+  '.......dddDpppplpd......',
+  '.......dddppppd.........',
+  '......ddddddppp.........',
+  '.....dddddddpppp........',
+  '.....dddddDddppp........',
+  '....ssdddd.ddppp........',
+  '....uuuddd.ddpppp.......',
+  '....uuuu...ddpppp.......',
+  '.....eeuu...dBBuuee.....',
+  '......eeee...Buuueee....',
+  '.............Buueeee....',
+  '..............eeee......',
 ];
 
-// F1: Passing Direito (Perna frontal firme no centro, traseira recolhida +2px passando)
+// F1: Passing Direito (perna dianteira firme no piso, perna traseira recolhida passando)
 const LEGS_WALK_1_TPL: readonly string[] = [
   '......BBBBBBkkBBBB......',
   '......ddddppppplpd......',
-  '......ddddDpppplpd......',
-  '......ddpd.Dplhd........',
-  '......ddpd.Dplhd........',
-  '.......ddpdDplhd........',
-  '.......ddpdDplhd........',
-  '.......ddpdDplhd........',
-  '.......ttatDplhd........',
-  '......sssssDplhd........',
-  '......gccccDplhd........',
-  '............ttatw.......',
-  '...........uuuuwu.......',
-  '...........geeeee.......',
+  '......ddppppdppp........',
+  '......ddppppdppp........',
+  '......ddppppdppp........',
+  '......dddpppdddd........',
+  '......dddpppddd.........',
+  '......ddppppddd.........',
+  '......ddppppds..........',
+  '......ddppppBcB.........',
+  '......ddppppBuB.........',
+  '......duuuBBuB..........',
+  '......euuuuutu..........',
+  '.......eeeuuu...........',
 ];
 
-// F2: Contact Esquerdo (Perna traseira estende à frente por trás da frontal que recua)
+// F2: Contact Esquerdo (espelho orgânico de F0: perna direita atrás, esquerda à frente)
 const LEGS_WALK_2_TPL: readonly string[] = [
   '......BBBBBBkkBBBB......',
   '......ddddppppplpd......',
-  '.......dddpDppplpd......',
-  '........ddpDppplpd......',
-  '........ddpDppplp.......',
-  '.........ddDpppl........',
-  '........Dpppl.ddp.......',
-  '........Dpppl..ddp......',
-  '.......Dpppl...ddpd.....',
-  '.......ttatw...ddpd.....',
-  '......uuuuwu...ttat.....',
-  '......geeeee..sssss.....',
-  '..............gcccc.....',
+  '......dddDpppppp........',
+  '......dddppppdppp.......',
+  '.....ddddpppddppp.......',
+  '.....dddppp.dddpp.......',
+  '....dddppp..Dddppp......',
+  '...ddddppp...ddppp......',
+  '..dddddddd...ddppp......',
+  '.ssddddd.....Dddppp.....',
+  '.euuud........ddpBsu....',
+  '..uuuc........dBuuuue...',
+  '..uuuu........Buuueee...',
+  '...eeee........eeee.....',
 ];
 
-// F3: Passing Esquerdo (Perna traseira firme no centro, frontal recolhida +2px passando)
+// F3: Passing Esquerdo (perna traseira recolhida atrás, dianteira firme passando)
 const LEGS_WALK_3_TPL: readonly string[] = [
   '......BBBBBBkkBBBB......',
   '......ddddppppplpd......',
-  '......ddddDpppplpd......',
-  '......ddpd.Dplhd........',
-  '......ddpd.Dplhd........',
-  '......ddpd..Dplhd.......',
-  '......ddpd..Dplhd.......',
-  '......ddpd..Dplhd.......',
-  '......ddpd..ttatw.......',
-  '......ddpd.uuuuwu.......',
-  '......ttat.geeeee.......',
-  '.....sssss..............',
-  '.....gcccc..............',
+  '......dddDppppdpp.......',
+  '......dddppppdppp.......',
+  '......dddppppdppp.......',
+  '......ddppppddpp........',
+  '.....ddddpppddddd.......',
+  '....ssddddpppddd........',
+  '...eeuddddddDddpp.......',
+  '...eeuddDdddDddpp.......',
+  '....uuuuc...uuBBBB......',
+  '....euuuu...uuuuucu.....',
+  '.....uuuu...euuuuuu.....',
+  '......ee.....eeeeee.....',
 ];
 
 const WALK_LEG_FRAMES = [LEGS_WALK_0_TPL, LEGS_WALK_1_TPL, LEGS_WALK_2_TPL, LEGS_WALK_3_TPL] as const;
