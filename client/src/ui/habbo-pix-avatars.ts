@@ -263,110 +263,153 @@ function buildPalettes(look: HabboAvatarLook): AvatarPalettes {
 }
 
 // ============================================================================
-// SAPATOS COM INCLINAÇÃO HUMANA (FLAT / HEEL-STRIKE / TOE-OFF) & PERNAS ARTICULADAS
+// PERNAS & TÊNIS ESCULPIDOS DO ZERO VIA TEMPLATES ASCII (MÉTODO PIXEL-ART-STUDIO)
+// Grade 24x15 estampada em x=5, y=33 (âncora dos pés em y=47).
+// Sem interpolação matemática de retas: cada pixel foi esculpido à mão para
+// garantir silhueta limpa em 1x, zero jaggies e zero joelhos dobrando ao contrário!
 // ============================================================================
 
-type FootTilt = 'flat' | 'heel' | 'toe';
+const LEGS_IDLE_TPL: readonly string[] = [
+  '......BBBBBBkkBBBB......',
+  '......ddddppppplpd......',
+  '......ddddDpppplpd......',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '.......ttat.ttatw.......',
+  '......sssss.uuuuwu......',
+  '......gcccc.geeeee......',
+];
 
-function drawSneaker(
-  buf: PixelBuf,
-  x: number,
-  y: number,
-  shoes: Ramp,
-  accentColor: string,
-  isFrontFoot: boolean,
-  tilt: FootTilt = 'flat',
-): void {
-  const w = isFrontFoot ? 6 : 5;
-  const upperCol = isFrontFoot ? shoes.base : shoes.dk;
-  const tongueCol = isFrontFoot ? shoes.lt : shoes.base;
-  const soleCol = isFrontFoot ? '#e2e8f0' : '#cbd5e1';
+const LEGS_SIT_TPL: readonly string[] = [
+  '......BBBBBBkkBBBB......',
+  '......ddddddppppld......',
+  '......ddddddDpppld......',
+  '........dddd.ppppld.....',
+  '........ddddDpppppld....',
+  '..........dddDppplhd....',
+  '..........dddDppplhd....',
+  '..........dddDppplhd....',
+  '..........dddDppplhd....',
+  '..........dddDppplhd....',
+  '..........ttat.ttatw....',
+  '.........sssss.uuuuwu...',
+  '.........gcccc.geeeee...',
+];
 
-  if (tilt === 'heel') {
-    // Pé aterrissando com calcanhar apoiado e bico apontando 1px para cima (humano caminhando!)
-    buf.hline(x + 1, x + w - 2, y, tongueCol);
-    buf.set(x + 2, y, accentColor);
-    buf.rect(x, y + 1, w - 1, 1, upperCol);
-    buf.set(x + w - 1, y, '#ffffff'); // bico levantado 1px
-    buf.hline(x, x + w - 2, y + 2, soleCol);
-    buf.set(x + w - 1, y + 1, soleCol);
-    buf.set(x, y + 2, '#94a3b8');
-    return;
-  }
+// 4 Poses-Chave Clássicas de Caminhada (pixel-art-studio: 4 poses limpas > 12 borradas):
+// F0: Contact Direito (Perna frontal avança +2px down-right, traseira impulsiona -2px)
+const LEGS_WALK_0_TPL: readonly string[] = [
+  '......BBBBBBkkBBBB......',
+  '......ddddppppplpd......',
+  '.....ddddD.pppplpd......',
+  '.....ddpd...Dpplhd......',
+  '.....ddpd...Dpplhd......',
+  '....ddpd.....Dpplhd.....',
+  '....ddpd.....Dpplhd.....',
+  '....ddpd......Dppld.....',
+  '...ddpd.......Dppld.....',
+  '...ttat.......Dppld.....',
+  '..sssss.......ttatw.....',
+  '..gcccc......uuuuwu.....',
+  '.............geeeee.....',
+];
 
-  if (tilt === 'toe') {
-    // Pé impulsionando o chão (calcanhar levantado 1px atrás, ponta apoiada)
-    buf.hline(x + 1, x + w - 2, y - 1, tongueCol);
-    buf.set(x + 2, y - 1, accentColor);
-    buf.rect(x, y, w - 1, 1, upperCol);
-    buf.rect(x + 2, y + 1, w - 2, 1, upperCol);
-    buf.set(x + w - 2, y + 1, '#ffffff');
-    buf.hline(x, x + 1, y + 1, soleCol);
-    buf.hline(x + 2, x + w - 1, y + 2, soleCol);
-    return;
-  }
+// F1: Passing Direito (Perna frontal firme no centro, traseira recolhida +2px passando)
+const LEGS_WALK_1_TPL: readonly string[] = [
+  '......BBBBBBkkBBBB......',
+  '......ddddppppplpd......',
+  '......ddddDpppplpd......',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '.......ddpdDplhd........',
+  '.......ddpdDplhd........',
+  '.......ddpdDplhd........',
+  '.......ttatDplhd........',
+  '......sssssDplhd........',
+  '......gccccDplhd........',
+  '............ttatw.......',
+  '...........uuuuwu.......',
+  '...........geeeee.......',
+];
 
-  // Pé plantado reto no chão ('flat')
-  buf.hline(x + 1, x + w - 2, y, tongueCol);
-  buf.set(x + 2, y, accentColor);
-  buf.rect(x, y + 1, w, 1, upperCol);
-  buf.set(x + w - 2, y + 1, '#ffffff');
-  buf.hline(x, x + w - 1, y + 2, soleCol);
-  buf.set(x, y + 2, '#94a3b8');
-}
+// F2: Contact Esquerdo (Perna traseira estende à frente por trás da frontal que recua)
+const LEGS_WALK_2_TPL: readonly string[] = [
+  '......BBBBBBkkBBBB......',
+  '......ddddppppplpd......',
+  '.......dddpDppplpd......',
+  '........ddpDppplpd......',
+  '........ddpDppplp.......',
+  '.........ddDpppl........',
+  '........Dpppl.ddp.......',
+  '........Dpppl..ddp......',
+  '.......Dpppl...ddpd.....',
+  '.......ttatw...ddpd.....',
+  '......uuuuwu...ttat.....',
+  '......geeeee..sssss.....',
+  '..............gcccc.....',
+];
 
-function drawArticulatedLeg(
-  buf: PixelBuf,
-  hipX: number,
-  hipY: number,
-  kneeDx: number,
-  footDx: number,
-  footDy: number,
-  pants: Ramp,
-  shoes: Ramp,
-  accentCol: string,
-  isFrontLeg: boolean,
-  tilt: FootTilt,
-): void {
-  // Anatomia humana limpa em escala 32x52:
-  // - Coxa (y = hipY .. hipY + 3): sai do quadril e acompanha metade do avanço do joelho (joelho NUNCA dobra para trás!)
-  // - Canela (y = hipY + 4 .. hipY + 7): desce do joelho até o tornozelo com silhueta firme de 4px (sem degraus tortos)
-  const mainCol = isFrontLeg ? pants.base : pants.dk;
-  const shadowCol = pants.dd;
-  const lightCol = isFrontLeg ? pants.lt : pants.base;
+// F3: Passing Esquerdo (Perna traseira firme no centro, frontal recolhida +2px passando)
+const LEGS_WALK_3_TPL: readonly string[] = [
+  '......BBBBBBkkBBBB......',
+  '......ddddppppplpd......',
+  '......ddddDpppplpd......',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd..Dplhd.......',
+  '......ddpd..Dplhd.......',
+  '......ddpd..Dplhd.......',
+  '......ddpd..ttatw.......',
+  '......ddpd.uuuuwu.......',
+  '......ttat.geeeee.......',
+  '.....sssss..............',
+  '.....gcccc..............',
+];
 
-  const thighX = hipX + Math.round(kneeDx * 0.5);
-  const shinX = hipX + footDx;
-  const kneeY = hipY + 4;
-  const ankleY = hipY + 8 + footDy;
+const WALK_LEG_FRAMES = [LEGS_WALK_0_TPL, LEGS_WALK_1_TPL, LEGS_WALK_2_TPL, LEGS_WALK_3_TPL] as const;
 
-  // Coxa (4 linhas sólidas)
-  for (let y = hipY; y < kneeY; y++) {
-    const t = (y - hipY) / 4;
-    const cx = Math.round(hipX + (thighX - hipX) * t);
-    buf.rect(cx, y, 4, 1, mainCol);
-    buf.set(cx, y, shadowCol);
-    buf.set(cx + 2, y, lightCol);
-    if (isFrontLeg) buf.set(cx + 3, y, pants.dk);
-  }
+// Poses de Dança Groove (pés batendo o ritmo limpos no chão)
+const LEGS_DANCE_0_TPL: readonly string[] = [
+  '......BBBBBBkkBBBB......',
+  '......ddddppppplpd......',
+  '......ddddDpppplpd......',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd..Dplhd.......',
+  '......ddpd..Dplhd.......',
+  '......ddpd..Dplhd.......',
+  '......ddpd..Dplhd.......',
+  '......ddpd..Dplhd.......',
+  '......ddpd..ttatw.......',
+  '.......ttat.uuuuwu......',
+  '......sssss.geeeee......',
+  '......gcccc.............',
+];
 
-  // Canela (conecta o joelho ao tornozelo sem quebrar a silhueta)
-  const shinTopX = Math.round(hipX + kneeDx);
-  const shinRows = Math.max(2, ankleY - kneeY);
-  for (let i = 0; i < shinRows; i++) {
-    const y = kneeY + i;
-    const t = shinRows <= 1 ? 1 : i / (shinRows - 1);
-    const cx = Math.round(shinTopX + (shinX - shinTopX) * t);
-    buf.rect(cx, y, 4, 1, mainCol);
-    buf.set(cx, y, shadowCol);
-    buf.set(cx + 2, y, lightCol);
-    if (isFrontLeg && i === 0) {
-      buf.set(cx + 1, y, pants.hi);
-    }
-  }
+const LEGS_DANCE_1_TPL: readonly string[] = [
+  '......BBBBBBkkBBBB......',
+  '......ddddppppplpd......',
+  '......ddddDpppplpd......',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ddpd.Dplhd........',
+  '......ttat.Dplhd........',
+  '.....sssss..ttatw.......',
+  '.....gcccc.uuuuwu.......',
+  '...........geeeee.......',
+];
 
-  drawSneaker(buf, shinX, ankleY, shoes, accentCol, isFrontLeg, tilt);
-}
+const DANCE_LEG_FRAMES = [LEGS_DANCE_0_TPL, LEGS_IDLE_TPL, LEGS_DANCE_1_TPL, LEGS_IDLE_TPL] as const;
 
 function drawLegsAndShoes(
   buf: PixelBuf,
@@ -377,141 +420,39 @@ function drawLegsAndShoes(
   isFront: boolean,
 ): void {
   const { pants, shoes, shirt } = pal;
-  const f8 = f16 % 8;
+  const buckleCol = isFront ? (look.accessory === 'crown' ? '#fbbf24' : '#e2e8f0') : '#0f172a';
 
-  // Postura Sentada ('sit' e 'type') Natural em "L" na diagonal isométrica 2:1:
-  if (action === 'sit' || action === 'type') {
-    // Em 'sit', a perna dianteira dá uma leve balançada relaxada nos frames 11..14
-    const footTap = action === 'sit' && (f16 === 11 || f16 === 13) ? -1 : 0;
-
-    buf.hline(11, 20, 35, '#0f172a');
-    if (isFront) {
-      buf.rect(17, 35, 2, 1, look.accessory === 'crown' ? '#fbbf24' : '#e2e8f0');
-    }
-
-    // Quadril apoiado na poltrona/sofá
-    buf.rect(11, 36, 9, 3, pants.dk);
-    buf.hline(11, 14, 38, pants.dd);
-
-    // Perna traseira dobrada na diagonal SE
-    buf.rect(13, 38, 4, 3, pants.dk);
-    buf.rect(15, 40, 4, 4, pants.dd);
-    drawSneaker(buf, 15, 43, shoes, shirt.base, false, 'flat');
-
-    // Perna dianteira iluminada na coxa e joelho dobrado à frente
-    buf.rect(16, 37, 5, 3, pants.base);
-    buf.hline(17, 20, 37, pants.lt);
-    buf.vline(16, 38, 43, pants.dd);
-    buf.rect(18, 39, 4, 5, pants.base);
-    buf.vline(20, 39, 43, pants.lt);
-    drawSneaker(buf, 19, 44 + footTap, shoes, shirt.lt, true, footTap < 0 ? 'heel' : 'flat');
-    return;
-  }
-
-  // Cinemática Humana de Caminhada Isométrica 2:1 em 8 Fases:
-  // Regras anatômicas estritas (perspectiva SE, olhando para +X direita):
-  // 1. O joelho SEMPRE dobra para frente (kneeDx >= footDx), nunca para trás!
-  // 2. Na projeção isométrica 2:1, passo à frente (+X) desce levemente (+1px Y no chão),
-  //    enquanto o pé de impulsão atrás (-X) sobe levemente (-1px Y), mantendo as duas pernas alinhadas ao piso.
-  // 3. Amplitude natural (-2..+2px por perna) sem cruzar ou torcer os quadris.
-  const WALK_POSE: ReadonlyArray<{
-    bKneeDx: number;
-    bFootDx: number;
-    bFootDy: number;
-    bTilt: FootTilt;
-    fKneeDx: number;
-    fFootDx: number;
-    fFootDy: number;
-    fTilt: FootTilt;
-    hipShiftX: number;
-  }> = [
-    // 0: Contact D (Frente pisa à frente no calcanhar, Traseira atrás na ponta)
-    { bKneeDx: -1, bFootDx: -2, bFootDy: -1, bTilt: 'toe', fKneeDx: 2, fFootDx: 2, fFootDy: 1, fTilt: 'heel', hipShiftX: 0 },
-    // 1: Down D (Frente planta firme no piso, Traseira dobra joelho para frente puxando o pé)
-    { bKneeDx: 0, bFootDx: -1, bFootDy: -2, bTilt: 'toe', fKneeDx: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-    // 2: Pass D (Frente firme no centro, Traseira passa levantada com joelho à frente)
-    { bKneeDx: 1, bFootDx: 0, bFootDy: -2, bTilt: 'toe', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-    // 3: Reach D (Traseira estende à frente preparando calcanhar, Frente fica atrás)
-    { bKneeDx: 2, bFootDx: 2, bFootDy: 0, bTilt: 'heel', fKneeDx: 0, fFootDx: -1, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
-    // 4: Contact E (Traseira pisa à frente, Frente atrás na ponta)
-    { bKneeDx: 2, bFootDx: 2, bFootDy: 0, bTilt: 'heel', fKneeDx: -1, fFootDx: -2, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 },
-    // 5: Down E (Traseira planta firme, Frente dobra joelho para frente puxando o pé)
-    { bKneeDx: 1, bFootDx: 1, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fFootDx: -1, fFootDy: -2, fTilt: 'toe', hipShiftX: 0 },
-    // 6: Pass E (Traseira firme no centro, Frente passa levantada com joelho à frente)
-    { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fFootDx: 0, fFootDy: -2, fTilt: 'toe', hipShiftX: 0 },
-    // 7: Reach E (Frente estende à frente preparando calcanhar, Traseira fica atrás)
-    { bKneeDx: 0, bFootDx: -1, bFootDy: -1, bTilt: 'toe', fKneeDx: 2, fFootDx: 2, fFootDy: 1, fTilt: 'heel', hipShiftX: 0 },
-  ];
-
-  let pose = {
-    bKneeDx: 0,
-    bFootDx: 0,
-    bFootDy: 0,
-    bTilt: 'flat' as FootTilt,
-    fKneeDx: 0,
-    fFootDx: 0,
-    fFootDy: 0,
-    fTilt: 'flat' as FootTilt,
-    hipShiftX: 0,
+  const legPal: Palette = {
+    B: '#0f172a',
+    k: buckleCol,
+    D: pants.dd,
+    d: pants.dk,
+    p: pants.base,
+    l: pants.lt,
+    h: pants.hi,
+    s: shoes.dk,
+    u: shoes.base,
+    t: shoes.lt,
+    w: '#ffffff',
+    a: shirt.lt,
+    e: '#e2e8f0',
+    c: '#cbd5e1',
+    g: '#94a3b8',
   };
 
-  if (action === 'walk') {
-    pose = WALK_POSE[f8];
+  let tpl: readonly string[] = LEGS_IDLE_TPL;
+  if (action === 'sit' || action === 'type') {
+    tpl = LEGS_SIT_TPL;
+  } else if (action === 'walk') {
+    // 8 fases mapeadas suavemente sobre as 4 poses-chave clássicas (2 fases por pose-chave)
+    const walkPhase = Math.floor((f16 % 8) / 2);
+    tpl = WALK_LEG_FRAMES[walkPhase];
   } else if (action === 'dance') {
-    // Dança com batida rítmica natural (joelhos dobram apenas para frente, nunca para trás!)
-    const DANCE_POSE: typeof WALK_POSE = [
-      { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fFootDx: 1, fFootDy: 0, fTilt: 'heel', hipShiftX: 0 },
-      { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fFootDx: 1, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-      { bKneeDx: 1, bFootDx: 0, bFootDy: -1, bTilt: 'toe', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-      { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-      { bKneeDx: 1, bFootDx: 1, bFootDy: 0, bTilt: 'heel', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-      { bKneeDx: 1, bFootDx: 1, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-      { bKneeDx: 0, bKneeDy2: 0 } as any,
-      { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 0, fFootDx: 0, fFootDy: 0, fTilt: 'flat', hipShiftX: 0 },
-    ];
-    DANCE_POSE[6] = { bKneeDx: 0, bFootDx: 0, bFootDy: 0, bTilt: 'flat', fKneeDx: 1, fFootDx: 0, fFootDy: -1, fTilt: 'toe', hipShiftX: 0 };
-    pose = DANCE_POSE[f8];
+    const dancePhase = Math.floor((f16 % 8) / 2);
+    tpl = DANCE_LEG_FRAMES[dancePhase];
   }
 
-  // Cinto escuro com fivela dourada/prateada deslocada +1px para a direita (perspectiva 3/4 SE)
-  const hx = pose.hipShiftX;
-  buf.hline(11 + hx, 20 + hx, 33, '#0f172a');
-  if (isFront) {
-    const buckleCol = look.accessory === 'crown' ? '#fbbf24' : '#e2e8f0';
-    buf.rect(17 + hx, 33, 2, 1, buckleCol);
-  }
-  // Quadril isométrico (y = 34..35)
-  buf.rect(11 + hx, 34, 10, 2, pants.base);
-  buf.rect(11 + hx, 34, 4, 2, pants.dk);
-  buf.set(15 + hx, 35, pants.dd);
-
-  drawArticulatedLeg(
-    buf,
-    11 + hx,
-    36,
-    pose.bKneeDx,
-    pose.bFootDx,
-    pose.bFootDy,
-    pants,
-    shoes,
-    shirt.base,
-    false,
-    pose.bTilt,
-  );
-
-  drawArticulatedLeg(
-    buf,
-    16 + hx,
-    36,
-    pose.fKneeDx,
-    pose.fFootDx,
-    pose.fFootDy,
-    pants,
-    shoes,
-    shirt.lt,
-    true,
-    pose.fTilt,
-  );
+  buf.stamp(tpl, 5, 33, legPal);
 }
 
 // ============================================================================
@@ -1131,13 +1072,14 @@ function renderHabboAvatarBuf(
   let headDx = 0;
 
   if (action === 'walk') {
-    const WALK_BOB = [0, 1, 0, -1, 0, 1, 0, -1] as const;
-    const HAIR_LAG = [0, 0, 1, 0, 0, 0, 1, 0] as const;
+    // Regra pixel-art-studio: corpo mais baixo no Contact (0..1, 4..5) e mais alto no Passing (2..3, 6..7);
+    // cabelo/cabeça acompanha 1 fase depois (follow-through).
+    const WALK_BOB = [1, 1, -1, -1, 1, 1, -1, -1] as const;
+    const HAIR_LAG = [0, 1, 1, 0, 0, 1, 1, 0] as const;
     const CHEST_TWIST = [1, 1, 0, -1, -1, -1, 0, 1] as const;
     bodyBob = WALK_BOB[f8];
     hairLag = HAIR_LAG[f8];
     chestTwist = CHEST_TWIST[f8];
-    // Leve inclinação humana à frente na caminhada
     headDx = 1;
   } else if (action === 'dance') {
     const DANCE_BOB = [0, 1, 0, 1, 0, 1, 0, 1] as const;
