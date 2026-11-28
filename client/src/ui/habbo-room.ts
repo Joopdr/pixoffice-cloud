@@ -1999,13 +1999,18 @@ export class HabboRoomController {
     }
 
     if (override) {
-      ctx.drawImage(
-        override.image,
-        Math.round(anchorPos.x - override.anchorX * S),
-        Math.round(anchorPos.y - override.anchorY * S),
-        Math.round(override.image.width * S),
-        Math.round(override.image.height * S),
-      );
+      const w = Math.round(override.image.width * S);
+      const h = Math.round(override.image.height * S);
+      const drawY = Math.round(anchorPos.y - override.anchorY * S);
+      if (f.rot === 1 && !getAsepriteOverride(`${f.type}_1`)) {
+        ctx.save();
+        ctx.translate(Math.round(anchorPos.x + override.anchorX * S), drawY);
+        ctx.scale(-1, 1);
+        ctx.drawImage(override.image, 0, 0, w, h);
+        ctx.restore();
+      } else {
+        ctx.drawImage(override.image, Math.round(anchorPos.x - override.anchorX * S), drawY, w, h);
+      }
       return;
     }
 

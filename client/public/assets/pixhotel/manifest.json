@@ -1,1 +1,67 @@
-{}
+{
+  "club_sofa": {
+    "url": "/assets/pixhotel/furni/club_sofa.png",
+    "anchorX": 30,
+    "anchorY": 40
+  },
+  "dev_desk": {
+    "url": "/assets/pixhotel/furni/dev_desk.png",
+    "anchorX": 25,
+    "anchorY": 25
+  },
+  "exec_chair": {
+    "url": "/assets/pixhotel/furni/exec_chair.png",
+    "anchorX": 12,
+    "anchorY": 36
+  },
+  "espresso_bar": {
+    "url": "/assets/pixhotel/furni/espresso_bar.png",
+    "anchorX": 16,
+    "anchorY": 41
+  },
+  "vending_drinks": {
+    "url": "/assets/pixhotel/furni/vending_drinks.png",
+    "anchorX": 17,
+    "anchorY": 46
+  },
+  "server_rack": {
+    "url": "/assets/pixhotel/furni/server_rack.png",
+    "anchorX": 19,
+    "anchorY": 48
+  },
+  "holo_screen": {
+    "url": "/assets/pixhotel/furni/holo_screen.png",
+    "anchorX": 20,
+    "anchorY": 50
+  },
+  "conf_table": {
+    "url": "/assets/pixhotel/furni/conf_table.png",
+    "anchorX": 29,
+    "anchorY": 41
+  },
+  "arcade_cab": {
+    "url": "/assets/pixhotel/furni/arcade_cab.png",
+    "anchorX": 15,
+    "anchorY": 46
+  },
+  "palm_plant": {
+    "url": "/assets/pixhotel/furni/palm_plant.png",
+    "anchorX": 13,
+    "anchorY": 41
+  },
+  "floor_lamp": {
+    "url": "/assets/pixhotel/furni/floor_lamp.png",
+    "anchorX": 12,
+    "anchorY": 43
+  },
+  "bookshelf_pro": {
+    "url": "/assets/pixhotel/furni/bookshelf_pro.png",
+    "anchorX": 14,
+    "anchorY": 46
+  },
+  "water_cooler": {
+    "url": "/assets/pixhotel/furni/water_cooler.png",
+    "anchorX": 17,
+    "anchorY": 43
+  }
+}
